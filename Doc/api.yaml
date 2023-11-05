@@ -7,7 +7,7 @@ info:
       to keep in touch with your friends by sharing photos of special moments.  
 
       - [The github private project repository] (https://github.com/luigidannibale/Wasa)
-    version: 0.0.1
+    version: 1
     contact:
       email: dannibale.1991254@studenti.uniroma1.it
 
@@ -45,83 +45,188 @@ paths:
                     description:   Server error
                 "100": 
                     description:   Informative message
+    
+    #doLogin
     /users/:
       post:
+        operationId: doLogin
         tags: 
-          - users 
-        summary: Logs in the user
+          - user
+        summary: Logs in a user
         description: |-
           If the user does not exist, it will be created,
           and an identifier is returned.
-          If the user exists, the user identifier is returned.
-        operationId: doLogin
+          If the user exists, the user identifier is returned.        
         requestBody:
           description: User details
+          required: true
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  name:
-                    type: string
-                    example: Maria
-                    pattern: 'ˆ.*?$'
-                    minLength: 3
-                    maxLength: 16
-                    required: true
+                $ref: "#/components/schemas/User"
+                  
         responses:
-          '201':
+          "200":
             description: User log-in action successful
             content:
               application/json:
                 schema:
-                  type: object
-                  properties:
-                    identifier:
-                      type: string
-                      example: "abcdef012345"
+                    $ref: "#/components/schemas/User/properties/id"
+          "201":
+            description: New user log-in action successful
+            content:
+              application/json:
+                schema:
+                    $ref: "#/components/schemas/User/properties/id"
           "400": 
-            description: "Bad request"
+            description: Bad request
+    
+    #getUserProfile
     /users/getUserProfile/:
       get:
-        tags: 
-          - users
-        summary: Find user by Id
-        description: "Returns a single user"
         operationId: getUserProfile
+        tags: 
+          - user
+        summary: Finds a user by Id
+        description: |
+          If the user id exists, the user is returned.        
         parameters:
           - name: userID
             in: query
             description: The id of the user to find 
             required: true
             schema:
-              type: integer
+              $ref : "#/components/schemas/User/properties/id"
         responses: 
           "200":
-            description: "Successfully found the user"
+            description: Successfully found the user
             content:
               application/json:      
                 schema:
                   $ref : "#/components/schemas/User"
           "400":
-            description: "Bad request"
+            description: Bad request
           "404":
-            description: "Not found"
-        
+            description: Not found
+
+    #setMyUserName
+    /users/{userID}/:
+      parameters:
+      - $ref : "#/components/parameters/userID"
+      put:
+        operationId: setMyUserName
+        tags:
+          - user
+        summary: Changes the username
+        description: |
+          Takes a user (by the id) and a new name and sets the name as the new username of such user        
+        parameters:
+          - name: username 
+            in: query
+            description: Name to set to the user
+            required: true
+            schema:
+              $ref : "#/components/schemas/User/properties/username"
+        responses:
+          "200":
+            description: Successful
+          "400":
+            description: Bad request
+    
+    #followUser
+    #unfollowUser
+    /users/{userID}/followed/{userID}/:
+      parameters:
+      - $ref : "#/components/parameters/userID"
+      put:
+        operationId: followUser
+        tags:
+          - user
+        summary: Follows a user
+        description: |
+          Takes the id of a user, if it exists, the actual user starts following the given user (if was already following nothing happens)
+        responses:
+          "200": 
+            description: Successful, already was following
+          "201":
+            description: Successful, started following
+          "400":
+            description: Bad request
+          "404":
+            description: User to follow not found            
+      delete:
+        operationId: unfollowUser
+        tags:
+          - user
+        summary: Unfollows a user
+        description: |
+          Takes the id of a user, if it is followed by the actual user, the actual user unfollows the given user (if wasn't already following nothing happens)
+        responses:
+          "200": 
+            description: Successful, already not followed
+          "201":
+            description: Successful, unfollowed
+          "400":
+            description: Bad request          
+
+    #banUser
+    #unbanUser
+    /users/{userID}/banned/{userID}/:
+      parameters:
+      - $ref : "#/components/parameters/userID"
+
+      put:
+        operationId: banUser
+        tags:
+          - user 
+        summary: Bans a user
+        description: |
+          Takes the id of a user, if it exists, the actual user bans the given user (if was already banned nothing happens)
+        responses:
+          "200": 
+            description: Successful, already banned
+          "201":
+            description: Successful, banned
+          "400":
+            description: Bad request
+          "404":
+            description: User to ban not found
+      delete:
+        operationId: unbanUser
+        tags:
+          - user
+        summary: Unbans a user
+        description: |
+          Takes the id of a user, if it is banned by the actual user, the actual user unbans the given user (if wasn't already banned nothing happens)
+        responses:
+          "200": 
+            description: Successful, already not banned
+          "201":
+            description: Successful, unbanned
+          "400":
+            description: Bad request 
+     
+
 components:
-    schemas:
-        User:          
-          details about user
-        schema_name_1:
-            type: object
-            properties:
-                property_name_1:
-                    type: integer
-                    minimum: 0
-                    maximum: 50
-                property_name_2:
-                    type: string
-                    enum:
-                        -val1
-                        -val2
-                        -val3 ... 
+  parameters:
+    userID: 
+      name: userID
+      in: path
+      description: Id of the user
+      required: true
+      schema:
+        $ref : "#/components/schemas/User/properties/id"
+  schemas:
+      User:          
+        type: object
+        properties:
+          id:
+            type: string
+            example: ab1wd
+            readOnly: true          
+          username:
+            type: string
+            example: Maria
+            pattern: ˆ .*? $
+            minLength: 3
+            maxLength: 16
