@@ -7,7 +7,7 @@ info:
       to keep in touch with your friends by sharing photos of special moments.  
 
       - [The github private project repository] (https://github.com/luigidannibale/Wasa)
-    version: 1
+    version: "1"
     contact:
       email: dannibale.1991254@studenti.uniroma1.it
 
@@ -20,32 +20,6 @@ externalDocs:
 #    description:
 
 paths:
-    /path1:
-
-        post:
-        put:
-        get:
-        delete:
-        head:
-            summary:
-            description:
-            responses:
-                "200": 
-                    description:  OK, accepted
-                    content:
-                        application/json:
-                            schema:
-                                type:
-                                    tipo
-                "300": 
-                    description:   Redirection  
-                "400": 
-                    description:   Client error
-                "500": 
-                    description:   Server error
-                "100": 
-                    description:   Informative message
-    
     #doLogin
     /users/:
       post:
@@ -108,6 +82,29 @@ paths:
             description: Bad request
           "404":
             description: Not found
+
+    #getMyStream    
+    /users/{userID}/getMyStream:
+      parameters:
+        - $ref : "#/components/parameters/userID"
+      get:
+        operationId: getMyStream
+        tags:
+          - user
+        summary: Gets the user his stream 
+        description: |
+          Takes an user id and returns his stream as array of photos
+        responses:
+          "200":
+            description: Successfully returning the stream
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items: 
+                    $ref : "#/components/schemas/Photo"
+          "400":
+            description: Bad request
 
     #setMyUserName
     /users/{userID}/:
@@ -206,8 +203,55 @@ paths:
           "400":
             description: Bad request 
      
+    #uploadPhoto
+    #deletePhoto
+    /photos/:      
+      post:
+        tags:
+          - photos
+        summary: Post a new photo
+        description: |
+          Posts a new photo and returns the id of the posted photo
+        operationId: uploadPhoto
+        requestBody:
+          content:
+            multipart/form-data :
+              schema:
+                type: string
+                format: binary
+        responses:
+          "201":
+            description: Photo posted successfully
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Photo/properties/id'
+          "400":
+            description : "Bad request"          
+      delete:
+        tags:
+          - photos
+        description: "Deletes an existing photo"
+        summary: Deletes a photo
+        operationId: deletePhoto
+        parameters:
+          - name: photoID
+            in: query
+            required: true
+            schema:
+              type: integer
+        responses:
+          "200":
+            description: Successful
+          "400":
+            description: "Bad request"
+          "404":
+            description: "Not found"
+          "500":
+            description: "Server error"    
+    
 
-components:
+components:  
   parameters:
     userID: 
       name: userID
@@ -230,3 +274,16 @@ components:
             pattern: ˆ .*? $
             minLength: 3
             maxLength: 16
+      Photo: 
+        type: object 
+        properties:
+          id:
+            type: string
+            example: wvd12
+            readOnly: true
+          image:
+            description: The actual image of the photo
+            type: string
+            format: binary
+          upload-timestamp:
+            type: date
