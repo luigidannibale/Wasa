@@ -132,9 +132,10 @@ paths:
     
     #followUser
     #unfollowUser
-    /users/{userID}/followed/{userID}/:
+    /users/{userID}/followed/{followedID}/:
       parameters:
       - $ref : "#/components/parameters/userID"
+      - $ref : "#/components/parameters/followedID"
       put:
         operationId: followUser
         tags:
@@ -168,9 +169,10 @@ paths:
 
     #banUser
     #unbanUser
-    /users/{userID}/banned/{userID}/:
+    /users/{userID}/banned/{bannedID}/:
       parameters:
       - $ref : "#/components/parameters/userID"
+      - $ref : "#/components/parameters/bannedID"
 
       put:
         operationId: banUser
@@ -257,6 +259,20 @@ components:
       name: userID
       in: path
       description: Id of the user
+      required: true
+      schema:
+        $ref : "#/components/schemas/User/properties/id"
+    followedID: 
+      name: followedID
+      in: path
+      description: Id of the followed user
+      required: true
+      schema:
+        $ref : "#/components/schemas/User/properties/id"
+    bannedID: 
+      name: bannedID
+      in: path
+      description: Id of the banned user
       required: true
       schema:
         $ref : "#/components/schemas/User/properties/id"
