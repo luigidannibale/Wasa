@@ -252,6 +252,162 @@ paths:
           "500":
             description: "Server error"    
     
+    #likePhoto
+    /photos/{photoID}/likes/:
+      parameters:
+        - $ref : "#/components/parameters/photoID"
+      put:
+        operationId: likePhoto
+        tags: 
+          - photos
+        summary: Puts a like to a photo
+        description: |
+          Takes a userID and creates a like of that user to the photo, 
+          if such user has already liked the photo, nothing happens.
+        parameters:
+          - name: userID
+            in: query
+            schema:
+              $ref : "#/components/schemas/User/properties/id"
+        responses:
+          "200":
+            description: Successful, already like
+            content:
+              application/json:
+                schema:
+                  $ref : "#/components/schemas/Like/properties/id"
+          "201":
+            description: Successfully liked the photo
+            content:
+              application/json:
+                schema:
+                  $ref : "#/components/schemas/Like/properties/id"
+          "400":
+            description: Bad request
+          "401":
+            description: User has no authorization to like this photo
+          "404":
+            description: User not found
+    
+    #getLike
+    #unlikePhoto
+    /photos/{photoID}/likes/{likeID}/:
+      parameters: 
+        - $ref : "#/components/parameters/photoID"
+        - $ref : "#/components/parameters/likeID"
+      
+      get:
+        operationId: getLike
+        tags: 
+          - photos 
+        summary: Gets the like details
+        description: Takes a like id and returns the like 
+        responses:
+          "200":
+            description:  Success, returning the like
+            content:
+              application/json:
+                schema:
+                   $ref : "#/components/schemas/Like"
+        
+      delete:
+        operationId: unlikePhoto
+        tags:
+          - photos
+        summary: Deletes a like to the photo
+        description: |
+          Takes a userID, if it matches the user that has put the like, the like is deleted,
+          otherwise nothing happens.
+        parameters:
+          - name: userID
+            in: query
+            schema:
+              $ref : "#/components/schemas/User/properties/id"
+        responses:
+          "200":
+            description: Success, photo unliked
+          "400":
+            description: Bad request
+          "401":
+            description: User requesting the elimination of the like has no authorization
+    
+    #commentPhoto
+    /photos/{photoID}/comments/:
+      parameters:
+        - $ref : "#/components/parameters/photoID"
+      post:
+        operationId: commentPhoto
+        tags: 
+          - photos
+        summary: Comments a photo
+        description: |
+          Takes a userID and the text message of the comment and creates 
+          a new comment of that user to the photo.
+        parameters:
+          - name: userID
+            in: query
+            schema:
+              $ref : "#/components/schemas/User/properties/id"
+          - name: text-message
+            in: query
+            schema:
+              $ref : "#/components/schemas/Comment/properties/text-message"
+        responses:
+          "201":
+            description: Successful, commment created, returning id
+            content:
+              application/json:
+                schema:
+                  $ref : "#/components/schemas/Comment/properties/id"
+          "400":
+            description: Bad request
+          "401":
+            description: User has no authorization to comment this photo
+          "404":
+            description: User not found
+    
+    #getComment
+    #uncommentPhoto
+    /photos/{photoID}/comments/{commentID}/:
+      parameters: 
+        - $ref : "#/components/parameters/photoID"
+        - $ref : "#/components/parameters/commentID"
+      
+      get:
+        operationId: getComment
+        tags: 
+          - photos 
+        summary: Gets the comment details
+        description: Takes a comment id and returns the comment
+        responses:
+          "200":
+            description:  Success, returning the comment
+            content:
+              application/json:
+                schema:
+                   $ref : "#/components/schemas/Comment"
+        
+      delete:
+        operationId: uncommentPhoto
+        tags:
+          - photos
+        summary: Deletes a comment to the photo
+        description: |
+          Takes a userID, if it matches the user that has posted the comment, the comment is deleted,
+          otherwise nothing happens.
+        parameters:
+          - name: userID
+            in: query
+            schema:
+              $ref : "#/components/schemas/User/properties/id"
+        responses:
+          "200":
+            description: Success, comment deleted
+          "400":
+            description: Bad request
+          "401":
+            description: User requesting the elimination of the comment has no authorization
+    
 
 components:  
   parameters:
@@ -276,6 +432,28 @@ components:
       required: true
       schema:
         $ref : "#/components/schemas/User/properties/id"
+    photoID:
+      name: photoID
+      in: path
+      description: ID of the photo
+      required: true
+      schema:
+        $ref : "#/components/schemas/Photo/properties/id"
+    likeID:
+      name: likeID
+      in: path
+      description: ID of the like
+      required: true
+      schema:
+        $ref : "#/components/schemas/Like/properties/id"
+    commentID:
+      name: commentID
+      in: path
+      description: ID of the comment
+      required: true
+      schema:
+        $ref : "#/components/schemas/Comment/properties/id"
+  
   schemas:
       User:          
         type: object
@@ -302,4 +480,35 @@ components:
             type: string
             format: binary
           upload-timestamp:
-            type: date
+            type: object
+            schema:
+              $ref: "#/components/schemas/Date"
+      Like:
+        type: object
+        properties:
+          id:
+            type: string
+            example: as32
+            readOnly: true
+          userID:
+            $ref : "#/components/schemas/User/properties/id"
+      Comment:
+        type: object
+        properties:
+          id:
+            type: string
+            example: as32
+            readOnly: true
+          userID:
+            $ref : "#/components/schemas/User/properties/id"
+          text-message:
+            type: string
+      Date:
+        year:
+          type: integer            
+        month:
+          type: enum
+          val:
+            - January
+            - February','March','April','May','June','July','August','September','October','November','December']}
+        yet to finish
