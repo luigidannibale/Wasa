@@ -15,10 +15,6 @@ externalDocs:
   description: Find out more about project specification
   url: http://gamificationlab.uniroma1.it/notes/Project.pdf
     
-#servers:
-#    - url:
-#    description:
-
 paths:
     #doLogin
     /users/:
@@ -61,9 +57,11 @@ paths:
         operationId: getUserProfile
         tags: 
           - user
-        summary: Finds a user by Id
+        summary: Returns the profile of the user
         description: |
-          If the user id exists, the user is returned.        
+          The user profile of the user is returned.         
+          If the user id is not valid, error 400 is threw.
+          If the user id is valid but doesn't exist error  404 is threw.
         parameters:
           - name: userID
             in: query
@@ -73,39 +71,17 @@ paths:
               $ref : "#/components/schemas/User/properties/id"
         responses: 
           "200":
-            description: Successfully found the user
+            description: Successful, returning the found the user
             content:
               application/json:      
                 schema:
-                  $ref : "#/components/schemas/User"
+                  $ref : "#/components/schemas/UserProfile"
+                    
           "400":
-            description: Bad request
+            description: Bad request, enter a valid user ID
           "404":
-            description: Not found
-
-    #getMyStream    
-    /users/{userID}/getMyStream:
-      parameters:
-        - $ref : "#/components/parameters/userID"
-      get:
-        operationId: getMyStream
-        tags:
-          - user
-        summary: Gets the user his stream 
-        description: |
-          Takes an user id and returns his stream as array of photos
-        responses:
-          "200":
-            description: Successfully returning the stream
-            content:
-              application/json:
-                schema:
-                  type: array
-                  items: 
-                    $ref : "#/components/schemas/Photo"
-          "400":
-            description: Bad request
-
+            description: User not found
+    
     #setMyUserName
     /users/{userID}/:
       parameters:
@@ -116,7 +92,10 @@ paths:
           - user
         summary: Changes the username
         description: |
-          Takes a user (by the id) and a new name and sets the name as the new username of such user        
+          Takes a user (by the id) and a name and sets the name as the new username of such user. 
+          If the username was already set with such name nothing happens.
+          If the username isn't valid error 400 is threw.
+          If the username is valid but user id doesn't exist error 404 is threw.
         parameters:
           - name: username 
             in: query
@@ -126,95 +105,224 @@ paths:
               $ref : "#/components/schemas/User/properties/username"
         responses:
           "200":
-            description: Successful
+            description: Successful, username was already set like so
+          "201":
+            description: Successful, username set
           "400":
-            description: Bad request
-    
+            description: Bad request, returning the not valid parameter(s)
+            content: 
+              application/json:
+                schema:
+                  anyOf:
+                    - $ref : "#/components/parameters/userID"
+                    - $ref : "#/components/schemas/User/properties/username"
+          "404":
+            description: User not found
+      
+    #getMyStream    
+    /users/{userID}/getMyStream:
+      parameters:
+        - $ref : "#/components/parameters/userID"
+      get:
+        operationId: getMyStream
+        tags:
+          - user
+        summary: Gets the user his stream 
+        description: |
+          Takes an user id and returns his stream (stream of photos of users 
+          followed by actual user) as array of photos. 
+          If the id does not exist error 404 is threw.
+        responses:
+          "200":
+            description: Successful, returning the stream
+            content:
+              application/json:
+                schema:
+                  $ref : "#/components/schemas/UserProfile/properties/stream"
+          "400":
+            description: Bad request, userID not valid
+          "404":
+            description: User not found
+          
     #followUser
-    #unfollowUser
-    /users/{userID}/followed/{followedID}/:
+    /users/{userID}/followed/:
       parameters:
       - $ref : "#/components/parameters/userID"
-      - $ref : "#/components/parameters/followedID"
+      
       put:
         operationId: followUser
         tags:
           - user
         summary: Follows a user
         description: |
-          Takes the id of a user, if it exists, the actual user starts following the given user (if was already following nothing happens)
+          The actual user (user ID) starts following the given user (followed ID).
+          If was already followed nothing happens.
+          If one of the IDs isn't a valid id error 400 is threw.
+          If one of the IDs don't exist error 404 is threw.
+        requestBody:
+          content:
+            application/json:
+              schema:
+                $ref : "#/components/schemas/User"
         responses:
           "200": 
-            description: Successful, already was following
+            description: Successful, already followed
           "201":
-            description: Successful, started following
+            description: Successful, followed
           "400":
-            description: Bad request
+            description: Bad request, returning the not valid parameter(s)
+            content: 
+              application/json:
+                schema:
+                  anyOf:
+                    - $ref : "#/components/parameters/userID"
+                    - $ref : "#/components/schemas/User"
           "404":
-            description: User to follow not found            
+            description: Not found, returning the parameter(s)
+            content: 
+              application/json:
+                schema:
+                  anyOf:
+                    - $ref : "#/components/parameters/userID"
+                    - $ref : "#/components/schemas/User"
+    
+    #unfollowUser
+    /users/{userID}/followed/{followedID}/:
+      parameters:
+      - $ref : "#/components/parameters/userID"
+      - $ref : "#/components/parameters/followedID"
+      
       delete:
         operationId: unfollowUser
         tags:
           - user
         summary: Unfollows a user
         description: |
-          Takes the id of a user, if it is followed by the actual user, the actual user unfollows the given user (if wasn't already following nothing happens)
+          The actual user (user ID) unfollows the given user (followed ID).
+          If was already not followed nothing happens.
+          If one of the IDs isn't a valid id error 400 is threw.
+          If one of the IDs don't exist error 404 is threw.
         responses:
           "200": 
             description: Successful, already not followed
           "201":
             description: Successful, unfollowed
           "400":
-            description: Bad request          
+            description: Bad request, returning the not valid parameter(s)
+            content: 
+              application/json:
+                schema:
+                  anyOf:
+                    - $ref : "#/components/parameters/userID"
+                    - $ref : "#/components/parameters/followedID"
+          "404":
+            description: Not found, returning the parameter(s) 
+            content: 
+              application/json:
+                schema:
+                  anyOf:
+                    - $ref : "#/components/parameters/userID"
+                    - $ref : "#/components/parameters/followedID"
 
     #banUser
-    #unbanUser
-    /users/{userID}/banned/{bannedID}/:
+    /users/{userID}/banned/:
       parameters:
       - $ref : "#/components/parameters/userID"
-      - $ref : "#/components/parameters/bannedID"
-
+      
       put:
         operationId: banUser
         tags:
           - user 
         summary: Bans a user
         description: |
-          Takes the id of a user, if it exists, the actual user bans the given user (if was already banned nothing happens)
+          The actual user (user ID) bans the given user (banned ID).
+          If was already banned nothing happens.
+          If one of the IDs isn't a valid id error 400 is threw.
+          If one of the IDs don't exist error 404 is threw.
+        requestBody:
+          content:
+            application/json:
+              schema:
+                $ref : "#/components/schemas/User"
         responses:
           "200": 
             description: Successful, already banned
           "201":
             description: Successful, banned
           "400":
-            description: Bad request
+            description: Bad request, returning the not valid parameter(s)
+            content: 
+              application/json:
+                schema:
+                  anyOf:
+                    - $ref : "#/components/parameters/userID"
+                    - $ref : "#/components/schemas/User"
           "404":
-            description: User to ban not found
+            description: Not found, returning the parameter(s)
+            content: 
+              application/json:
+                schema:
+                  anyOf:
+                    - $ref : "#/components/parameters/userID"
+                    - $ref : "#/components/schemas/User"
+    
+    #unbanUser
+    /users/{userID}/banned/{bannedID}/:
+      parameters:
+      - $ref : "#/components/parameters/userID"
+      - $ref : "#/components/parameters/bannedID"
+
+     
       delete:
         operationId: unbanUser
         tags:
           - user
         summary: Unbans a user
         description: |
-          Takes the id of a user, if it is banned by the actual user, the actual user unbans the given user (if wasn't already banned nothing happens)
+          The actual user (user ID) unbans the given user (unbanned ID). 
+          If was already not banned nothing happens.
+          If one of the IDs isn't a valid id error 400 is threw.
+          If one of the IDs don't exist error 404 is threw.
         responses:
           "200": 
             description: Successful, already not banned
           "201":
             description: Successful, unbanned
           "400":
-            description: Bad request 
+            description: Bad request, returning the not valid parameter(s)
+            content: 
+              application/json:
+                schema:
+                  anyOf:
+                    - $ref : "#/components/parameters/userID"
+                    - $ref : "#/components/parameters/bannedID"
+          "404":
+            description: Not found, returning the parameter(s) 
+            content: 
+              application/json:
+                schema:
+                  anyOf:
+                    - $ref : "#/components/parameters/userID"
+                    - $ref : "#/components/parameters/bannedID"
      
     #uploadPhoto
-    #deletePhoto
-    /photos/:      
+    /photos/:
       post:
+        operationId: uploadPhoto
         tags:
           - photos
         summary: Post a new photo
         description: |
-          Posts a new photo and returns the id of the posted photo
-        operationId: uploadPhoto
+          Takes a photo and a user, the user posts the photo.
+          If the user id or the photo are not valid error 400 is threw.
+          If the user id does not match a user error 404 is threw.
+        parameters:
+          - name: userID
+            in: query
+            description: The user id of the user that posts the photo
+            required: true
+            schema:
+              $ref: '#/components/schemas/User/properties/id'
         requestBody:
           content:
             multipart/form-data :
@@ -222,35 +330,45 @@ paths:
                 type: string
                 format: binary
         responses:
-          "201":
-            description: Photo posted successfully
+          "200":
+            description: Successful, photo posted, returning photo id
             content:
               application/json:
                 schema:
                   $ref: '#/components/schemas/Photo/properties/id'
           "400":
-            description : "Bad request"          
+            
+            description: Bad request, returning the not valid parameter(s)
+            content: 
+              application/json:
+                schema:
+                  anyOf:
+                    - $ref : "#/components/parameters/userID"
+                    - $ref : "#/components/schemas/Photo"
+          "404":
+            description : Not found, the user id doesn't match a user
+      
+    #deletePhoto
+    /photos/{photoID}:
+      parameters:
+        - $ref : "#/components/parameters/photoID"
+        
       delete:
+        operationId: deletePhoto
         tags:
           - photos
-        description: "Deletes an existing photo"
+        description: |
+          Deletes a photo by the id.
+          If the id isn't valid, error 400 is threw.
+          If the id doesn't match a photo, error 404 is threw.
         summary: Deletes a photo
-        operationId: deletePhoto
-        parameters:
-          - name: photoID
-            in: query
-            required: true
-            schema:
-              type: integer
         responses:
           "200":
-            description: Successful
+            description: Successful, photo deleted
           "400":
-            description: "Bad request"
+            description: Bad request, enter a valid photo ID
           "404":
-            description: "Not found"
-          "500":
-            description: "Server error"    
+            description: Not found, photo doesn't exist
     
     #likePhoto
     /photos/{photoID}/likes/:
@@ -271,23 +389,33 @@ paths:
               $ref : "#/components/schemas/User/properties/id"
         responses:
           "200":
-            description: Successful, already like
+            description: Successful, already liked, returning like id
             content:
               application/json:
                 schema:
                   $ref : "#/components/schemas/Like/properties/id"
           "201":
-            description: Successfully liked the photo
+            description: Successfully liked the photo, returning like id
             content:
               application/json:
                 schema:
                   $ref : "#/components/schemas/Like/properties/id"
           "400":
-            description: Bad request
-          "401":
-            description: User has no authorization to like this photo
+            description: Bad request, returning the not valid parameter(s)
+            content: 
+              application/json:
+                schema:
+                  anyOf:
+                    - $ref : "#/components/schemas/User/properties/id"
+                    - $ref : "#/components/parameters/photoID"
           "404":
-            description: User not found
+            description: Not found, returning the parameter(s)
+            content: 
+              application/json:
+                schema:
+                  anyOf:
+                    - $ref : "#/components/schemas/User/properties/id"
+                    - $ref : "#/components/parameters/photoID"
     
     #getLike
     #unlikePhoto
@@ -327,9 +455,21 @@ paths:
           "200":
             description: Success, photo unliked
           "400":
-            description: Bad request
-          "401":
-            description: User requesting the elimination of the like has no authorization
+            description: Bad request, returning the not valid parameter(s)
+            content: 
+              application/json:
+                schema:
+                  anyOf:
+                    - $ref : "#/components/parameters/photoID"
+                    - $ref : "#/components/parameters/likeID"
+          "404":
+            description: Not found, returning the parameter(s)
+            content: 
+              application/json:
+                schema:
+                  anyOf:
+                    - $ref : "#/components/schemas/Photo/properties/id"
+                    - $ref : "#/components/parameters/likeID"
     
     #commentPhoto
     /photos/{photoID}/comments/:
@@ -360,11 +500,21 @@ paths:
                 schema:
                   $ref : "#/components/schemas/Comment/properties/id"
           "400":
-            description: Bad request
-          "401":
-            description: User has no authorization to comment this photo
+            description: Bad request, returning the not valid parameter(s)
+            content: 
+              application/json:
+                schema:
+                  anyOf:
+                    - $ref : "#/components/parameters/photoID"
+                    - $ref : "#/components/parameters/likeID"
           "404":
-            description: User not found
+            description: Not found, returning the parameter(s)
+            content: 
+              application/json:
+                schema:
+                  anyOf:
+                    - $ref : "#/components/parameters/photoID"
+                    - $ref : "#/components/parameters/likeID"
     
     #getComment
     #uncommentPhoto
@@ -404,9 +554,21 @@ paths:
           "200":
             description: Success, comment deleted
           "400":
-            description: Bad request
-          "401":
-            description: User requesting the elimination of the comment has no authorization
+            description: Bad request, returning the not valid parameter(s)
+            content: 
+              application/json:
+                schema:
+                  anyOf:
+                    - $ref : "#/components/parameters/photoID"
+                    - $ref : "#/components/parameters/commentID"
+          "404":
+            description: Not found, returning the parameter(s)
+            content: 
+              application/json:
+                schema:
+                  anyOf:
+                    - $ref : "#/components/parameters/photoID"
+                    - $ref : "#/components/parameters/commentID"
     
 
 components:  
@@ -455,60 +617,103 @@ components:
         $ref : "#/components/schemas/Comment/properties/id"
   
   schemas:
-      User:          
-        type: object
-        properties:
-          id:
-            type: string
-            example: ab1wd
-            readOnly: true          
-          username:
-            type: string
-            example: Maria
-            pattern: ˆ .*? $
-            minLength: 3
-            maxLength: 16
-      Photo: 
-        type: object 
-        properties:
-          id:
-            type: string
-            example: wvd12
-            readOnly: true
-          image:
-            description: The actual image of the photo
-            type: string
-            format: binary
-          upload-timestamp:
-            type: object
-            schema:
-              $ref: "#/components/schemas/Date"
-      Like:
-        type: object
-        properties:
-          id:
-            type: string
-            example: as32
-            readOnly: true
-          userID:
-            $ref : "#/components/schemas/User/properties/id"
-      Comment:
-        type: object
-        properties:
-          id:
-            type: string
-            example: as32
-            readOnly: true
-          userID:
-            $ref : "#/components/schemas/User/properties/id"
-          text-message:
-            type: string
-      Date:
+    User:          
+      type: object
+      properties:
+        id:
+          type: string
+          example: ab1wd
+          readOnly: true
+        username:
+          type: string
+          example: Maria
+          pattern: ˆ .*? $
+          minLength: 3
+          maxLength: 16
+    UserProfile:
+      type: object
+      properties:
+        user:
+          $ref : "#/components/schemas/User"
+        followed:
+          type: array
+          items: 
+            $ref : "#/components/schemas/User"
+        following:
+          type: array
+          items: 
+            $ref : "#/components/schemas/User"
+        stream:
+          type: array
+          items: 
+            $ref : "#/components/schemas/Photo"
+    Photo: 
+      type: object 
+      properties:
+        id:
+          type: string
+          example: wvd12
+          readOnly: true
+        image:
+          description: The actual image of the photo
+          type: string
+          format: binary
+        upload-timestamp:
+          $ref: "#/components/schemas/Date"
+    Like:
+      type: object
+      properties:
+        id:
+          type: string
+          example: as32
+          readOnly: true
+        userID:
+          $ref : "#/components/schemas/User/properties/id"
+    Comment:
+      type: object
+      properties:
+        id:
+          type: string
+          example: as32
+          readOnly: true
+        userID:
+          $ref : "#/components/schemas/User/properties/id"
+        text-message:
+          type: string
+    Date:
+      properties: 
         year:
           type: integer            
         month:
-          type: enum
-          val:
+          type: string
+          enum:
             - January
-            - February','March','April','May','June','July','August','September','October','November','December']}
-        yet to finish
+            - February
+            - March
+            - April
+            - May
+            - June
+            - July
+            - August
+            - September
+            - October
+            - November
+            - December
+        day:
+          type: integer
+          minimum: 1
+          maximum: 31
+        hour:
+          type: integer
+          minimum: 0
+          maximum: 23
+        minutes:
+          type: integer
+          minimum: 0
+          maximum: 59
+        seconds:
+          type: integer
+          minimum: 0
+          maximum: 59
+
+    
