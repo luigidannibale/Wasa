@@ -171,13 +171,12 @@ paths:
           "201":
             description: Successful, followed
           "400":
-            description: Bad request, returning the not valid parameter(s)
+            description: Bad request
             content: 
-              application/json:
+              text/plain:
                 schema:
-                  anyOf:
-                    - $ref : "#/components/parameters/userID"
-                    - $ref : "#/components/schemas/User"
+                  type: string
+                
           "404":
             description: Not found, returning the parameter(s)
             content: 
@@ -489,10 +488,10 @@ paths:
             in: query
             schema:
               $ref : "#/components/schemas/User/properties/id"
-          - name: text-message
+          - name: content
             in: query
             schema:
-              $ref : "#/components/schemas/Comment/properties/text-message"
+              $ref : "#/components/schemas/Comment/properties/content"
         responses:
           "201":
             description: Successful, commment created, returning id
@@ -679,7 +678,7 @@ components:
           readOnly: true
         userID:
           $ref : "#/components/schemas/User/properties/id"
-        text-message:
+        content:
           type: string
     Date:
       properties: 
