@@ -1,6 +1,5 @@
 openapi: 3.0.3
 
-
 info:
   title: WasaPhoto - OpenAPI 3.0
   description: | 
@@ -50,8 +49,8 @@ paths:
                 schema:
                     $ref: "#/components/schemas/User/properties/id"
           "400": 
-            description: Bad request
-    
+            { $ref : "#/components/responses/BadRequest" }
+                
     #getUserProfile
     /users/getUserProfile/:
       get:
@@ -60,9 +59,8 @@ paths:
           - user
         summary: Returns the profile of the user
         description: |
-          The user profile of the user is returned.         
-          If the user id is not valid, error 400 is threw.
-          If the user id is valid but doesn't exist error  404 is threw.
+          The user profile of the user is returned.                   
+          If the user can't be found error 404 is threw.
         parameters:
           - name: userID
             in: query
@@ -79,9 +77,13 @@ paths:
                   $ref : "#/components/schemas/UserProfile"
                     
           "400":
-            description: Bad request, enter a valid user ID
+            { $ref : "#/components/responses/BadRequest" }
           "404":
             description: User not found
+            content: 
+              text/plain:
+                schema:
+                  type: string
     
     #setMyUserName
     /users/{userID}/:
@@ -94,9 +96,8 @@ paths:
         summary: Changes the username
         description: |
           Takes a user (by the id) and a name and sets the name as the new username of such user. 
-          If the username was already set with such name nothing happens.
-          If the username isn't valid error 400 is threw.
-          If the username is valid but user id doesn't exist error 404 is threw.
+          If the username was already set with such name nothing happens.          
+          If the user can't be found error 404 is threw.
         parameters:
           - name: username 
             in: query
@@ -107,18 +108,31 @@ paths:
         responses:
           "200":
             description: Successful, username was already set like so
+            content: 
+              text/plain:
+                schema:
+                  type: string
           "201":
             description: Successful, username set
+            content: 
+              text/plain:
+                schema:
+                  type: string
           "400":
-            description: Bad request, returning the not valid parameter(s)
+            { $ref : "#/components/responses/BadRequest" }
+                    
+          "404":
+            description: User not found
+            content: 
+              text/plain:
+                schema:
+                  type: string
+          "406":
+            description: Not acceptable
             content: 
               application/json:
                 schema:
-                  anyOf:
-                    - $ref : "#/components/parameters/userID"
-                    - $ref : "#/components/schemas/User/properties/username"
-          "404":
-            description: User not found
+                  $ref : "#/components/schemas/User/properties/username"
       
     #getMyStream    
     /users/{userID}/getMyStream:
@@ -141,7 +155,7 @@ paths:
                 schema:
                   $ref : "#/components/schemas/UserProfile/properties/stream"
           "400":
-            description: Bad request, userID not valid
+            { $ref : "#/components/responses/BadRequest" }
           "404":
             description: User not found
           
@@ -157,9 +171,8 @@ paths:
         summary: Follows a user
         description: |
           The actual user (user ID) starts following the given user (followed ID).
-          If was already followed nothing happens.
-          If one of the IDs isn't a valid id error 400 is threw.
-          If one of the IDs don't exist error 404 is threw.
+          If was already followed nothing happens.          
+          If one of the IDs can't be found error 404 is threw.
         requestBody:
           content:
             application/json:
@@ -171,13 +184,12 @@ paths:
           "201":
             description: Successful, followed
           "400":
-            description: Bad request, returning the not valid parameter(s)
+            description: Bad request
             content: 
-              application/json:
+              text/plain:
                 schema:
-                  anyOf:
-                    - $ref : "#/components/parameters/userID"
-                    - $ref : "#/components/schemas/User"
+                  type: string
+                
           "404":
             description: Not found, returning the parameter(s)
             content: 
@@ -187,7 +199,7 @@ paths:
                     - $ref : "#/components/parameters/userID"
                     - $ref : "#/components/schemas/User"
     
-    #unfollowUser
+    #unfollowUser - LastMod : 21/11
     /users/{userID}/followed/{followedID}/:
       parameters:
       - $ref : "#/components/parameters/userID"
@@ -199,23 +211,12 @@ paths:
           - user
         summary: Unfollows a user
         description: |
-          The actual user (user ID) unfollows the given user (followed ID).
-          If was already not followed nothing happens.
-          If one of the IDs isn't a valid id error 400 is threw.
-          If one of the IDs don't exist error 404 is threw.
+          The actual user (userID) unfollows the given user (followedID).          
         responses:
           "200": 
-            description: Successful, already not followed
-          "201":
-            description: Successful, unfollowed
+            { $ref : "#/components/responses/OK"}
           "400":
-            description: Bad request, returning the not valid parameter(s)
-            content: 
-              application/json:
-                schema:
-                  anyOf:
-                    - $ref : "#/components/parameters/userID"
-                    - $ref : "#/components/parameters/followedID"
+            { $ref : "#/components/responses/BadRequest" }
           "404":
             description: Not found, returning the parameter(s) 
             content: 
@@ -224,7 +225,9 @@ paths:
                   anyOf:
                     - $ref : "#/components/parameters/userID"
                     - $ref : "#/components/parameters/followedID"
-
+          "500": 
+            { $ref : "#/components/responses/InternalServerError" }
+    
     #banUser
     /users/{userID}/banned/:
       parameters:
@@ -237,9 +240,8 @@ paths:
         summary: Bans a user
         description: |
           The actual user (user ID) bans the given user (banned ID).
-          If was already banned nothing happens.
-          If one of the IDs isn't a valid id error 400 is threw.
-          If one of the IDs don't exist error 404 is threw.
+          If was already banned nothing happens.          
+          If one of the IDs can't be found error 404 is threw.
         requestBody:
           content:
             application/json:
@@ -251,13 +253,7 @@ paths:
           "201":
             description: Successful, banned
           "400":
-            description: Bad request, returning the not valid parameter(s)
-            content: 
-              application/json:
-                schema:
-                  anyOf:
-                    - $ref : "#/components/parameters/userID"
-                    - $ref : "#/components/schemas/User"
+            { $ref : "#/components/responses/BadRequest" }
           "404":
             description: Not found, returning the parameter(s)
             content: 
@@ -265,8 +261,7 @@ paths:
                 schema:
                   anyOf:
                     - $ref : "#/components/parameters/userID"
-                    - $ref : "#/components/schemas/User"
-    
+                    - $ref : "#/components/schemas/User"    
     #unbanUser
     /users/{userID}/banned/{bannedID}/:
       parameters:
@@ -282,21 +277,22 @@ paths:
         description: |
           The actual user (user ID) unbans the given user (unbanned ID). 
           If was already not banned nothing happens.
-          If one of the IDs isn't a valid id error 400 is threw.
-          If one of the IDs don't exist error 404 is threw.
+          If one of the IDs can't be found error 404 is threw.
         responses:
           "200": 
             description: Successful, already not banned
+            content: 
+              text/plain:
+                schema:
+                  type: string
           "201":
             description: Successful, unbanned
-          "400":
-            description: Bad request, returning the not valid parameter(s)
             content: 
-              application/json:
+              text/plain:
                 schema:
-                  anyOf:
-                    - $ref : "#/components/parameters/userID"
-                    - $ref : "#/components/parameters/bannedID"
+                  type: string
+          "400":
+            { $ref : "#/components/responses/BadRequest" }
           "404":
             description: Not found, returning the parameter(s) 
             content: 
@@ -314,8 +310,7 @@ paths:
           - photos
         summary: Post a new photo
         description: |
-          Takes a photo and a user, the user posts the photo.
-          If the user id or the photo are not valid error 400 is threw.
+          Takes a photo and a user, the user posts the photo.          
           If the user id does not match a user error 404 is threw.
         parameters:
           - name: userID
@@ -338,8 +333,9 @@ paths:
                 schema:
                   $ref: '#/components/schemas/Photo/properties/id'
           "400":
-            
-            description: Bad request, returning the not valid parameter(s)
+            { $ref : "#/components/responses/BadRequest" }
+          "406":
+            description: Not acceptable, returning the not valid parameter(s)
             content: 
               application/json:
                 schema:
@@ -347,9 +343,13 @@ paths:
                     - $ref : "#/components/parameters/userID"
                     - $ref : "#/components/schemas/Photo"
           "404":
-            description : Not found, the user id doesn't match a user
-      
-    #deletePhoto
+            description : Not found, the user id doesn't match a user            
+            content: 
+              text/plain:
+                schema:
+                  type: string
+    
+    #deletePhoto - LastMod : 21/11
     /photos/{photoID}:
       parameters:
         - $ref : "#/components/parameters/photoID"
@@ -359,19 +359,19 @@ paths:
         tags:
           - photos
         description: |
-          Deletes a photo by the id.
-          If the id isn't valid, error 400 is threw.
-          If the id doesn't match a photo, error 404 is threw.
+          Deletes a photo by the id.          
         summary: Deletes a photo
         responses:
           "200":
-            description: Successful, photo deleted
+            { $ref : "#/components/responses/OK" }
           "400":
-            description: Bad request, enter a valid photo ID
+            { $ref : "#/components/responses/BadRequest" }
           "404":
-            description: Not found, photo doesn't exist
+            { $ref : "#/components/responses/NotFound" }
+          "500":
+            { $ref : "#/components/responses/InternalServerError" }
     
-    #likePhoto
+    #likePhoto - LastMod : 21/11
     /photos/{photoID}/likes/:
       parameters:
         - $ref : "#/components/parameters/photoID"
@@ -390,25 +390,19 @@ paths:
               $ref : "#/components/schemas/User/properties/id"
         responses:
           "200":
-            description: Successful, already liked, returning like id
+            description: Successful, already liked
             content:
               application/json:
                 schema:
-                  $ref : "#/components/schemas/Like/properties/id"
+                  $ref : "#/components/schemas/Message"
           "201":
-            description: Successfully liked the photo, returning like id
+            description: Successful, photo has been likes
             content:
               application/json:
                 schema:
-                  $ref : "#/components/schemas/Like/properties/id"
+                  $ref : "#/components/schemas/Message"
           "400":
-            description: Bad request, returning the not valid parameter(s)
-            content: 
-              application/json:
-                schema:
-                  anyOf:
-                    - $ref : "#/components/schemas/User/properties/id"
-                    - $ref : "#/components/parameters/photoID"
+            { $ref : "#/components/responses/BadRequest" }
           "404":
             description: Not found, returning the parameter(s)
             content: 
@@ -417,28 +411,15 @@ paths:
                   anyOf:
                     - $ref : "#/components/schemas/User/properties/id"
                     - $ref : "#/components/parameters/photoID"
+          "500":
+            { $ref : "#/components/responses/InternalServerError" }
     
-    #getLike
-    #unlikePhoto
-    /photos/{photoID}/likes/{likeID}/:
+    
+    #unlikePhoto - LastMod : 21/11
+    /photos/{photoID}/likes/{userID}/:
       parameters: 
         - $ref : "#/components/parameters/photoID"
-        - $ref : "#/components/parameters/likeID"
-      
-      get:
-        operationId: getLike
-        tags: 
-          - photos 
-        summary: Gets the like details
-        description: Takes a like id and returns the like 
-        responses:
-          "200":
-            description:  Success, returning the like
-            content:
-              application/json:
-                schema:
-                   $ref : "#/components/schemas/Like"
-        
+        - $ref : "#/components/parameters/userID"
       delete:
         operationId: unlikePhoto
         tags:
@@ -447,22 +428,11 @@ paths:
         description: |
           Takes a userID, if it matches the user that has put the like, the like is deleted,
           otherwise nothing happens.
-        parameters:
-          - name: userID
-            in: query
-            schema:
-              $ref : "#/components/schemas/User/properties/id"
         responses:
           "200":
-            description: Success, photo unliked
+            { $ref : "#/components/responses/OK" }
           "400":
-            description: Bad request, returning the not valid parameter(s)
-            content: 
-              application/json:
-                schema:
-                  anyOf:
-                    - $ref : "#/components/parameters/photoID"
-                    - $ref : "#/components/parameters/likeID"
+            { $ref : "#/components/responses/BadRequest" }
           "404":
             description: Not found, returning the parameter(s)
             content: 
@@ -470,7 +440,9 @@ paths:
                 schema:
                   anyOf:
                     - $ref : "#/components/schemas/Photo/properties/id"
-                    - $ref : "#/components/parameters/likeID"
+                    - $ref : "#/components/schemas/User/properties/id"
+          "500":
+            { $ref : "#/components/responses/InternalServerError" }
     
     #commentPhoto
     /photos/{photoID}/comments/:
@@ -489,10 +461,10 @@ paths:
             in: query
             schema:
               $ref : "#/components/schemas/User/properties/id"
-          - name: text-message
+          - name: content
             in: query
             schema:
-              $ref : "#/components/schemas/Comment/properties/text-message"
+              $ref : "#/components/schemas/Comment/properties/content"
         responses:
           "201":
             description: Successful, commment created, returning id
@@ -501,13 +473,7 @@ paths:
                 schema:
                   $ref : "#/components/schemas/Comment/properties/id"
           "400":
-            description: Bad request, returning the not valid parameter(s)
-            content: 
-              application/json:
-                schema:
-                  anyOf:
-                    - $ref : "#/components/parameters/photoID"
-                    - $ref : "#/components/parameters/likeID"
+            { $ref : "#/components/responses/BadRequest" }
           "404":
             description: Not found, returning the parameter(s)
             content: 
@@ -515,7 +481,7 @@ paths:
                 schema:
                   anyOf:
                     - $ref : "#/components/parameters/photoID"
-                    - $ref : "#/components/parameters/likeID"
+                    - $ref : "#/components/parameters/commentID"
     
     #getComment
     #uncommentPhoto
@@ -555,13 +521,7 @@ paths:
           "200":
             description: Success, comment deleted
           "400":
-            description: Bad request, returning the not valid parameter(s)
-            content: 
-              application/json:
-                schema:
-                  anyOf:
-                    - $ref : "#/components/parameters/photoID"
-                    - $ref : "#/components/parameters/commentID"
+            { $ref : "#/components/responses/BadRequest" }
           "404":
             description: Not found, returning the parameter(s)
             content: 
@@ -601,14 +561,7 @@ components:
       description: ID of the photo
       required: true
       schema:
-        $ref : "#/components/schemas/Photo/properties/id"
-    likeID:
-      name: likeID
-      in: path
-      description: ID of the like
-      required: true
-      schema:
-        $ref : "#/components/schemas/Like/properties/id"
+        $ref : "#/components/schemas/Photo/properties/id"    
     commentID:
       name: commentID
       in: path
@@ -622,13 +575,13 @@ components:
       type: object
       properties:
         id:
-          type: string
-          example: ab1wd
+          type: integer
+          example: 42
           readOnly: true
         username:
           type: string
           example: Maria
-          pattern: ˆ .*? $
+          pattern: "^[a-zA-Z0-9._]{3,16}$"
           minLength: 3
           maxLength: 16
     UserProfile:
@@ -652,8 +605,8 @@ components:
       type: object 
       properties:
         id:
-          type: string
-          example: wvd12
+          type: integer
+          example: 12
           readOnly: true
         image:
           description: The actual image of the photo
@@ -663,23 +616,19 @@ components:
           $ref: "#/components/schemas/Date"
     Like:
       type: object
-      properties:
-        id:
-          type: string
-          example: as32
-          readOnly: true
+      properties:        
         userID:
           $ref : "#/components/schemas/User/properties/id"
     Comment:
       type: object
       properties:
         id:
-          type: string
-          example: as32
+          type: integer
+          example: 42
           readOnly: true
         userID:
           $ref : "#/components/schemas/User/properties/id"
-        text-message:
+        content:
           type: string
     Date:
       properties: 
@@ -716,5 +665,36 @@ components:
           type: integer
           minimum: 0
           maximum: 59
-
-    
+    Message:
+      properties:
+        message:  
+          type: string
+          example: "Error"
+          minLength: 0
+          maxLength: 255
+      
+  responses:
+    OK:
+      description: The request has been completed successfully
+      content: 
+        application/json:
+          schema:
+            $ref : "#/components/schemas/Message"
+    BadRequest:
+      description: The request isn't valid
+      content: 
+        application/json:
+          schema:
+            $ref : "#/components/schemas/Message"
+    NotFound:
+      description: Resource not found
+      content: 
+        application/json:
+          schema:
+            $ref : "#/components/schemas/Message"
+    InternalServerError:
+      description: Internal server error has occurred
+      content: 
+        application/json:
+          schema:
+            $ref : "#/components/schemas/Message"
