@@ -1,39 +1,35 @@
 package api
 
 import (
-	"github.com/julienschmidt/httprouter"
-	"net/http"
 	"encoding/json"
-	"strconv"
 	"io"
+	"net/http"
+	"strconv"
+
+	"github.com/julienschmidt/httprouter"
+	"github.com/luigidannibale/Wasa/service/utils"
 )
 
-
-func (rt *_router) folloUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (rt *_router) followUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("content-type", "application/json")
-	
-	//body, _ := io.readAll(r.Body)	
-	//This should get the body
-	var user User
-	json.Unmarshal(r.Body, &user)
-	
+
 	//This takes the userID from parameters
 	userID, err := strconv.Atoi(ps.ByName("userID"))
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode("message : could not convert the userID")
 		return
 	}
-	if Users[userID] == nil {
-		w.WriteHeader(http.StatusNotFound)
-		return userID
-	}
-	if Users[user.id] == nil {
-		w.WriteHeader(http.StatusNotFound)
-		return body
-	}
-	// Insert the user into the followed 		
-	// Users[userID].followed.append(user)
+	body, _ := io.ReadAll(r.Body)
+	//This should get the body
+	var userToFollow utils.User
+	json.Unmarshal(body, &userToFollow)
 
+	if &userToFollow == nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(userToFollow)
+		return
+	}
 
 }
