@@ -2,15 +2,15 @@ openapi: 3.0.3
 
 
 info:
-    title: WasaPhoto - OpenAPI 3.0
-    description: | 
-      This is the api specification for WasaPhoto, an educational purpose based project, 
-      to keep in touch with your friends by sharing photos of special moments.  
-
-      - [The github private project repository] (https://github.com/luigidannibale/Wasa)
-    version: "1"
-    contact:
-      email: dannibale.1991254@studenti.uniroma1.it
+  title: WasaPhoto - OpenAPI 3.0
+  description: | 
+    This is the api specification for WasaPhoto, an educational purpose based project, 
+    to keep in touch with your friends by sharing photos of special moments.  
+    - [The github private project repository] (https://github.com/luigidannibale/Wasa)
+    
+  version: 1.0.0
+  contact:
+    email: dannibale.1991254@studenti.uniroma1.it
 
 externalDocs:
   description: Find out more about project specification
