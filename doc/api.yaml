@@ -134,7 +134,7 @@ paths:
                 schema:
                   $ref : "#/components/schemas/User/properties/username"
       
-    #getMyStream    
+    #getMyStream - LastMod : 23//11
     /users/{userID}/getMyStream:
       parameters:
         - $ref : "#/components/parameters/userID"
@@ -145,8 +145,7 @@ paths:
         summary: Gets the user his stream 
         description: |
           Takes an user id and returns his stream (stream of photos of users 
-          followed by actual user) as array of photos. 
-          If the id does not exist error 404 is threw.
+          followed by actual user) as array of photos.
         responses:
           "200":
             description: Successful, returning the stream
@@ -157,9 +156,11 @@ paths:
           "400":
             { $ref : "#/components/responses/BadRequest" }
           "404":
-            description: User not found
+            { $ref : "#/components/responses/NotFound" }
+          "500":
+            { $ref : "#/components/responses/InternalServerError" }
           
-    #followUser
+    #followUser - LastMod : 23/11
     /users/{userID}/followed/:
       parameters:
       - $ref : "#/components/parameters/userID"
@@ -170,25 +171,35 @@ paths:
           - user
         summary: Follows a user
         description: |
-          The actual user (user ID) starts following the given user (followed ID).
-          If was already followed nothing happens.          
-          If one of the IDs can't be found error 404 is threw.
-        requestBody:
-          content:
-            application/json:
-              schema:
-                $ref : "#/components/schemas/User"
+          The actual user (userID) starts following the given user (userToFollowID).
+          If was already followed nothing happens.
+        parameters:          
+          - name: userToFollowID
+            in: query
+            description: Id of the user to follow
+            required: true
+            schema:
+              $ref : "#/components/schemas/User/properties/id"
+        
         responses:
           "200": 
             description: Successful, already followed
+            content: 
+              application/json:
+                schema:
+                  $ref : "#/components/schemas/Message"
           "201":
             description: Successful, followed
+            content: 
+              application/json:
+                schema:
+                  $ref : "#/components/schemas/Message"
           "400":
             description: Bad request
             content: 
-              text/plain:
+              application/json:
                 schema:
-                  type: string
+                  $ref : "#/components/schemas/Message"
                 
           "404":
             description: Not found, returning the parameter(s)
@@ -302,7 +313,7 @@ paths:
                     - $ref : "#/components/parameters/userID"
                     - $ref : "#/components/parameters/bannedID"
      
-    #uploadPhoto
+    #uploadPhoto - LastMod : 23/11
     /photos/:
       post:
         operationId: uploadPhoto
@@ -334,20 +345,14 @@ paths:
                   $ref: '#/components/schemas/Photo/properties/id'
           "400":
             { $ref : "#/components/responses/BadRequest" }
+          "404":
+            { $ref : "#/components/responses/NotFound" }
           "406":
-            description: Not acceptable, returning the not valid parameter(s)
+            description: Not acceptable
             content: 
               application/json:
                 schema:
-                  anyOf:
-                    - $ref : "#/components/parameters/userID"
-                    - $ref : "#/components/schemas/Photo"
-          "404":
-            description : Not found, the user id doesn't match a user            
-            content: 
-              text/plain:
-                schema:
-                  type: string
+                    $ref : "#/components/schemas/Photo"          
     
     #deletePhoto - LastMod : 21/11
     /photos/{photoID}:
@@ -612,6 +617,8 @@ components:
           description: The actual image of the photo
           type: string
           format: binary
+          minLength: 0
+          maxLength: 40960
         upload-timestamp:
           $ref: "#/components/schemas/Date"
     Like:

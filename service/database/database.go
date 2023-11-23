@@ -40,11 +40,14 @@ import (
 
 // AppDatabase is the high level interface for the DB
 type AppDatabase interface {
+	Follow(int, int) (string, error)
 	Unfollow(int, int) (string, error)
 	Like(int, utils.Like) (string, error)
 	Unlike(int, int) (string, error)
 	DeletePhoto(int) (string, error)
 	Ping() error
+	GetStream(int) ([]utils.Photo, string, error)
+	UploadPhoto(int, utils.Photo) (int, string, error)
 }
 
 type appdbimpl struct {
@@ -60,12 +63,60 @@ func New(db *sql.DB) (AppDatabase, error) {
 
 	// Check if table exists. If not, the database is empty, and we need to create the structure
 	var tableName string
-	err := db.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='example_table';`).Scan(&tableName)
+	err := db.QueryRow(`SELECT id FROM sqlite_master WHERE type='table' AND name='Users';`).Scan(&tableName)
 	if errors.Is(err, sql.ErrNoRows) {
-		sqlStmt := `CREATE TABLE example_table (id INTEGER NOT NULL PRIMARY KEY, name TEXT);`
+		sqlStmt := `CREATE TABLE Users
+			(id INTEGER NOT NULL PRIMARY KEY, 
+			username TEXT NOT NULL UNIQUE);`
 		_, err = db.Exec(sqlStmt)
 		if err != nil {
-			return nil, fmt.Errorf("error creating database structure: %w", err)
+			return nil, fmt.Errorf("error creating 'Users' table: %w", err)
+		}
+		sqlStmt = `CREATE TABLE Photos 
+			(id INTEGER NOT NULL PRIMARY KEY, 
+			image BLOB NOT NULL);`
+		_, err = db.Exec(sqlStmt)
+		if err != nil {
+			return nil, fmt.Errorf("error creating 'Photos' table: %w", err)
+		}
+		sqlStmt = `CREATE TABLE Comments 
+			(id INTEGER NOT NULL PRIMARY KEY, 
+			userID INTEGER,
+			content TEXT NOT NULL,
+			FOREIGN KEY(userID) REFERENCES Users(id));`
+		_, err = db.Exec(sqlStmt)
+		if err != nil {
+			return nil, fmt.Errorf("error creating 'Comments' table: %w", err)
+		}
+		sqlStmt = `CREATE TABLE Likes 
+			(userID INTEGER,
+			photoID INTEGER,
+			PRIMARY KEY(userID, photoID),
+			FOREIGN KEY(photoID) REFERENCES Photos(id)),
+			FOREIGN KEY(userID) REFERENCES Users(id));`
+		_, err = db.Exec(sqlStmt)
+		if err != nil {
+			return nil, fmt.Errorf("error creating 'Likes' table: %w", err)
+		}
+		sqlStmt = `CREATE TABLE Follows 
+			(followerID INTEGER,
+			followedID INTEGER,
+			PRIMARY KEY(followerID, followedID),
+			FOREIGN KEY(followerID) REFERENCES Users(id)),
+			FOREIGN KEY(followedID) REFERENCES Users(id));`
+		_, err = db.Exec(sqlStmt)
+		if err != nil {
+			return nil, fmt.Errorf("error creating 'Following' table: %w", err)
+		}
+		sqlStmt = `CREATE TABLE Bans 
+			(bannerID INTEGER,
+			bannedID INTEGER,
+			PRIMARY KEY(bannerID, bannedID),
+			FOREIGN KEY(bannerID) REFERENCES Users(id)),
+			FOREIGN KEY(bannedID) REFERENCES Users(id));`
+		_, err = db.Exec(sqlStmt)
+		if err != nil {
+			return nil, fmt.Errorf("error creating 'Following' table: %w", err)
 		}
 	}
 

@@ -26,6 +26,14 @@ type Photo struct {
 	Image string
 }
 
+func (p Photo) Validate() error {
+	if l := len(p.Image); l < 0 || l > 40960 {
+		return errors.New("Photo not acceptable")
+	}
+
+	return nil
+}
+
 type Like struct {
 	UserID int
 }

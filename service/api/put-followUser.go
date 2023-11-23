@@ -1,35 +1,58 @@
 package api
 
 import (
+	"encoding/json"
+	"strconv"
+
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
+	"github.com/luigidannibale/Wasa/service/utils"
 )
 
 func (rt *_router) followUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("content-type", "application/json")
-	/*
-		//body, _ := io.readAll(r.Body)
-		//This should get the body
-		var user User
-		json.Unmarshal(r.Body, &user)
 
-		//This takes the userID from parameters
-		userID, err := strconv.Atoi(ps.ByName("userID"))
+	//This should get the body
+	var user utils.User
+	json.NewDecoder(r.Body).Decode(&user)
 
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
+	//This takes the userID from parameters
+	userID, err := strconv.Atoi(ps.ByName("userID"))
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode("message : could not convert the userID")
+		return
+	}
+	userToFollowID, err := strconv.Atoi(ps.ByName("userToFollowID"))
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode("message : could not convert the userToFollowID")
+		return
+	}
+
+	s, err := rt.db.Follow(userID, userToFollowID)
+
+	//Checks for DB-side errrors(404,500)
+	if err != nil {
+		if e := err.Error(); e == "UserNotFound" || e == "FollowedNotFound" {
+			w.WriteHeader(http.StatusNotFound)
+			if e == "UserNotFound" {
+				json.NewEncoder(w).Encode(userID)
+			} else if e == "FollowedNotFound" {
+				json.NewEncoder(w).Encode(userToFollowID)
+			}
 			return
+		} else if e == "AlreadyFollowed" {
+			w.WriteHeader(http.StatusOK)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
 		}
-		if Users[userID] == nil {
-			w.WriteHeader(http.StatusNotFound)
-			return userID
-		}
-		if Users[user.id] == nil {
-			w.WriteHeader(http.StatusNotFound)
-			return body
-		}
-		// Insert the user into the followed
-		// Users[userID].followed.append(user)
-	*/
+	} else {
+		w.WriteHeader(http.StatusCreated)
+	}
+	json.NewEncoder(w).Encode("message : " + s)
+	return
+
 }

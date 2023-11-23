@@ -2,7 +2,7 @@ package database
 
 //import "errors"
 
-func (db *appdbimpl) Unfollow(userID int, userToUnfollow int) (string, error) {
+func (db *appdbimpl) Unfollow(userID int, userToUnfollowID int) (string, error) {
 
 	// return "Could't find the user", errors.New("UserNotFound")
 	// return "Could't find the user to unfollow", errors.New("FollowedNotFound")
