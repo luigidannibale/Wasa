@@ -589,54 +589,6 @@ components:
           pattern: "^[a-zA-Z0-9._]{3,16}$"
           minLength: 3
           maxLength: 16
-    UserProfile:
-      type: object
-      properties:
-        user:
-          $ref : "#/components/schemas/User"
-        followed:
-          type: array
-          items: 
-            $ref : "#/components/schemas/User"
-        following:
-          type: array
-          items: 
-            $ref : "#/components/schemas/User"
-        stream:
-          type: array
-          items: 
-            $ref : "#/components/schemas/Photo"
-    Photo: 
-      type: object 
-      properties:
-        id:
-          type: integer
-          example: 12
-          readOnly: true
-        image:
-          description: The actual image of the photo
-          type: string
-          format: binary
-          minLength: 0
-          maxLength: 40960
-        upload-timestamp:
-          $ref: "#/components/schemas/Date"
-    Like:
-      type: object
-      properties:        
-        userID:
-          $ref : "#/components/schemas/User/properties/id"
-    Comment:
-      type: object
-      properties:
-        id:
-          type: integer
-          example: 42
-          readOnly: true
-        userID:
-          $ref : "#/components/schemas/User/properties/id"
-        content:
-          type: string
     Date:
       properties: 
         year:
@@ -672,13 +624,64 @@ components:
           type: integer
           minimum: 0
           maximum: 59
+    Photo: 
+      type: object 
+      properties:
+        id:
+          type: integer
+          example: 12
+          readOnly: true
+        image:
+          description: The actual image of the photo
+          type: string
+          format: binary
+          minLength: 0
+          maxLength: 40960
+        upload-timestamp:
+          $ref: "#/components/schemas/Date"
+    UserProfile:
+      type: object
+      properties:
+        user:
+          $ref : "#/components/schemas/User"
+        followed:
+          type: array
+          items: 
+            $ref : "#/components/schemas/User"
+        following:
+          type: array
+          items: 
+            $ref : "#/components/schemas/User"
+        stream:
+          type: array
+          items: 
+            $ref : "#/components/schemas/Photo"    
+    Like:
+      type: object
+      properties:        
+        userID:
+          $ref : "#/components/schemas/User/properties/id"
+    Comment:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 42
+          readOnly: true
+        userID:
+          $ref : "#/components/schemas/User/properties/id"
+        content:
+          type: string
+          example: "Nice photo"
+          minLength: 0
+          maxLength: 1024    
     Message:
       properties:
         message:  
           type: string
           example: "Error"
           minLength: 0
-          maxLength: 255
+          maxLength: 1024
       
   responses:
     OK:
@@ -688,13 +691,13 @@ components:
           schema:
             $ref : "#/components/schemas/Message"
     BadRequest:
-      description: The request isn't valid
+      description: The request is bad asked
       content: 
         application/json:
           schema:
             $ref : "#/components/schemas/Message"
     NotFound:
-      description: Resource not found
+      description: Resource(s) not found
       content: 
         application/json:
           schema:
