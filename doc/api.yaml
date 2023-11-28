@@ -17,12 +17,13 @@ externalDocs:
 
 tags:
   - name: user
-    description: User related
+    description: User related paths
   - name: photos
-    description: Photos related
+    description: Photos related paths
 
 paths:
     #doLogin
+    #getUserProfile
     /users/:
       post:
         operationId: doLogin
@@ -57,8 +58,6 @@ paths:
           "400": 
             { $ref : "#/components/responses/BadRequest" }
                 
-    #getUserProfile
-    /users/getUserProfile/:
       get:
         operationId: getUserProfile
         tags: 
@@ -80,16 +79,11 @@ paths:
             content:
               application/json:      
                 schema:
-                  $ref : "#/components/schemas/UserProfile"
-                    
+                  $ref : "#/components/schemas/UserProfile"                    
           "400":
             { $ref : "#/components/responses/BadRequest" }
           "404":
-            description: User not found
-            content: 
-              text/plain:
-                schema:
-                  type: string
+            { $ref : "#/components/responses/NotFound" }
     
     #setMyUserName
     /users/{userID}/:
@@ -425,12 +419,11 @@ paths:
           "500":
             { $ref : "#/components/responses/InternalServerError" }
     
-    
     #unlikePhoto - LastMod : 21/11
-    /photos/{photoID}/likes/{userID}/:
+    /photos/{photoID}/likes/{likeID}/:
       parameters: 
         - $ref : "#/components/parameters/photoID"
-        - $ref : "#/components/parameters/userID"
+        - $ref : "#/components/parameters/likeID"
       delete:
         operationId: unlikePhoto
         tags:
@@ -542,47 +535,53 @@ paths:
                     - $ref : "#/components/parameters/photoID"
                     - $ref : "#/components/parameters/commentID"
     
-
 components:  
-  parameters:
-    userID: 
+  parameters: # LastMod - 28/11
+    userID: #can be referenced using $ref : "#/components/parameters/userID"
       name: userID
       in: path
       description: Id of the user
       required: true
       schema:
         $ref : "#/components/schemas/User/properties/id"
-    followedID: 
+    followedID: #can be referenced using $ref : "#/components/parameters/followedID"
       name: followedID
       in: path
       description: Id of the followed user
       required: true
       schema:
         $ref : "#/components/schemas/User/properties/id"
-    bannedID: 
+    bannedID: #can be referenced using $ref : "#/components/parameters/bannedID"
       name: bannedID
       in: path
       description: Id of the banned user
       required: true
       schema:
         $ref : "#/components/schemas/User/properties/id"
-    photoID:
+    photoID: #can be referenced using $ref : "#/components/parameters/photoID"
       name: photoID
       in: path
       description: ID of the photo
       required: true
       schema:
         $ref : "#/components/schemas/Photo/properties/id"    
-    commentID:
+    commentID: #can be referenced using $ref : "#/components/parameters/commentID"
       name: commentID
       in: path
       description: ID of the comment
       required: true
       schema:
         $ref : "#/components/schemas/Comment/properties/id"
+    likeID: #can be referenced using $ref : "#/components/parameters/likeID"
+      name: likeID
+      in: path
+      description: ID of the like
+      required: true
+      schema:
+        $ref : "#/components/schemas/Like/properties/id"
   
-  schemas:
-    User:          
+  schemas:  #LastMod - 28/11  
+    User: #can be referenced using $ref : "#/components/schemas/User"         
       type: object
       properties:
         id:
@@ -595,7 +594,22 @@ components:
           pattern: "^[a-zA-Z0-9._]{3,16}$"
           minLength: 3
           maxLength: 16
-    Date:
+        name:
+          type: string
+          example: Marianna
+          pattern: "^[a-zA-Z]{3,25}$"
+          minLength: 3
+          maxLength: 25
+        surname:
+          type: string
+          example: Rossi
+          pattern: "^[a-zA-Z']{3,25}$"
+          minLength: 3
+          maxLength: 25
+        #dateOfBirth:
+        #  type: object
+        #  $ref : "#/components/schemas/Date"
+    Date: #can be referenced using $ref : "#/components/schemas/Date"
       properties: 
         year:
           type: integer            
@@ -629,8 +643,8 @@ components:
         seconds:
           type: integer
           minimum: 0
-          maximum: 59
-    Photo: 
+          maximum: 59    
+    Photo: #can be referenced using $ref : "#/components/schemas/Photo"
       type: object 
       properties:
         id:
@@ -643,9 +657,14 @@ components:
           format: binary
           minLength: 0
           maxLength: 40960
+        caption:
+          type: string  
+          example: Look what a beautiful photo
+          minLength: 0
+          maxLength: 100
         upload-timestamp:
           $ref: "#/components/schemas/Date"
-    UserProfile:
+    UserProfile: #can be referenced using $ref : "#/components/schemas/UserProfile"
       type: object
       properties:
         user:
@@ -662,18 +681,18 @@ components:
           type: array
           items: 
             $ref : "#/components/schemas/Photo"    
-    Like:
+    Like: #can be referenced using $ref : "#/components/schemas/Like"
       type: object
       properties:        
-        userID:
+        id:
           $ref : "#/components/schemas/User/properties/id"
-    Comment:
+    Comment: #can be referenced using $ref : "#/components/schemas/Comment"
       type: object
       properties:
         id:
           type: integer
           example: 42
-          readOnly: true
+          readOnly: true        
         userID:
           $ref : "#/components/schemas/User/properties/id"
         content:
@@ -681,7 +700,7 @@ components:
           example: "Nice photo"
           minLength: 0
           maxLength: 1024    
-    Message:
+    Message: #can be referenced using $ref : "#/components/schemas/Message"
       properties:
         message:  
           type: string
@@ -689,26 +708,26 @@ components:
           minLength: 0
           maxLength: 1024
       
-  responses:
-    OK:
+  responses: # LastMod - 28/11
+    OK: #can be referenced using $ref : "#/components/responses/OK"
       description: The request has been completed successfully
       content: 
         application/json:
           schema:
             $ref : "#/components/schemas/Message"
-    BadRequest:
+    BadRequest: #can be referenced using $ref : "#/components/responses/BadRequest"
       description: The request is bad asked
       content: 
         application/json:
           schema:
             $ref : "#/components/schemas/Message"
-    NotFound:
+    NotFound: #can be referenced using $ref : "#/components/responses/NotFound"
       description: Resource(s) not found
       content: 
         application/json:
           schema:
             $ref : "#/components/schemas/Message"
-    InternalServerError:
+    InternalServerError: #can be referenced using $ref : "#/components/responses/InteralServerError"
       description: Internal server error has occurred
       content: 
         application/json:
