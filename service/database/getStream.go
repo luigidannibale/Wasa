@@ -6,8 +6,6 @@ import (
 	"github.com/luigidannibale/Wasa/service/utils"
 )
 
-//import "errors"
-
 func (db *appdbimpl) GetStream(userID int) ([]utils.Photo, string, error) {
 
 	var stream []utils.Photo
