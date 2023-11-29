@@ -5,7 +5,7 @@ info:
   description: | 
     This is the api specification for WasaPhoto, an educational purpose based project, 
     to keep in touch with your friends by sharing photos of special moments.  
-    - [The github private project repository] (https://github.com/luigidannibale/Wasa)
+    - [The github private project repository](https://github.com/luigidannibale/Wasa)
     
   version: 1.0.0
   contact:
