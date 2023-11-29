@@ -36,5 +36,4 @@ func (rt *_router) getMyStream(w http.ResponseWriter, r *http.Request, ps httpro
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(stream)
-	return
 }

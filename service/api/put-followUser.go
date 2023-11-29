@@ -53,6 +53,4 @@ func (rt *_router) followUser(w http.ResponseWriter, r *http.Request, ps httprou
 		w.WriteHeader(http.StatusCreated)
 	}
 	json.NewEncoder(w).Encode("message : " + s)
-	return
-
 }

@@ -31,7 +31,7 @@ func (rt *_router) likePhoto(w http.ResponseWriter, r *http.Request, ps httprout
 	}
 
 	var like utils.Like
-	like.UserID = userID
+	like.Id = userID
 
 	//Delete the like of the user from the photo
 	s, err := rt.db.Like(photoID, like)
@@ -55,6 +55,4 @@ func (rt *_router) likePhoto(w http.ResponseWriter, r *http.Request, ps httprout
 		w.WriteHeader(http.StatusCreated)
 	}
 	json.NewEncoder(w).Encode("message : " + s)
-	return
-
 }

@@ -37,5 +37,4 @@ func (rt *_router) deletePhoto(w http.ResponseWriter, r *http.Request, ps httpro
 		w.WriteHeader(http.StatusOK)
 	}
 	json.NewEncoder(w).Encode("message : " + s)
-	return
 }

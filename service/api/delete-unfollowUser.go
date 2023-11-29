@@ -50,6 +50,4 @@ func (rt *_router) unfollowUser(w http.ResponseWriter, r *http.Request, ps httpr
 		w.WriteHeader(http.StatusOK)
 	}
 	json.NewEncoder(w).Encode("message : " + s)
-	return
-
 }
