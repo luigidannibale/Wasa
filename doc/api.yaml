@@ -22,8 +22,8 @@ tags:
     description: Photos related paths
 
 paths:
-    #doLogin
-    #getUserProfile
+    #doLogin - LastMod : 30/11
+    #getUserProfile - LastMod : 30/11
     /users/:
       post:
         operationId: doLogin
@@ -56,7 +56,9 @@ paths:
                 schema:
                     $ref: "#/components/schemas/User/properties/id"
           "400": 
-            { $ref : "#/components/responses/BadRequest" }         
+            $ref : "#/components/responses/BadRequest" 
+          "500":
+            $ref : "#/components/responses/InternalServerError"        
                    
       get:
         operationId: getUserProfile
@@ -64,28 +66,29 @@ paths:
           - user
         summary: Returns the profile of the user
         description: |
-          The user profile of the user is returned.                   
-          If the user can't be found error 404 is threw.
+          The user profile of the user is returned.
         parameters:
-          - name: userID
+          - name: username
             in: query
-            description: The id of the user to find 
+            description: The username of the user to find 
             required: true
             schema:
-              $ref : "#/components/schemas/User/properties/id"
+              $ref : "#/components/schemas/User/properties/username"
         responses: 
           "200":
-            description: Successful, returning the found the user
+            description: Successful, returning the found user
             content:
               application/json:      
                 schema:
                   $ref : "#/components/schemas/UserProfile"                    
           "400":
-            { $ref : "#/components/responses/BadRequest" }
+            $ref : "#/components/responses/BadRequest" 
           "404":
-            { $ref : "#/components/responses/NotFound" }
+            $ref : "#/components/responses/NotFound" 
+          "500":
+            $ref : "#/components/responses/InternalServerError" 
     
-    #setMyUserName
+    #setMyUserName - LastMod : 30/11
     /users/{userID}/:
       parameters:
       - $ref : "#/components/parameters/userID"
@@ -107,34 +110,18 @@ paths:
               $ref : "#/components/schemas/User/properties/username"
         responses:
           "200":
-            description: Successful, username was already set like so
-            content: 
-              text/plain:
-                schema:
-                  type: string
+            $ref : "#/components/responses/OK"
           "201":
-            description: Successful, username set
-            content: 
-              text/plain:
-                schema:
-                  type: string
+            $ref : "#/components/responses/Created"
           "400":
-            { $ref : "#/components/responses/BadRequest" }
-                    
+            $ref : "#/components/responses/BadRequest"                    
           "404":
-            description: User not found
-            content: 
-              text/plain:
-                schema:
-                  type: string
+            $ref : "#/components/responses/NotFound"
           "406":
-            description: Not acceptable
-            content: 
-              application/json:
-                schema:
-                  $ref : "#/components/schemas/User/properties/username"
-      
-    #getMyStream - LastMod : 23//11
+            $ref : "#/components/responses/NotAcceptable"
+          "500":
+            $ref : "#/components/responses/InternalServerError"
+    #getMyStream - LastMod : 30//11
     /users/{userID}/getMyStream:
       parameters:
         - $ref : "#/components/parameters/userID"
@@ -152,15 +139,15 @@ paths:
             content:
               application/json:
                 schema:
-                  $ref : "#/components/schemas/UserProfile/properties/stream"
+                  $ref : "#/components/schemas/Stream"
           "400":
-            { $ref : "#/components/responses/BadRequest" }
+            $ref : "#/components/responses/BadRequest" 
           "404":
-            { $ref : "#/components/responses/NotFound" }
+            $ref : "#/components/responses/NotFound"
           "500":
-            { $ref : "#/components/responses/InternalServerError" }
+            $ref : "#/components/responses/InternalServerError"
           
-    #followUser - LastMod : 23/11
+    #followUser - LastMod : 30/11
     /users/{userID}/followed/:
       parameters:
       - $ref : "#/components/parameters/userID"
@@ -183,32 +170,15 @@ paths:
         
         responses:
           "200": 
-            description: Successful, already followed
-            content: 
-              application/json:
-                schema:
-                  $ref : "#/components/schemas/Message"
+            $ref : "#/components/responses/OK"
           "201":
-            description: Successful, followed
-            content: 
-              application/json:
-                schema:
-                  $ref : "#/components/schemas/Message"
+            $ref : "#/components/responses/Created"
           "400":
-            description: Bad request
-            content: 
-              application/json:
-                schema:
-                  $ref : "#/components/schemas/Message"
-                
+            $ref : "#/components/responses/BadRequest"                 
           "404":
-            description: Not found, returning the parameter(s)
-            content: 
-              application/json:
-                schema:
-                  anyOf:
-                    - $ref : "#/components/parameters/userID"
-                    - $ref : "#/components/schemas/User"
+            $ref : "#/components/responses/NotFound"            
+          "500":
+            $ref : "#/components/responses/InternalServerError"
     
     #unfollowUser - LastMod : 21/11
     /users/{userID}/followed/{followedID}/:
@@ -225,21 +195,15 @@ paths:
           The actual user (userID) unfollows the given user (followedID).          
         responses:
           "200": 
-            { $ref : "#/components/responses/OK"}
+            $ref : "#/components/responses/OK"
           "400":
-            { $ref : "#/components/responses/BadRequest" }
+            $ref : "#/components/responses/BadRequest"
           "404":
-            description: Not found, returning the parameter(s) 
-            content: 
-              application/json:
-                schema:
-                  anyOf:
-                    - $ref : "#/components/parameters/userID"
-                    - $ref : "#/components/parameters/followedID"
+            $ref : "#/components/responses/NotFound"
           "500": 
-            { $ref : "#/components/responses/InternalServerError" }
+            $ref : "#/components/responses/InternalServerError"
     
-    #banUser
+    #banUser - LastMod : 30/11
     /users/{userID}/banned/:
       parameters:
       - $ref : "#/components/parameters/userID"
@@ -250,70 +214,51 @@ paths:
           - user 
         summary: Bans a user
         description: |
-          The actual user (user ID) bans the given user (banned ID).
+          The actual user (user ID) bans the given user (userToBanID).
           If was already banned nothing happens.          
-          If one of the IDs can't be found error 404 is threw.
-        requestBody:
-          content:
-            application/json:
-              schema:
-                $ref : "#/components/schemas/User"
+        parameters:          
+          - name: userToBanID
+            in: query
+            description: Id of the user to ban
+            required: true
+            schema:
+              $ref : "#/components/schemas/User/properties/id"
         responses:
           "200": 
-            description: Successful, already banned
+            $ref : "#/components/responses/OK"            
           "201":
-            description: Successful, banned
+            $ref : "#/components/responses/Created"            
           "400":
-            { $ref : "#/components/responses/BadRequest" }
+            $ref : "#/components/responses/BadRequest" 
           "404":
-            description: Not found, returning the parameter(s)
-            content: 
-              application/json:
-                schema:
-                  anyOf:
-                    - $ref : "#/components/parameters/userID"
-                    - $ref : "#/components/schemas/User"    
-    #unbanUser
+            $ref : "#/components/responses/NotFound" 
+          "500":
+            $ref : "#/components/responses/InternalServerError"
+    
+    #unbanUser - LastMod : 30/11
     /users/{userID}/banned/{bannedID}/:
       parameters:
       - $ref : "#/components/parameters/userID"
       - $ref : "#/components/parameters/bannedID"
 
-     
       delete:
         operationId: unbanUser
         tags:
           - user
         summary: Unbans a user
         description: |
-          The actual user (user ID) unbans the given user (unbanned ID). 
-          If was already not banned nothing happens.
-          If one of the IDs can't be found error 404 is threw.
+          The actual user (user ID) unbans the given user (unbanned ID).           
         responses:
           "200": 
-            description: Successful, already not banned
-            content: 
-              text/plain:
-                schema:
-                  type: string
-          "201":
-            description: Successful, unbanned
-            content: 
-              text/plain:
-                schema:
-                  type: string
+            $ref : "#/components/responses/OK"                         
           "400":
-            { $ref : "#/components/responses/BadRequest" }
+            $ref : "#/components/responses/BadRequest" 
           "404":
-            description: Not found, returning the parameter(s) 
-            content: 
-              application/json:
-                schema:
-                  anyOf:
-                    - $ref : "#/components/parameters/userID"
-                    - $ref : "#/components/parameters/bannedID"
+            $ref : "#/components/responses/NotFound"
+          "500":
+            $ref : "#/components/responses/InternalServerError"
      
-    #uploadPhoto - LastMod : 23/11
+    #uploadPhoto - LastMod : 30/11
     /photos/:
       post:
         operationId: uploadPhoto
@@ -337,24 +282,22 @@ paths:
                 type: string
                 format: binary
         responses:
-          "200":
+          "201":
             description: Successful, photo posted, returning photo id
             content:
               application/json:
                 schema:
                   $ref: '#/components/schemas/Photo/properties/id'
           "400":
-            { $ref : "#/components/responses/BadRequest" }
+            $ref : "#/components/responses/BadRequest"
           "404":
-            { $ref : "#/components/responses/NotFound" }
+            $ref : "#/components/responses/NotFound" 
           "406":
-            description: Not acceptable
-            content: 
-              application/json:
-                schema:
-                    $ref : "#/components/schemas/Photo"          
+            $ref : "#/components/responses/NotAcceptable" 
+          "500":
+            $ref : "#/components/responses/InternalServerError" 
     
-    #deletePhoto - LastMod : 21/11
+    #deletePhoto - LastMod : 30/11
     /photos/{photoID}:
       parameters:
         - $ref : "#/components/parameters/photoID"
@@ -368,15 +311,15 @@ paths:
         summary: Deletes a photo
         responses:
           "200":
-            { $ref : "#/components/responses/OK" }
+            $ref : "#/components/responses/OK" 
           "400":
-            { $ref : "#/components/responses/BadRequest" }
+            $ref : "#/components/responses/BadRequest" 
           "404":
-            { $ref : "#/components/responses/NotFound" }
+           $ref : "#/components/responses/NotFound" 
           "500":
-            { $ref : "#/components/responses/InternalServerError" }
+            $ref : "#/components/responses/InternalServerError" 
     
-    #likePhoto - LastMod : 21/11
+    #likePhoto - LastMod : 30/11
     /photos/{photoID}/likes/:
       parameters:
         - $ref : "#/components/parameters/photoID"
@@ -395,31 +338,17 @@ paths:
               $ref : "#/components/schemas/User/properties/id"
         responses:
           "200":
-            description: Successful, already liked
-            content:
-              application/json:
-                schema:
-                  $ref : "#/components/schemas/Message"
+            $ref : "#/components/responses/OK" 
           "201":
-            description: Successful, photo has been likes
-            content:
-              application/json:
-                schema:
-                  $ref : "#/components/schemas/Message"
+            $ref : "#/components/responses/Created" 
           "400":
-            { $ref : "#/components/responses/BadRequest" }
+            $ref : "#/components/responses/BadRequest"
           "404":
-            description: Not found, returning the parameter(s)
-            content: 
-              application/json:
-                schema:
-                  anyOf:
-                    - $ref : "#/components/schemas/User/properties/id"
-                    - $ref : "#/components/parameters/photoID"
+            $ref : "#/components/responses/NotFound"            
           "500":
-            { $ref : "#/components/responses/InternalServerError" }
+            $ref : "#/components/responses/InternalServerError"
     
-    #unlikePhoto - LastMod : 21/11
+    #unlikePhoto - LastMod : 30/11
     /photos/{photoID}/likes/{likeID}/:
       parameters: 
         - $ref : "#/components/parameters/photoID"
@@ -434,21 +363,15 @@ paths:
           otherwise nothing happens.
         responses:
           "200":
-            { $ref : "#/components/responses/OK" }
+            $ref : "#/components/responses/OK" 
           "400":
-            { $ref : "#/components/responses/BadRequest" }
+            $ref : "#/components/responses/BadRequest" 
           "404":
-            description: Not found, returning the parameter(s)
-            content: 
-              application/json:
-                schema:
-                  anyOf:
-                    - $ref : "#/components/schemas/Photo/properties/id"
-                    - $ref : "#/components/schemas/User/properties/id"
+            $ref : "#/components/responses/NotFound" 
           "500":
-            { $ref : "#/components/responses/InternalServerError" }
+            $ref : "#/components/responses/InternalServerError" 
     
-    #commentPhoto
+    #commentPhoto - LastMod : 30/11
     /photos/{photoID}/comments/:
       parameters:
         - $ref : "#/components/parameters/photoID"
@@ -477,18 +400,14 @@ paths:
                 schema:
                   $ref : "#/components/schemas/Comment/properties/id"
           "400":
-            { $ref : "#/components/responses/BadRequest" }
+            $ref : "#/components/responses/BadRequest" 
           "404":
-            description: Not found, returning the parameter(s)
-            content: 
-              application/json:
-                schema:
-                  anyOf:
-                    - $ref : "#/components/parameters/photoID"
-                    - $ref : "#/components/parameters/commentID"
+            $ref : "#/components/responses/NotFound" 
+          "500":
+            $ref : "#/components/responses/InternalServerError"
     
-    #getComment
-    #uncommentPhoto
+    #getComment - LastMod : 30/11
+    #uncommentPhoto - LastMod : 30/11
     /photos/{photoID}/comments/{commentID}/:
       parameters: 
         - $ref : "#/components/parameters/photoID"
@@ -507,6 +426,12 @@ paths:
               application/json:
                 schema:
                    $ref : "#/components/schemas/Comment"
+          "400":
+            $ref : "#/components/responses/BadRequest" 
+          "404":
+            $ref : "#/components/responses/NotFound" 
+          "500":
+            $ref : "#/components/responses/InternalServerError"
         
       delete:
         operationId: uncommentPhoto
@@ -514,26 +439,16 @@ paths:
           - photos
         summary: Deletes a comment to the photo
         description: |
-          Takes a userID, if it matches the user that has posted the comment, the comment is deleted,
-          otherwise nothing happens.
-        parameters:
-          - name: userID
-            in: query
-            schema:
-              $ref : "#/components/schemas/User/properties/id"
+          Deletes a comment to the photo, by the IDs of both.
         responses:
           "200":
             description: Success, comment deleted
           "400":
-            { $ref : "#/components/responses/BadRequest" }
+            $ref : "#/components/responses/BadRequest" 
           "404":
-            description: Not found, returning the parameter(s)
-            content: 
-              application/json:
-                schema:
-                  anyOf:
-                    - $ref : "#/components/parameters/photoID"
-                    - $ref : "#/components/parameters/commentID"
+            $ref : "#/components/responses/NotFound" 
+          "500":
+            $ref : "#/components/responses/InternalServerError"
     
 components:  
   parameters: # LastMod - 28/11
@@ -606,11 +521,11 @@ components:
           pattern: "^[a-zA-Z']{3,25}$"
           minLength: 3
           maxLength: 25
-        #dateOfBirth:
-        #  type: object
-        #  $ref : "#/components/schemas/Date"
-    Timestamp: #can be referenced using $ref : "#/components/schemas/Timestamp"
-      properties: 
+        dateOfBirth:        
+          $ref : "#/components/schemas/Date"
+    Date :  #can be referenced using $ref : "#/components/schemas/Date"
+      type : object
+      properties:
         year:
           type: integer            
         month:
@@ -632,6 +547,11 @@ components:
           type: integer
           minimum: 1
           maximum: 31
+    Timestamp: #can be referenced using $ref : "#/components/schemas/Timestamp"
+      type: object
+      properties: 
+        date:
+          $ref : "#/components/schemas/Date"
         hour:
           type: integer
           minimum: 0
@@ -664,6 +584,10 @@ components:
           maxLength: 100
         uploadTimestamp:
           $ref: "#/components/schemas/Timestamp"
+    Stream: #can be referenced using $ref : "#/components/schemas/Stream"
+      type: array
+      items: 
+        $ref : "#/components/schemas/Photo"
     UserProfile: #can be referenced using $ref : "#/components/schemas/UserProfile"
       type: object
       properties:
@@ -678,9 +602,7 @@ components:
           items: 
             $ref : "#/components/schemas/User"
         stream:
-          type: array
-          items: 
-            $ref : "#/components/schemas/Photo"    
+          $ref : "#/components/schemas/Stream"    
     Like: #can be referenced using $ref : "#/components/schemas/Like"
       type: object
       properties:        
@@ -701,6 +623,7 @@ components:
           minLength: 0
           maxLength: 1024    
     Message: #can be referenced using $ref : "#/components/schemas/Message"
+      type: object
       properties:
         message:  
           type: string
@@ -715,6 +638,12 @@ components:
         application/json:
           schema:
             $ref : "#/components/schemas/Message"
+    Created: #can be referenced using $ref : "#/components/responses/Created"
+      description: The request has been completed successfully, resulting in a creation
+      content: 
+        application/json:
+          schema:
+            $ref : "#/components/schemas/Message"
     BadRequest: #can be referenced using $ref : "#/components/responses/BadRequest"
       description: The request is bad asked
       content: 
@@ -723,6 +652,12 @@ components:
             $ref : "#/components/schemas/Message"
     NotFound: #can be referenced using $ref : "#/components/responses/NotFound"
       description: Resource(s) not found
+      content: 
+        application/json:
+          schema:
+            $ref : "#/components/schemas/Message"
+    NotAcceptable: #can be referenced using $ref : "#/components/responses/NotAcceptable"
+      description: Resource(s) not acceptable
       content: 
         application/json:
           schema:
