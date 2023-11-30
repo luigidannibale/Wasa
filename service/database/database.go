@@ -41,6 +41,7 @@ import (
 // AppDatabase is the high level interface for the DB
 type AppDatabase interface {
 	CreateUser(string) (int, string, error)
+	GetUser(int) (utils.User, string, error)
 	GetUserByUsername(string) (int, string, error)
 	Follow(int, int) (string, error)
 	Unfollow(int, int) (string, error)
@@ -71,8 +72,9 @@ func New(db *sql.DB) (AppDatabase, error) {
 		sqlStmt := `CREATE TABLE Users
 			(Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, 
 			Username TEXT NOT NULL UNIQUE,
-			Name TEXT NOT NULL,
-			Surname TEXT NOT NULL);`
+			Name TEXT,
+			Surname TEXT
+			DateOfBirth TEXT);`
 		_, err = db.Exec(sqlStmt)
 		if err != nil {
 			return nil, fmt.Errorf("error creating 'Users' table: %w", err)
@@ -81,7 +83,7 @@ func New(db *sql.DB) (AppDatabase, error) {
 		sqlStmt = `CREATE TABLE Photos 
 			(Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, 
 			Image BLOB NOT NULL,
-			Caption TEXT NOT NULL
+			Caption TEXT NOT NULL,
 			UploadTimestamp TEXT NOT NULL);`
 		_, err = db.Exec(sqlStmt)
 		if err != nil {
@@ -102,7 +104,7 @@ func New(db *sql.DB) (AppDatabase, error) {
 			(UserID INTEGER,
 			PhotoID INTEGER,
 			PRIMARY KEY(UserID, PhotoID),
-			FOREIGN KEY(PhotoID) REFERENCES Photos(Id)),
+			FOREIGN KEY(PhotoID) REFERENCES Photos(Id),
 			FOREIGN KEY(UserID) REFERENCES Users(Id));`
 		_, err = db.Exec(sqlStmt)
 		if err != nil {
@@ -113,22 +115,22 @@ func New(db *sql.DB) (AppDatabase, error) {
 			(FollowerID INTEGER,
 			FollowedID INTEGER,
 			PRIMARY KEY(FollowerID, FollowedID),
-			FOREIGN KEY(FollowerID) REFERENCES Users(Id)),
+			FOREIGN KEY(FollowerID) REFERENCES Users(Id),
 			FOREIGN KEY(FollowedID) REFERENCES Users(Id));`
 		_, err = db.Exec(sqlStmt)
 		if err != nil {
-			return nil, fmt.Errorf("error creating 'Following' table: %w", err)
+			return nil, fmt.Errorf("error creating 'Follows' table: %w", err)
 		}
 		// Creates Bans table		#LastMod - 28/11
 		sqlStmt = `CREATE TABLE Bans 
 			(BannerID INTEGER,
 			BannedID INTEGER,
 			PRIMARY KEY(BannerID, BannedID),
-			FOREIGN KEY(BannerID) REFERENCES Users(Id)),
+			FOREIGN KEY(BannerID) REFERENCES Users(Id),
 			FOREIGN KEY(BannedID) REFERENCES Users(Id));`
 		_, err = db.Exec(sqlStmt)
 		if err != nil {
-			return nil, fmt.Errorf("error creating 'Following' table: %w", err)
+			return nil, fmt.Errorf("error creating 'Bans' table: %w", err)
 		}
 	}
 
