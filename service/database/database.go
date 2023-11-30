@@ -40,6 +40,8 @@ import (
 
 // AppDatabase is the high level interface for the DB
 type AppDatabase interface {
+	CreateUser(string) (int, string, error)
+	GetUserByUsername(string) (int, string, error)
 	Follow(int, int) (string, error)
 	Unfollow(int, int) (string, error)
 	Like(int, utils.Like) (string, error)

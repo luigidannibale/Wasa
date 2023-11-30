@@ -9,10 +9,11 @@ type Validable interface {
 }
 
 type User struct {
-	Id       int    `json:"id"`
-	Username string `json:"username"`
-	Name     string `json:"name"`
-	Surname  string `json:"surname"`
+	Id          int    `json:"id"`
+	Username    string `json:"username"`
+	Name        string `json:"name"`
+	Surname     string `json:"surname"`
+	DateOfBirth Date   `json:"dateOfBirth"`
 }
 
 // to insert regex validation
@@ -37,24 +38,35 @@ type Comment struct {
 	UserID  int    `json:"userID"`
 	Content string `json:"content"`
 }
-type Timestamp struct {
-	Year    int    `json:"year"`
-	Month   string `json:"month"`
-	Day     int    `json:"day"`
-	Hour    int    `json:"hour"`
-	Minutes int    `json:"minutes"`
-	Seconds int    `json:"seconds"`
+type Date struct {
+	Year  int    `json:"year"`
+	Month string `json:"month"`
+	Day   int    `json:"day"`
 }
 
-func (d Timestamp) validate() error {
+func (d Date) validate() error {
 	validMonths := []string{"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"}
-
+	if d.Year < 1900 {
+		return errors.New("bad year")
+	}
 	if !arrayContains(validMonths, d.Month) {
 		return errors.New("bad month")
 	}
 	if d.Day < 1 || d.Day > 31 {
 		return errors.New("bad day")
 	}
+
+	return nil
+}
+
+type Timestamp struct {
+	Date    Date `json:"date"`
+	Hour    int  `json:"hour"`
+	Minutes int  `json:"minutes"`
+	Seconds int  `json:"seconds"`
+}
+
+func (d Timestamp) validate() error {
 	if d.Hour < 0 || d.Hour > 23 {
 		return errors.New("bad hour")
 	}
@@ -89,8 +101,8 @@ func (p Photo) Validate() error {
 }
 
 type UserProfile struct {
-	user      User
-	followed  []User
-	following []User
-	stream    []Photo
+	User      User    `json:"user"`
+	Followed  []User  `json:"followed"`
+	Following []User  `json:"following"`
+	Stream    []Photo `json:"stream"`
 }

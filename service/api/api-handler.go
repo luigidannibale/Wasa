@@ -8,7 +8,7 @@ import (
 func (rt *_router) Handler() http.Handler {
 	// Register routes
 
-	//rt.router.POST("/users", rt.doLogin)
+	rt.router.POST("/users", rt.doLogin)
 	//rt.router.GET("/users", rt.getUserProfile)
 	//rt.router.PUT("/users/:userID", rt.setMyUserName)
 	rt.router.GET("/users/:userID/getMyStream", rt.getMyStream)

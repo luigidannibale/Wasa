@@ -43,7 +43,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/User"
+                $ref: "#/components/schemas/User/properties/username"
                   
         responses:
           "200":
@@ -92,6 +92,7 @@ paths:
             $ref : "#/components/responses/InternalServerError" 
     
     #setMyUserName - LastMod : 30/11
+    #updateUser - put - to implement
     /users/{userID}/:
       parameters:
       - $ref : "#/components/parameters/userID"
@@ -532,6 +533,7 @@ components:
       properties:
         year:
           type: integer            
+          minimum:  1900
         month:
           type: string
           enum:

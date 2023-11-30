@@ -1,9 +1,6 @@
 package utils
 
-import (
-	"errors"
-)
-
+/*
 const (
 	userType int = iota
 	photoType
@@ -33,7 +30,7 @@ func validateDataByID(idType int, id int) error {
 		return errors.New("StatusNotFound")
 	}
 	return nil
-}
+}*/
 
 func arrayContains[T comparable](array []T, val T) bool {
 	for _, v := range array {
