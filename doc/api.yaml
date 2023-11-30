@@ -16,11 +16,14 @@ externalDocs:
   url: http://gamificationlab.uniroma1.it/notes/Project.pdf
 
 tags:
-  - name: user
-    description: User related paths
-  - name: photos
-    description: Photos related paths
-
+  - name: User
+    description: Operations of users on his profile (e.g. creation, change username, etc.)
+  - name: User Interactions
+    description: Operations of users regarding other users (e.g. follow, ban, etc.)
+  - name: Photos
+    description: Operations of users on their photos (e.g. post a photo, delete, etc.)
+  - name: Photos Interactions
+    description: Operations of users on others users photos (e.g. post a photo, delete, etc.)
 paths:
     #doLogin - LastMod : 30/11
     #getUserProfile - LastMod : 30/11
@@ -28,7 +31,7 @@ paths:
       post:
         operationId: doLogin
         tags: 
-          - user
+          - User
         summary: Logs in a user
         description: |-
           If the user does not exist, it will be created,
@@ -63,7 +66,7 @@ paths:
       get:
         operationId: getUserProfile
         tags: 
-          - user
+          - User
         summary: Returns the profile of the user
         description: |
           The user profile of the user is returned.
@@ -95,7 +98,7 @@ paths:
       put:
         operationId: setMyUserName
         tags:
-          - user
+          - User
         summary: Changes the username
         description: |
           Takes a user (by the id) and a name and sets the name as the new username of such user. 
@@ -121,6 +124,7 @@ paths:
             $ref : "#/components/responses/NotAcceptable"
           "500":
             $ref : "#/components/responses/InternalServerError"
+    
     #getMyStream - LastMod : 30//11
     /users/{userID}/getMyStream:
       parameters:
@@ -128,7 +132,7 @@ paths:
       get:
         operationId: getMyStream
         tags:
-          - user
+          - User
         summary: Gets the user his stream 
         description: |
           Takes an user id and returns his stream (stream of photos of users 
@@ -155,7 +159,7 @@ paths:
       put:
         operationId: followUser
         tags:
-          - user
+          - User Interactions
         summary: Follows a user
         description: |
           The actual user (userID) starts following the given user (userToFollowID).
@@ -189,7 +193,7 @@ paths:
       delete:
         operationId: unfollowUser
         tags:
-          - user
+          - User Interactions
         summary: Unfollows a user
         description: |
           The actual user (userID) unfollows the given user (followedID).          
@@ -211,7 +215,7 @@ paths:
       put:
         operationId: banUser
         tags:
-          - user 
+          - User Interactions
         summary: Bans a user
         description: |
           The actual user (user ID) bans the given user (userToBanID).
@@ -244,7 +248,7 @@ paths:
       delete:
         operationId: unbanUser
         tags:
-          - user
+          - User Interactions
         summary: Unbans a user
         description: |
           The actual user (user ID) unbans the given user (unbanned ID).           
@@ -263,7 +267,7 @@ paths:
       post:
         operationId: uploadPhoto
         tags:
-          - photos
+          - Photos
         summary: Post a new photo
         description: |
           Takes a photo and a user, the user posts the photo.          
@@ -305,7 +309,7 @@ paths:
       delete:
         operationId: deletePhoto
         tags:
-          - photos
+          - Photos
         description: |
           Deletes a photo by the id.          
         summary: Deletes a photo
@@ -326,7 +330,7 @@ paths:
       put:
         operationId: likePhoto
         tags: 
-          - photos
+          - Photos Interactions
         summary: Puts a like to a photo
         description: |
           Takes a userID and creates a like of that user to the photo, 
@@ -356,7 +360,7 @@ paths:
       delete:
         operationId: unlikePhoto
         tags:
-          - photos
+          - Photos Interactions
         summary: Deletes a like to the photo
         description: |
           Takes a userID, if it matches the user that has put the like, the like is deleted,
@@ -378,7 +382,7 @@ paths:
       post:
         operationId: commentPhoto
         tags: 
-          - photos
+          - Photos Interactions
         summary: Comments a photo
         description: |
           Takes a userID and the text message of the comment and creates 
@@ -416,7 +420,7 @@ paths:
       get:
         operationId: getComment
         tags: 
-          - photos 
+          - Photos Interactions
         summary: Gets the comment details
         description: Takes a comment id and returns the comment
         responses:
@@ -436,7 +440,7 @@ paths:
       delete:
         operationId: uncommentPhoto
         tags:
-          - photos
+          - Photos Interactions
         summary: Deletes a comment to the photo
         description: |
           Deletes a comment to the photo, by the IDs of both.
