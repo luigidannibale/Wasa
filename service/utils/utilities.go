@@ -1,5 +1,10 @@
 package utils
 
+import (
+	"strconv"
+	"strings"
+)
+
 /*
 const (
 	userType int = iota
@@ -45,4 +50,21 @@ func arrayContains[T comparable](array []T, val T) bool {
 
 func remove[T interface{}](slice []T, s int) []T {
 	return append(slice[:s], slice[s+1:]...)
+}
+func StringToDate(s string) Date {
+	//s is in "dd-month-yyyy" format
+	var d Date
+	x := strings.Split(s, "-")
+	day, _ := strconv.Atoi(x[0])
+	year, _ := strconv.Atoi(x[2])
+	d.Day = day
+	d.Month = x[1]
+	d.Year = year
+	return d
+}
+
+func DateToString(d Date) string {
+	var s string = "dd-month-yyyy"
+	s = strconv.Itoa(d.Day) + "-" + d.Month + "-" + strconv.Itoa(d.Year)
+	return s
 }

@@ -41,8 +41,9 @@ import (
 // AppDatabase is the high level interface for the DB
 type AppDatabase interface {
 	CreateUser(string) (int, string, error)
+	UpdateUser(utils.User) (utils.User, string, error)
 	GetUser(int) (utils.User, string, error)
-	GetUserByUsername(string) (int, string, error)
+	GetUserByUsername(string) (utils.User, string, error)
 	Follow(int, int) (string, error)
 	Unfollow(int, int) (string, error)
 	Like(int, utils.Like) (string, error)
@@ -73,7 +74,7 @@ func New(db *sql.DB) (AppDatabase, error) {
 			(Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, 
 			Username TEXT NOT NULL UNIQUE,
 			Name TEXT,
-			Surname TEXT
+			Surname TEXT,
 			DateOfBirth TEXT);`
 		_, err = db.Exec(sqlStmt)
 		if err != nil {

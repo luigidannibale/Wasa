@@ -24,21 +24,26 @@ tags:
     description: Operations of users on their photos (e.g. post a photo, delete, etc.)
   - name: Photos Interactions
     description: Operations of users on others users photos (e.g. post a photo, delete, etc.)
+  - name: Working
+    description: (debug tag) Methods implemented and operative 
+  - name: Not Working
+    description: (debug tag) Methods to be implemented or not fully operative
 paths:
-    #doLogin - LastMod : 30/11
-    #getUserProfile - LastMod : 30/11
+    #doLogin - LastMod : 1/12 - Status : Working
+    #getUserProfile - LastMod : 1/12 - Status : Working
     /users/:
       post:
         operationId: doLogin
         tags: 
           - User
+          - Working
         summary: Logs in a user
         description: |-
           If the user does not exist, it will be created,
           and an identifier is returned.
           If the user exists, the user identifier is returned.        
         requestBody:
-          description: User details
+          description: Usename of the user
           required: true
           content:
             application/json:
@@ -67,9 +72,10 @@ paths:
         operationId: getUserProfile
         tags: 
           - User
-        summary: Returns the profile of the user
+          - Working
+        summary: Returns the profile of the user.
         description: |
-          The user profile of the user is returned.
+          The profile of the user is returned, so all the details about the user.
         parameters:
           - name: username
             in: query
@@ -79,11 +85,11 @@ paths:
               $ref : "#/components/schemas/User/properties/username"
         responses: 
           "200":
-            description: Successful, returning the found user
+            description: Successful, returning the user
             content:
               application/json:      
                 schema:
-                  $ref : "#/components/schemas/UserProfile"                    
+                  $ref : "#/components/schemas/User"                    
           "400":
             $ref : "#/components/responses/BadRequest" 
           "404":
@@ -91,7 +97,7 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError" 
     
-    #setMyUserName - LastMod : 30/11
+    #setMyUserName - LastMod : 1/12 - Status : Working
     #updateUser - put - to implement
     /users/{userID}/:
       parameters:
@@ -100,6 +106,7 @@ paths:
         operationId: setMyUserName
         tags:
           - User
+          - Working
         summary: Changes the username
         description: |
           Takes a user (by the id) and a name and sets the name as the new username of such user. 
@@ -121,12 +128,12 @@ paths:
             $ref : "#/components/responses/BadRequest"                    
           "404":
             $ref : "#/components/responses/NotFound"
-          "406":
-            $ref : "#/components/responses/NotAcceptable"
+          "409":
+            $ref : "#/components/responses/Conflict"
           "500":
             $ref : "#/components/responses/InternalServerError"
-    
-    #getMyStream - LastMod : 30//11
+          
+    #getMyStream - LastMod : 30/11 - Status : Not Working
     /users/{userID}/getMyStream:
       parameters:
         - $ref : "#/components/parameters/userID"
@@ -134,6 +141,7 @@ paths:
         operationId: getMyStream
         tags:
           - User
+          - Not Working
         summary: Gets the user his stream 
         description: |
           Takes an user id and returns his stream (stream of photos of users 
@@ -152,7 +160,7 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError"
           
-    #followUser - LastMod : 30/11
+    #followUser - LastMod : 30/11 - Status : Not Working
     /users/{userID}/followed/:
       parameters:
       - $ref : "#/components/parameters/userID"
@@ -161,6 +169,7 @@ paths:
         operationId: followUser
         tags:
           - User Interactions
+          - Not Working
         summary: Follows a user
         description: |
           The actual user (userID) starts following the given user (userToFollowID).
@@ -185,7 +194,7 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError"
     
-    #unfollowUser - LastMod : 21/11
+    #unfollowUser - LastMod : 21/11 - Status : Not Working
     /users/{userID}/followed/{followedID}/:
       parameters:
       - $ref : "#/components/parameters/userID"
@@ -195,6 +204,7 @@ paths:
         operationId: unfollowUser
         tags:
           - User Interactions
+          - Not Working
         summary: Unfollows a user
         description: |
           The actual user (userID) unfollows the given user (followedID).          
@@ -208,7 +218,7 @@ paths:
           "500": 
             $ref : "#/components/responses/InternalServerError"
     
-    #banUser - LastMod : 30/11
+    #banUser - LastMod : 30/11 - Status : Not Working
     /users/{userID}/banned/:
       parameters:
       - $ref : "#/components/parameters/userID"
@@ -217,6 +227,7 @@ paths:
         operationId: banUser
         tags:
           - User Interactions
+          - Not Working
         summary: Bans a user
         description: |
           The actual user (user ID) bans the given user (userToBanID).
@@ -240,7 +251,7 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError"
     
-    #unbanUser - LastMod : 30/11
+    #unbanUser - LastMod : 30/11 - Status : Not Working
     /users/{userID}/banned/{bannedID}/:
       parameters:
       - $ref : "#/components/parameters/userID"
@@ -250,6 +261,7 @@ paths:
         operationId: unbanUser
         tags:
           - User Interactions
+          - Not Working
         summary: Unbans a user
         description: |
           The actual user (user ID) unbans the given user (unbanned ID).           
@@ -263,12 +275,13 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError"
      
-    #uploadPhoto - LastMod : 30/11
+    #uploadPhoto - LastMod : 30/11 - Status : Not Working
     /photos/:
       post:
         operationId: uploadPhoto
         tags:
           - Photos
+          - Not Working
         summary: Post a new photo
         description: |
           Takes a photo and a user, the user posts the photo.          
@@ -302,7 +315,7 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError" 
     
-    #deletePhoto - LastMod : 30/11
+    #deletePhoto - LastMod : 30/11 - Status : Not Working
     /photos/{photoID}:
       parameters:
         - $ref : "#/components/parameters/photoID"
@@ -311,6 +324,7 @@ paths:
         operationId: deletePhoto
         tags:
           - Photos
+          - Not Working
         description: |
           Deletes a photo by the id.          
         summary: Deletes a photo
@@ -324,7 +338,7 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError" 
     
-    #likePhoto - LastMod : 30/11
+    #likePhoto - LastMod : 30/11 - Status : Not Working
     /photos/{photoID}/likes/:
       parameters:
         - $ref : "#/components/parameters/photoID"
@@ -332,6 +346,7 @@ paths:
         operationId: likePhoto
         tags: 
           - Photos Interactions
+          - Not Working
         summary: Puts a like to a photo
         description: |
           Takes a userID and creates a like of that user to the photo, 
@@ -353,7 +368,7 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError"
     
-    #unlikePhoto - LastMod : 30/11
+    #unlikePhoto - LastMod : 30/11 - Status : Not Working
     /photos/{photoID}/likes/{likeID}/:
       parameters: 
         - $ref : "#/components/parameters/photoID"
@@ -362,6 +377,7 @@ paths:
         operationId: unlikePhoto
         tags:
           - Photos Interactions
+          - Not Working
         summary: Deletes a like to the photo
         description: |
           Takes a userID, if it matches the user that has put the like, the like is deleted,
@@ -376,7 +392,7 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError" 
     
-    #commentPhoto - LastMod : 30/11
+    #commentPhoto - LastMod : 30/11 - Status : Not Working
     /photos/{photoID}/comments/:
       parameters:
         - $ref : "#/components/parameters/photoID"
@@ -384,6 +400,7 @@ paths:
         operationId: commentPhoto
         tags: 
           - Photos Interactions
+          - Not Working
         summary: Comments a photo
         description: |
           Takes a userID and the text message of the comment and creates 
@@ -411,8 +428,8 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError"
     
-    #getComment - LastMod : 30/11
-    #uncommentPhoto - LastMod : 30/11
+    #getComment - LastMod : 30/11 - Status : Not Working
+    #uncommentPhoto - LastMod : 30/11 - Status : Not Working
     /photos/{photoID}/comments/{commentID}/:
       parameters: 
         - $ref : "#/components/parameters/photoID"
@@ -422,6 +439,7 @@ paths:
         operationId: getComment
         tags: 
           - Photos Interactions
+          - Not Working
         summary: Gets the comment details
         description: Takes a comment id and returns the comment
         responses:
@@ -442,6 +460,7 @@ paths:
         operationId: uncommentPhoto
         tags:
           - Photos Interactions
+          - Not Working
         summary: Deletes a comment to the photo
         description: |
           Deletes a comment to the photo, by the IDs of both.
@@ -500,27 +519,32 @@ components:
       schema:
         $ref : "#/components/schemas/Like/properties/id"
   
-  schemas:  #LastMod - 28/11  
+  schemas:  #LastMod - 1/12
     User: #can be referenced using $ref : "#/components/schemas/User"         
       type: object
+      description: a user composed of id, username, name, surname, date of birth
       properties:
         id:
+          description: identifier of the user
           type: integer
           example: 42
           readOnly: true
         username:
+          description: username of the user
           type: string
           example: Maria
           pattern: "^[a-zA-Z0-9._]{3,16}$"
           minLength: 3
           maxLength: 16
         name:
+          description: name of the user 
           type: string
           example: Marianna
           pattern: "^[a-zA-Z]{3,25}$"
           minLength: 3
           maxLength: 25
         surname:
+          description: surname of the user 
           type: string
           example: Rossi
           pattern: "^[a-zA-Z']{3,25}$"
@@ -530,11 +554,14 @@ components:
           $ref : "#/components/schemas/Date"
     Date :  #can be referenced using $ref : "#/components/schemas/Date"
       type : object
+      description: a date composed of day,month,year
       properties:
         year:
+          description: year of the date
           type: integer            
           minimum:  1900
         month:
+          description: month of the date
           type: string
           enum:
             - January
@@ -550,92 +577,108 @@ components:
             - November
             - December
         day:
+          description: day of the date
           type: integer
           minimum: 1
           maximum: 31
     Timestamp: #can be referenced using $ref : "#/components/schemas/Timestamp"
       type: object
+      description: a timestamp composed of date, hour, minutes, seconds
       properties: 
         date:
           $ref : "#/components/schemas/Date"
         hour:
+          description: hour of the timestamp
           type: integer
           minimum: 0
           maximum: 23
         minutes:
+          description: minutes of the timestamp
           type: integer
           minimum: 0
           maximum: 59
         seconds:
+          description: seconds of the timestamp
           type: integer
           minimum: 0
           maximum: 59    
     Photo: #can be referenced using $ref : "#/components/schemas/Photo"
       type: object 
+      description: a photo composed of id, image, caption, upload timestamp
       properties:
         id:
+          description: id of the photo
           type: integer
           example: 12
           readOnly: true
-        image:
-          description: The actual image of the photo
+        image:          
+          description: image of the photo
           type: string
-          format: binary
+          format: binary          
           minLength: 0
           maxLength: 40960
         caption:
+          description: caption of the photo
           type: string  
           example: Look what a beautiful photo
+          pattern: ".*"
           minLength: 0
           maxLength: 100
         uploadTimestamp:
           $ref: "#/components/schemas/Timestamp"
-    Stream: #can be referenced using $ref : "#/components/schemas/Stream"
+    Stream: #can be referenced using $ref : "#/components/schemas/Stream"      
       type: array
+      description: a stream of photos
       items: 
         $ref : "#/components/schemas/Photo"
     UserProfile: #can be referenced using $ref : "#/components/schemas/UserProfile"
       type: object
+      description: a user profile composed of a user, followed list, following list, stream
       properties:
         user:
           $ref : "#/components/schemas/User"
-        followed:
+        followed:          
           type: array
+          description: list of users followed by the user
           items: 
             $ref : "#/components/schemas/User"
         following:
           type: array
+          description: list of users that follow the user
           items: 
             $ref : "#/components/schemas/User"
         stream:
           $ref : "#/components/schemas/Stream"    
     Like: #can be referenced using $ref : "#/components/schemas/Like"
       type: object
+      description: a like composed by id
       properties:        
         id:
           $ref : "#/components/schemas/User/properties/id"
     Comment: #can be referenced using $ref : "#/components/schemas/Comment"
       type: object
+      description: a comment composed of id, userID, content
       properties:
         id:
+          description: the id of the comment
           type: integer
           example: 42
           readOnly: true        
-        userID:
+        userID:          
           $ref : "#/components/schemas/User/properties/id"
         content:
+          description: the content of the comment
           type: string
           example: "Nice photo"
           minLength: 0
           maxLength: 1024    
-    Message: #can be referenced using $ref : "#/components/schemas/Message"
-      type: object
-      properties:
-        message:  
-          type: string
-          example: "Error"
-          minLength: 0
-          maxLength: 1024
+    Message: #can be referenced using $ref : "#/components/schemas/Message"      
+      description: a simple text message
+      type: string
+      example: "Error"
+      pattern: ".*"
+      minLength: 0
+      maxLength: 1024
       
   responses: # LastMod - 28/11
     OK: #can be referenced using $ref : "#/components/responses/OK"
@@ -664,6 +707,12 @@ components:
             $ref : "#/components/schemas/Message"
     NotAcceptable: #can be referenced using $ref : "#/components/responses/NotAcceptable"
       description: Resource(s) not acceptable
+      content: 
+        application/json:
+          schema:
+            $ref : "#/components/schemas/Message"
+    Conflict: #can be referenced using $ref : "#/components/responses/Conflict"
+      description: The request creates a conflict
       content: 
         application/json:
           schema:

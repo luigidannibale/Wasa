@@ -6,7 +6,7 @@ import (
 
 func (db *appdbimpl) CreateUser(username string) (int, string, error) {
 	var userID int
-	userID, s, e := db.GetUserByUsername(username)
+	u, s, e := db.GetUserByUsername(username)
 	if e != nil {
 		if e.Error() == "NotFound" {
 			err := db.c.QueryRow(`	INSERT INTO Users(Username)
@@ -21,5 +21,5 @@ func (db *appdbimpl) CreateUser(username string) (int, string, error) {
 			return userID, s, errors.New("InternalServerError")
 		}
 	}
-	return userID, "Logged", nil
+	return u.Id, "Logged", nil
 }
