@@ -8,46 +8,52 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-//LastMod 21/11
-
-// DELETE method, takes an userID and a followedID, and removes the followed from user following
 func (rt *_router) unfollowUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("content-type", "application/json")
 
-	//This takes the userID from parameters, if fails to convert error 400
+	var errorMessage string = ""
+	//userToUnfollowID, err := strconv.Atoi(r.URL.Query().Get("userToUnfollowID"))
+	userToUnfollowID, err := strconv.Atoi(ps.ByName("followedID"))
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		errorMessage = "Could not convert the userToUnfollowID"
+	}
 	userID, err := strconv.Atoi(ps.ByName("userID"))
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode("message: 'could not convert userID'")
-		return
+		errorMessage = "Could not convert the userID"
 	}
-	//This takes the followedID from parameters, if fails to convert error 400
-	followedID, err := strconv.Atoi(ps.ByName("followedID"))
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode("message: 'could not convert followedID'")
+	if userID == userToUnfollowID {
+		w.WriteHeader(http.StatusForbidden)
+		errorMessage = "The follower and followed can't have the same id"
+	}
+	if errorMessage != "" {
+		e := json.NewEncoder(w).Encode(errorMessage)
+		if e != nil {
+			http.Error(w, errorMessage, http.StatusInternalServerError)
+		}
 		return
 	}
 
-	//Delete from following of userID the userToUnfollow, if one of them
-	//isn't found error 404, if something else goes wrong errror 500
-	s, err := rt.db.Unfollow(userID, followedID)
+	s, err := rt.db.DeleteFollow(userID, userToUnfollowID)
 
 	//Checks for DB-side errrors(404,500)
 	if err != nil {
 		if e := err.Error(); e == "UserNotFound" || e == "FollowedNotFound" {
 			w.WriteHeader(http.StatusNotFound)
-			if e == "UserNotFound" {
-				json.NewEncoder(w).Encode(userID)
-			} else if e == "FollowedNotFound" {
-				json.NewEncoder(w).Encode(followedID)
+			e := json.NewEncoder(w).Encode(s)
+			if e != nil {
+				http.Error(w, s, http.StatusInternalServerError)
 			}
 			return
 		} else {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 	} else {
-		w.WriteHeader(http.StatusOK)
+		w.WriteHeader(http.StatusCreated)
 	}
-	json.NewEncoder(w).Encode("message : " + s)
+	e := json.NewEncoder(w).Encode(s)
+	if e != nil {
+		http.Error(w, s, http.StatusInternalServerError)
+	}
 }

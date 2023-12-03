@@ -2,6 +2,7 @@ package utils
 
 import (
 	"errors"
+	"regexp"
 )
 
 type Validable interface {
@@ -27,7 +28,20 @@ func (u User) Validate() error {
 	if l := len(u.Surname); l < 3 || l > 25 {
 		return errors.New("surname lenght not valid")
 	}
-	return nil
+	m, e := regexp.MatchString("^[a-zA-Z0-9._]{3,16}$", u.Username)
+	if !m {
+		return e
+	}
+	m, e = regexp.MatchString("^[a-zA-Z]{3,25}$", u.Name)
+	if !m {
+		return e
+	}
+	m, e = regexp.MatchString("^[a-zA-Z']{3,25}$", u.Surname)
+	if !m {
+		return e
+	}
+	e = u.DateOfBirth.validate()
+	return e
 }
 
 type Like struct {
@@ -38,6 +52,15 @@ type Comment struct {
 	UserID  int    `json:"userID"`
 	Content string `json:"content"`
 }
+
+func (c Comment) validate() error {
+	m, e := regexp.MatchString(".*{0,1024}$", c.Content)
+	if !m {
+		return e
+	}
+	return nil
+}
+
 type Date struct {
 	Year  int    `json:"year"`
 	Month string `json:"month"`
@@ -66,7 +89,7 @@ type Timestamp struct {
 	Seconds int  `json:"seconds"`
 }
 
-func (d Timestamp) validate() error {
+func (d Timestamp) Validate() error {
 	if d.Hour < 0 || d.Hour > 23 {
 		return errors.New("bad hour")
 	}
@@ -94,7 +117,11 @@ func (p Photo) Validate() error {
 	if l := len(p.Caption); l < 0 || l > 100 {
 		return errors.New("caption not acceptable")
 	}
-	if e := p.UploadTimestamp.validate(); e != nil {
+	if e := p.UploadTimestamp.Validate(); e != nil {
+		return e
+	}
+	m, e := regexp.MatchString(".*{0,100}$", p.Caption)
+	if !m {
 		return e
 	}
 	return nil

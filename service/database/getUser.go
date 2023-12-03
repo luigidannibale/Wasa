@@ -13,17 +13,6 @@ and an error */
 func (db *appdbimpl) GetUser(userID int) (utils.User, string, error) {
 	var user utils.User
 	var name, surname, dateOfBirth sql.NullString
-	/* 	e := db.c.QueryRow(`SELECT *
-	   						FROM Users
-	   						WHERE Id = ?`, userID).Scan(&user)
-	   	if e == nil {
-	   		return user, "User found successfully", nil
-	   	}
-	   	if errors.Is(e, sql.ErrNoRows) {
-	   		return user, "Couldn't find the user", errors.New("NotFound")
-	   	}
-	   	return user, "An error occured on the server : " + e.Error(), errors.New("InternalServerError")
-	*/
 	e := db.c.QueryRow(`SELECT Id,Username,Name,Surname,DateOfBirth
 						FROM Users
 						WHERE Id = ?`, userID).Scan(&user.Id, &user.Username, &name, &surname, &dateOfBirth)

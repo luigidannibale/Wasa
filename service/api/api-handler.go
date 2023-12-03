@@ -13,13 +13,13 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.PUT("/users/:userID", rt.setMyUserName)
 	//rt.router.GET("/users/:userID/getMyStream", rt.getMyStream)
 
-	//rt.router.PUT("/users/:userID/followed", rt.followUser)
-	//rt.router.DELETE("/users/:userID/followed/:followedID", rt.unfollowUser)
+	rt.router.PUT("/users/:userID/followed", rt.followUser)
+	rt.router.DELETE("/users/:userID/followed/:followedID", rt.unfollowUser)
 
 	//rt.router.PUT("/users/:userID/banned", rt.banUser)
 	//rt.router.DELETE("/users/:userID/banned/:bannedID", rt.unbanUser)
 
-	//rt.router.POST("/photos", rt.uploadPhoto)
+	rt.router.POST("/photos", rt.uploadPhoto)
 	//rt.router.DELETE("/photos/:photoID", rt.deletePhoto)
 
 	//rt.router.PUT("/photos/:photoID/likes", rt.likePhoto)

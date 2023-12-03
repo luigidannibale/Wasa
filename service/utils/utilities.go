@@ -68,3 +68,24 @@ func DateToString(d Date) string {
 	s = strconv.Itoa(d.Day) + "-" + d.Month + "-" + strconv.Itoa(d.Year)
 	return s
 }
+func StringToTimestamp(s string) Timestamp {
+	//s is in "dd-month-yyyy" format
+	var t Timestamp
+	/*x := strings.Split(s, "-")
+	day, _ := strconv.Atoi(x[0])
+	year, _ := strconv.Atoi(x[2])
+	d.Day = day
+	d.Month = x[1]
+	d.Year = year */
+	return t
+}
+
+func TimestampToString(t Timestamp) string {
+	var s string = "dd-month-yyyy"
+	//s = strconv.Itoa(d.Day) + "-" + d.Month + "-" + strconv.Itoa(d.Year)
+	return s
+}
+func Now() Timestamp {
+	var t Timestamp
+	return t
+}

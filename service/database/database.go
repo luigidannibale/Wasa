@@ -44,14 +44,16 @@ type AppDatabase interface {
 	UpdateUser(utils.User) (utils.User, string, error)
 	GetUser(int) (utils.User, string, error)
 	GetUserByUsername(string) (utils.User, string, error)
-	Follow(int, int) (string, error)
-	Unfollow(int, int) (string, error)
+	CreateFollow(int, int) (string, error)
+	DeleteFollow(int, int) (string, error)
+	CreatePhoto(int, utils.Photo) (int, string, error)
+
 	Like(int, utils.Like) (string, error)
 	Unlike(int, int) (string, error)
-	UploadPhoto(int, utils.Photo) (int, string, error)
 	DeletePhoto(int) (string, error)
 	Ping() error
 	GetStream(int) ([]utils.Photo, string, error)
+	VerifyUserIds([]int) (int, error)
 }
 
 type appdbimpl struct {
@@ -67,7 +69,8 @@ func New(db *sql.DB) (AppDatabase, error) {
 
 	// Check if table exists. If not, the database is empty, and we need to create the structure
 	var tableName string
-	err := db.QueryRow(`SELECT id FROM sqlite_master WHERE type='table' AND name='Users';`).Scan(&tableName)
+	err := db.QueryRow(`SELECT Users FROM sqlite_master WHERE type = 'table';`).Scan(&tableName)
+
 	if errors.Is(err, sql.ErrNoRows) {
 		// Creates Users table		#LastMod - 28/11
 		sqlStmt := `CREATE TABLE Users
@@ -83,9 +86,11 @@ func New(db *sql.DB) (AppDatabase, error) {
 		// Creates Photos table		#LastMod - 28/11
 		sqlStmt = `CREATE TABLE Photos 
 			(Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, 
+			UserID INTEGER,
 			Image BLOB NOT NULL,
 			Caption TEXT NOT NULL,
-			UploadTimestamp TEXT NOT NULL);`
+			UploadTimestamp TEXT NOT NULL
+			FOREIGN KEY(UserID) REFERENCES Users(Id));`
 		_, err = db.Exec(sqlStmt)
 		if err != nil {
 			return nil, fmt.Errorf("error creating 'Photos' table: %w", err)

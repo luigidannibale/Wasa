@@ -28,12 +28,18 @@ tags:
     description: (debug tag) Methods implemented and operative 
   - name: Not Working
     description: (debug tag) Methods to be implemented or not fully operative
-paths:
-    #doLogin - LastMod : 1/12 - Status : Working
+
+security:
+  - UserAuth: []
+
+paths:    
+    
+    #doLogin - LastMod : 2/12 - Status : Working
     #getUserProfile - LastMod : 1/12 - Status : Working
     /users/:
       post:
         operationId: doLogin
+        security: []
         tags: 
           - User
           - Working
@@ -56,13 +62,13 @@ paths:
             content:
               application/json:
                 schema:
-                    $ref: "#/components/schemas/User/properties/id"
+                    $ref: "#/components/schemas/Message"
           "201":
             description: New user log-in action successful
             content:
               application/json:
                 schema:
-                    $ref: "#/components/schemas/User/properties/id"
+                    $ref: "#/components/schemas/Message"
           "400": 
             $ref : "#/components/responses/BadRequest" 
           "500":
@@ -106,8 +112,8 @@ paths:
         operationId: setMyUserName
         tags:
           - User
-          - Working
-        summary: Changes the username
+          - Not Working
+        summary: Changes the username        
         description: |
           Takes a user (by the id) and a name and sets the name as the new username of such user. 
           If the username was already set with such name nothing happens.          
@@ -160,7 +166,7 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError"
           
-    #followUser - LastMod : 30/11 - Status : Not Working
+    #followUser - LastMod : 2/12 - Status : Working
     /users/{userID}/followed/:
       parameters:
       - $ref : "#/components/parameters/userID"
@@ -169,7 +175,7 @@ paths:
         operationId: followUser
         tags:
           - User Interactions
-          - Not Working
+          - Working
         summary: Follows a user
         description: |
           The actual user (userID) starts following the given user (userToFollowID).
@@ -188,13 +194,15 @@ paths:
           "201":
             $ref : "#/components/responses/Created"
           "400":
-            $ref : "#/components/responses/BadRequest"                 
+            $ref : "#/components/responses/BadRequest" 
+          "403":
+            $ref : "#/components/responses/Forbidden"                
           "404":
             $ref : "#/components/responses/NotFound"            
           "500":
             $ref : "#/components/responses/InternalServerError"
     
-    #unfollowUser - LastMod : 21/11 - Status : Not Working
+    #unfollowUser - LastMod : 2/12 - Status : Working
     /users/{userID}/followed/{followedID}/:
       parameters:
       - $ref : "#/components/parameters/userID"
@@ -287,14 +295,14 @@ paths:
           Takes a photo and a user, the user posts the photo.          
           If the user id does not match a user error 404 is threw.
         parameters:
-          - name: userID
+          - name: caption
             in: query
-            description: The user id of the user that posts the photo
-            required: true
+            required: false
+            description: the caption of the photo
             schema:
-              $ref: '#/components/schemas/User/properties/id'
+              $ref: "#/components/schemas/Photo/properties/caption"
         requestBody:
-          content:
+          content:          
             image/*:
               schema:
                 type: string
@@ -305,9 +313,11 @@ paths:
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/Photo/properties/id'
+                  $ref: "#/components/schemas/Message"
           "400":
             $ref : "#/components/responses/BadRequest"
+          "401":
+            $ref : "#/components/responses/Unauthorized" 
           "404":
             $ref : "#/components/responses/NotFound" 
           "406":
@@ -475,6 +485,11 @@ paths:
             $ref : "#/components/responses/InternalServerError"
     
 components:  
+  securitySchemes: # LastMod - 2/12
+    UserAuth: #can be referenced using $ref : "#/components/SecuritySchemes/UserAuth"
+      type: http
+      scheme: bearer
+  
   parameters: # LastMod - 28/11
     userID: #can be referenced using $ref : "#/components/parameters/userID"
       name: userID
@@ -621,7 +636,7 @@ components:
           description: caption of the photo
           type: string  
           example: Look what a beautiful photo
-          pattern: ".*"
+          pattern: ".*{0,100}$"
           minLength: 0
           maxLength: 100
         uploadTimestamp:
@@ -670,6 +685,7 @@ components:
           description: the content of the comment
           type: string
           example: "Nice photo"
+          pattern: ".*{0,1024}$"
           minLength: 0
           maxLength: 1024    
     Message: #can be referenced using $ref : "#/components/schemas/Message"      
@@ -680,7 +696,7 @@ components:
       minLength: 0
       maxLength: 1024
       
-  responses: # LastMod - 28/11
+  responses: # LastMod - 2/12
     OK: #can be referenced using $ref : "#/components/responses/OK"
       description: The request has been completed successfully
       content: 
@@ -695,6 +711,18 @@ components:
             $ref : "#/components/schemas/Message"
     BadRequest: #can be referenced using $ref : "#/components/responses/BadRequest"
       description: The request is bad asked
+      content: 
+        application/json:
+          schema:
+            $ref : "#/components/schemas/Message"
+    Unauthorized: #can be referenced using $ref : "#/components/responses/Unauthorized"
+      description: This request is unauthorized
+      content: 
+        application/json:
+          schema:
+            $ref : "#/components/schemas/Message"    
+    Forbidden: #can be referenced using $ref : "#/components/responses/Forbidden"
+      description: Resource(s) not found
       content: 
         application/json:
           schema:
