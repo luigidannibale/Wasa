@@ -11,25 +11,32 @@ import (
 
 func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("content-type", "application/json")
-
-	userID, e := strconv.Atoi(ps.ByName("userID"))
-	username := r.URL.Query().Get("username")
-
-	//Handling BadRequest
-	if e != nil || username == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		var errMessage string
-		if e != nil {
-			errMessage = "Couldn't decode userID " + e.Error()
-		} else {
-			errMessage = "Error taking the username"
-		}
-		e = json.NewEncoder(w).Encode(errMessage)
-		if e != nil {
-			http.Error(w, errMessage, http.StatusBadRequest)
-		}
+	userIDauth, e := strconv.Atoi(r.Header.Get("Authorization"))
+	if e != nil {
+		http.Error(w, "Couldn't identify userId for authentication", http.StatusUnauthorized)
 		return
 	}
+	e = rt.db.VerifyUserId(userIDauth)
+	if e != nil {
+		http.Error(w, "The userID provided for authentication can't be found", http.StatusUnauthorized)
+		return
+	}
+	userIDparam, e := strconv.Atoi(ps.ByName("userID"))
+	if e != nil {
+		http.Error(w, "Couldn't decode userID "+e.Error(), http.StatusBadRequest)
+		return
+	}
+	if userIDauth != userIDparam {
+		http.Error(w, "Authentication userID and parameter userID don't match", http.StatusForbidden)
+		return
+	}
+	userID := userIDauth
+	username := r.URL.Query().Get("username")
+	if username == "" {
+		http.Error(w, "Error taking the username", http.StatusBadRequest)
+		return
+	}
+
 	var userToUpdate utils.User
 
 	userToUpdate.Id = userID
@@ -37,22 +44,19 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps http
 
 	user, s, err := rt.db.UpdateUser(userToUpdate)
 
-	//Handling errors
 	if err != nil {
 		if err.Error() == "UsernameTaken" {
-			w.WriteHeader(http.StatusConflict)
+			http.Error(w, s, http.StatusConflict)
 		}
 		if err.Error() == "AlreadySo" {
 			w.WriteHeader(http.StatusOK)
 		}
 		if err.Error() == "InternalServerError" {
-			w.WriteHeader(http.StatusInternalServerError)
-		} else if err.Error() == "NotFound" {
-			w.WriteHeader(http.StatusNotFound)
+			http.Error(w, s, http.StatusInternalServerError)
 		}
 		e = json.NewEncoder(w).Encode(s)
 		if e != nil {
-			http.Error(w, "Couldn't encode error message : "+s, http.StatusInternalServerError)
+			http.Error(w, s, http.StatusInternalServerError)
 		}
 		return
 	}

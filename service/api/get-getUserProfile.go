@@ -16,14 +16,9 @@ func (rt *_router) getUserProfile(w http.ResponseWriter, r *http.Request, ps htt
 		http.Error(w, "Couldn't identify userId for authentication", http.StatusUnauthorized)
 		return
 	}
-	var userIds []int
-	userIds = append(userIds, userID)
-	i, e := rt.db.VerifyUserIds(userIds)
+	e := rt.db.VerifyUserId(userID)
 	if e != nil {
-		w.WriteHeader(http.StatusNotFound)
-		if i == 0 {
-			http.Error(w, "The userID can't be found", http.StatusNotFound)
-		}
+		http.Error(w, "The userID provided for authentication can't be found", http.StatusUnauthorized)
 		return
 	}
 
@@ -31,24 +26,17 @@ func (rt *_router) getUserProfile(w http.ResponseWriter, r *http.Request, ps htt
 
 	if username == "" {
 		http.Error(w, "Error taking the username", http.StatusBadRequest)
-		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	user, s, err := rt.db.GetUserByUsername(username)
-
 	if err != nil {
 		if e := err.Error(); e == "NotFound" {
-			w.WriteHeader(http.StatusNotFound)
+			http.Error(w, s, http.StatusNotFound)
 		} else {
-			w.WriteHeader(http.StatusInternalServerError)
-		}
-		e := json.NewEncoder(w).Encode(s)
-		if e != nil {
-			http.Error(w, "Couldn't encode error message : "+s, http.StatusInternalServerError)
+			http.Error(w, s, http.StatusInternalServerError)
 		}
 		return
-
 	}
 	w.WriteHeader(http.StatusOK)
 	e = json.NewEncoder(w).Encode(user)

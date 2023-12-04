@@ -35,7 +35,7 @@ security:
 paths:    
     
     #doLogin - LastMod : 2/12 - Status : Working
-    #getUserProfile - LastMod : 1/12 - Status : Working
+    #getUserProfile - LastMod : 4/12 - Status : Working
     /users/:
       post:
         operationId: doLogin
@@ -98,12 +98,14 @@ paths:
                   $ref : "#/components/schemas/User"                    
           "400":
             $ref : "#/components/responses/BadRequest" 
+          "401":
+            $ref : "#/components/responses/Unauthorized" 
           "404":
             $ref : "#/components/responses/NotFound" 
           "500":
             $ref : "#/components/responses/InternalServerError" 
     
-    #setMyUserName - LastMod : 1/12 - Status : Working
+    #setMyUserName - LastMod : 4/12 - Status : Working
     #updateUser - put - to implement
     /users/{userID}/:
       parameters:
@@ -112,7 +114,7 @@ paths:
         operationId: setMyUserName
         tags:
           - User
-          - Not Working
+          - Working
         summary: Changes the username        
         description: |
           Takes a user (by the id) and a name and sets the name as the new username of such user. 
@@ -131,7 +133,11 @@ paths:
           "201":
             $ref : "#/components/responses/Created"
           "400":
-            $ref : "#/components/responses/BadRequest"                    
+            $ref : "#/components/responses/BadRequest"
+          "401":
+            $ref : "#/components/responses/Unauthorized"                    
+          "403":
+            $ref : "#/components/responses/Forbidden"
           "404":
             $ref : "#/components/responses/NotFound"
           "409":
@@ -166,7 +172,7 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError"
           
-    #followUser - LastMod : 2/12 - Status : Working
+    #followUser - LastMod : 4/12 - Status : Working
     /users/{userID}/followed/:
       parameters:
       - $ref : "#/components/parameters/userID"
@@ -195,6 +201,8 @@ paths:
             $ref : "#/components/responses/Created"
           "400":
             $ref : "#/components/responses/BadRequest" 
+          "401":
+            $ref : "#/components/responses/Unauthorized" 
           "403":
             $ref : "#/components/responses/Forbidden"                
           "404":
@@ -202,7 +210,7 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError"
     
-    #unfollowUser - LastMod : 2/12 - Status : Working
+    #unfollowUser - LastMod : 4/12 - Status : Working
     /users/{userID}/followed/{followedID}/:
       parameters:
       - $ref : "#/components/parameters/userID"
@@ -212,7 +220,7 @@ paths:
         operationId: unfollowUser
         tags:
           - User Interactions
-          - Not Working
+          - Working
         summary: Unfollows a user
         description: |
           The actual user (userID) unfollows the given user (followedID).          
@@ -221,12 +229,16 @@ paths:
             $ref : "#/components/responses/OK"
           "400":
             $ref : "#/components/responses/BadRequest"
+          "401":
+            $ref : "#/components/responses/Unauthorized"
+          "403":
+            $ref : "#/components/responses/Forbidden"
           "404":
             $ref : "#/components/responses/NotFound"
           "500": 
             $ref : "#/components/responses/InternalServerError"
     
-    #banUser - LastMod : 30/11 - Status : Not Working
+    #banUser - LastMod : 4/12 - Status : Not Working
     /users/{userID}/banned/:
       parameters:
       - $ref : "#/components/parameters/userID"
@@ -235,7 +247,7 @@ paths:
         operationId: banUser
         tags:
           - User Interactions
-          - Not Working
+          - Working
         summary: Bans a user
         description: |
           The actual user (user ID) bans the given user (userToBanID).
@@ -249,17 +261,21 @@ paths:
               $ref : "#/components/schemas/User/properties/id"
         responses:
           "200": 
-            $ref : "#/components/responses/OK"            
+            $ref : "#/components/responses/OK"
           "201":
-            $ref : "#/components/responses/Created"            
+            $ref : "#/components/responses/Created"
           "400":
             $ref : "#/components/responses/BadRequest" 
+          "401":
+            $ref : "#/components/responses/Unauthorized" 
+          "403":
+            $ref : "#/components/responses/Forbidden"                
           "404":
-            $ref : "#/components/responses/NotFound" 
+            $ref : "#/components/responses/NotFound"            
           "500":
             $ref : "#/components/responses/InternalServerError"
     
-    #unbanUser - LastMod : 30/11 - Status : Not Working
+    #unbanUser - LastMod : 4/12 - - Status : Not Working
     /users/{userID}/banned/{bannedID}/:
       parameters:
       - $ref : "#/components/parameters/userID"
@@ -269,20 +285,24 @@ paths:
         operationId: unbanUser
         tags:
           - User Interactions
-          - Not Working
+          - Working
         summary: Unbans a user
         description: |
           The actual user (user ID) unbans the given user (unbanned ID).           
         responses:
           "200": 
-            $ref : "#/components/responses/OK"                         
+            $ref : "#/components/responses/OK"
           "400":
-            $ref : "#/components/responses/BadRequest" 
+            $ref : "#/components/responses/BadRequest"
+          "401":
+            $ref : "#/components/responses/Unauthorized"
+          "403":
+            $ref : "#/components/responses/Forbidden"
           "404":
             $ref : "#/components/responses/NotFound"
-          "500":
+          "500": 
             $ref : "#/components/responses/InternalServerError"
-     
+    
     #uploadPhoto - LastMod : 30/11 - Status : Not Working
     /photos/:
       post:

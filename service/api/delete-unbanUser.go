@@ -2,14 +2,13 @@ package api
 
 import (
 	"encoding/json"
-	"strconv"
-
 	"net/http"
+	"strconv"
 
 	"github.com/julienschmidt/httprouter"
 )
 
-func (rt *_router) followUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("content-type", "application/json")
 
 	userIDauth, e := strconv.Atoi(r.Header.Get("Authorization"))
@@ -33,30 +32,23 @@ func (rt *_router) followUser(w http.ResponseWriter, r *http.Request, ps httprou
 	}
 	userID := userIDauth
 
-	userToFollowID, err := strconv.Atoi(r.URL.Query().Get("userToFollowID"))
+	userToUnbanID, err := strconv.Atoi(ps.ByName("BannedID"))
 	if err != nil {
-		http.Error(w, "Could not convert the userToFollowID", http.StatusBadRequest)
-		return
-	}
-	e = rt.db.VerifyUserId(userToFollowID)
-	if e != nil {
-		http.Error(w, "The userToFollowID can't be found", http.StatusNotFound)
+		http.Error(w, "Could not convert the userToUnbanID", http.StatusBadRequest)
 		return
 	}
 
-	if userID == userToFollowID {
-		http.Error(w, "The follower and followed can't have the same id", http.StatusForbidden)
+	if userID == userToUnbanID {
+		http.Error(w, "The banner and banned can't have the same id", http.StatusForbidden)
 		return
 	}
-	s, err := rt.db.CreateFollow(userID, userToFollowID)
+	s, err := rt.db.DeleteBan(userID, userToUnbanID)
 
-	//Checks for DB-side errrors(404,500)
 	if err != nil {
-		if err.Error() == "AlreadyFollowed" {
-			w.WriteHeader(http.StatusOK)
+		if e := err.Error(); e == "UserNotFound" || e == "BannedNotFound" {
+			http.Error(w, s, http.StatusNotFound)
 		} else {
-			http.Error(w, s, http.StatusInternalServerError)
-			return
+			w.WriteHeader(http.StatusInternalServerError)
 		}
 	} else {
 		w.WriteHeader(http.StatusCreated)

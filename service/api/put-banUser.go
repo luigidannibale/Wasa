@@ -9,7 +9,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func (rt *_router) followUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (rt *_router) banUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("content-type", "application/json")
 
 	userIDauth, e := strconv.Atoi(r.Header.Get("Authorization"))
@@ -33,26 +33,26 @@ func (rt *_router) followUser(w http.ResponseWriter, r *http.Request, ps httprou
 	}
 	userID := userIDauth
 
-	userToFollowID, err := strconv.Atoi(r.URL.Query().Get("userToFollowID"))
+	userToBanID, err := strconv.Atoi(r.URL.Query().Get("userToBanID"))
 	if err != nil {
-		http.Error(w, "Could not convert the userToFollowID", http.StatusBadRequest)
+		http.Error(w, "Could not convert the userToBanID", http.StatusBadRequest)
 		return
 	}
-	e = rt.db.VerifyUserId(userToFollowID)
+	e = rt.db.VerifyUserId(userToBanID)
 	if e != nil {
-		http.Error(w, "The userToFollowID can't be found", http.StatusNotFound)
+		http.Error(w, "The userToBanID can't be found", http.StatusNotFound)
 		return
 	}
 
-	if userID == userToFollowID {
-		http.Error(w, "The follower and followed can't have the same id", http.StatusForbidden)
+	if userID == userToBanID {
+		http.Error(w, "The banner and banned can't have the same id", http.StatusForbidden)
 		return
 	}
-	s, err := rt.db.CreateFollow(userID, userToFollowID)
+	s, err := rt.db.CreateBan(userID, userToBanID)
 
 	//Checks for DB-side errrors(404,500)
 	if err != nil {
-		if err.Error() == "AlreadyFollowed" {
+		if err.Error() == "AlreadyBanned" {
 			w.WriteHeader(http.StatusOK)
 		} else {
 			http.Error(w, s, http.StatusInternalServerError)

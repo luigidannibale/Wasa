@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func (db *appdbimpl) DeleteFollow(userID int, userToUnfollowID int) (string, error) {
+func (db *appdbimpl) DeleteBan(userID int, userToUnbanID int) (string, error) {
 	user, s, e := db.GetUser(userID)
 	if e != nil {
 		if e.Error() == "NotFound" {
@@ -15,24 +15,24 @@ func (db *appdbimpl) DeleteFollow(userID int, userToUnfollowID int) (string, err
 			return s, errors.New("InternalServerError")
 		}
 	}
-	userToUnfollow, s, e := db.GetUser(userToUnfollowID)
+	userToUnban, s, e := db.GetUser(userToUnbanID)
 	if e != nil {
 		if e.Error() == "NotFound" {
-			return "Couldn't find the user to unfollow", errors.New("FollowedNotFound")
+			return "Couldn't find the user to unban", errors.New("BannedNotFound")
 		}
 		if e.Error() == "InternalServerError" {
 			return s, errors.New("InternalServerError")
 		}
 	}
 
-	res, err := db.c.Exec(`DELETE FROM Follows WHERE FollowerID = ? AND FollowedID = ?`, user.Id, userToUnfollow.Id)
+	res, err := db.c.Exec(`DELETE FROM Bans WHERE BannerID = ? AND BannedID = ?`, user.Id, userToUnban.Id)
 	if x, y := res.RowsAffected(); x == 0 && y == nil {
-		return fmt.Sprintf("User %s is not a follower of %s", user.Username, userToUnfollow.Username), errors.New("FollowedNotFound")
+		return fmt.Sprintf("User %s was not banned by %s", userToUnban.Username, user.Username), errors.New("BannedNotFound")
 	}
 	if err != nil {
 		return "An error occurred on the server" + err.Error(), errors.New("InternalServerError")
 	}
 
-	return fmt.Sprintf("User %s is no longer following %s", user.Username, userToUnfollow.Username), nil
+	return fmt.Sprintf("User %s has unbanned %s", user.Username, userToUnban.Username), nil
 
 }
