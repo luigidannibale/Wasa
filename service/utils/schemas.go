@@ -45,7 +45,8 @@ func (u User) Validate() error {
 }
 
 type Like struct {
-	Id int `json:"id"`
+	UserID  int `json:"userID"`
+	PhotoID int `json:"photoID"`
 }
 type Comment struct {
 	Id      int    `json:"id"`
@@ -105,6 +106,7 @@ func (d Timestamp) Validate() error {
 
 type Photo struct {
 	Id              int       `json:"id"`
+	UserId          int       `json:"userId"`
 	Image           string    `json:"image"`
 	Caption         string    `json:"caption"`
 	UploadTimestamp Timestamp `json:"uploadTimestamp"`

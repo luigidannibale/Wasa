@@ -2,9 +2,11 @@ package database
 
 import (
 	"errors"
+
+	"github.com/luigidannibale/Wasa/service/utils"
 )
 
-func (db *appdbimpl) CreateUser(username string) (int, string, error) {
+func (db *appdbimpl) CreateUserByUsername(username string) (int, string, error) {
 	var userID int
 	u, s, e := db.GetUserByUsername(username)
 	if e != nil {
@@ -22,4 +24,14 @@ func (db *appdbimpl) CreateUser(username string) (int, string, error) {
 		}
 	}
 	return u.Id, "Logged", nil
+}
+func (db *appdbimpl) CreateUser(user utils.User) (int, string, error) {
+	var userID int
+	userID, s, e := db.CreateUserByUsername(user.Username)
+	if e != nil {
+		return userID, s, e
+	}
+	user.Id = userID
+	_, s, e = db.UpdateUser(user)
+	return userID, s, e
 }

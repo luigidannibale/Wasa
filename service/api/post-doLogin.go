@@ -27,7 +27,7 @@ func (rt *_router) doLogin(w http.ResponseWriter, r *http.Request, ps httprouter
 	}
 
 	//Database query
-	id, s, err := rt.db.CreateUser(username["username"])
+	id, s, err := rt.db.CreateUserByUsername(username["username"])
 
 	//Handling errors
 	if err != nil {

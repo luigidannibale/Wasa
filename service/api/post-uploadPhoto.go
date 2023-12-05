@@ -13,7 +13,6 @@ import (
 func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("content-type", "application/json")
 	userID, er := strconv.Atoi(r.Header.Get("Authorization"))
-
 	if er != nil {
 		http.Error(w, "Couldn't identify userId for authentication", http.StatusUnauthorized)
 		return
@@ -28,6 +27,7 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	}
 
 	var photo utils.Photo
+	photo.UserId = userID
 	photo.Caption = caption
 	photo.Image = image
 	photo.UploadTimestamp = utils.Now()
@@ -35,12 +35,15 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 		http.Error(w, e.Error(), http.StatusBadRequest)
 	}
 
-	photoId, s, e := rt.db.CreatePhoto(userID, photo)
+	photoId, s, e := rt.db.CreatePhoto(photo)
 
 	if e != nil {
 		http.Error(w, s, http.StatusNotFound)
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(fmt.Sprintf("Photo uploaded successfully with id %d", photoId))
+	e = json.NewEncoder(w).Encode(fmt.Sprintf("Photo uploaded successfully with id %d", photoId))
+	if e != nil {
+		http.Error(w, fmt.Sprintf("Photo uploaded successfully with id %d, but an error occurred while encoding the message ", photoId)+e.Error(), http.StatusInternalServerError)
+	}
 }

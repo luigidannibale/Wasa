@@ -22,7 +22,7 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.POST("/photos", rt.uploadPhoto)
 	//rt.router.DELETE("/photos/:photoID", rt.deletePhoto)
 
-	//rt.router.PUT("/photos/:photoID/likes", rt.likePhoto)
+	rt.router.PUT("/photos/:photoID/likes", rt.likePhoto)
 	//rt.router.GET("/photos/:photoID/likes/:likeID", rt.getLike)
 	//rt.router.DELETE("/photos/:photoID/likes/:likeID", rt.unlikePhoto)
 

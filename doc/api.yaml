@@ -380,12 +380,7 @@ paths:
         summary: Puts a like to a photo
         description: |
           Takes a userID and creates a like of that user to the photo, 
-          if such user has already liked the photo, nothing happens.
-        parameters:
-          - name: userID
-            in: query
-            schema:
-              $ref : "#/components/schemas/User/properties/id"
+          if such user has already liked the photo, nothing happens.        
         responses:
           "200":
             $ref : "#/components/responses/OK" 
@@ -393,6 +388,8 @@ paths:
             $ref : "#/components/responses/Created" 
           "400":
             $ref : "#/components/responses/BadRequest"
+          "401":
+            $ref : "#/components/responses/Unauthorized"
           "404":
             $ref : "#/components/responses/NotFound"            
           "500":

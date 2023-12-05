@@ -40,7 +40,8 @@ import (
 
 // AppDatabase is the high level interface for the DB
 type AppDatabase interface {
-	CreateUser(string) (int, string, error)
+	CreateUser(utils.User) (int, string, error)
+	CreateUserByUsername(string) (int, string, error)
 	UpdateUser(utils.User) (utils.User, string, error)
 	GetUser(int) (utils.User, string, error)
 	GetUserByUsername(string) (utils.User, string, error)
@@ -50,7 +51,14 @@ type AppDatabase interface {
 	CreateBan(int, int) (string, error)
 	DeleteBan(int, int) (string, error)
 
-	CreatePhoto(int, utils.Photo) (int, string, error)
+	CreatePhoto(utils.Photo) (int, string, error)
+	GetPhoto(int) (utils.Photo, string, error)
+
+	CreateLike(utils.Like) (string, error)
+	DeleteLike(utils.Like) (string, error)
+
+	CreateComment(utils.Comment) (int, string, error)
+	DeleteComment(int) (string, error)
 	//DeletePhoto(int) (string, error)
 	//Like(int, utils.Like) (string, error)
 	//Unlike(int, int) (string, error)
@@ -91,7 +99,7 @@ func New(db *sql.DB) (AppDatabase, error) {
 			(Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, 
 			UserID INTEGER,
 			Image BLOB NOT NULL,
-			Caption TEXT NOT NULL,
+			Caption TEXT,
 			UploadTimestamp TEXT NOT NULL
 			FOREIGN KEY(UserID) REFERENCES Users(Id));`
 		_, err = db.Exec(sqlStmt)
