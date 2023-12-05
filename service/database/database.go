@@ -40,28 +40,38 @@ import (
 
 // AppDatabase is the high level interface for the DB
 type AppDatabase interface {
+
+	//Operations on Users table
 	CreateUser(utils.User) (int, string, error)
 	CreateUserByUsername(string) (int, string, error)
 	UpdateUser(utils.User) (utils.User, string, error)
 	GetUser(int) (utils.User, string, error)
 	GetUserByUsername(string) (utils.User, string, error)
 
-	CreateFollow(int, int) (string, error)
-	DeleteFollow(int, int) (string, error)
-	CreateBan(int, int) (string, error)
-	DeleteBan(int, int) (string, error)
+	//Operations on Follows table
+	CreateFollow(utils.Follow) (string, error)
+	GetFollow(utils.Follow) (string, error)
+	DeleteFollow(utils.Follow) (string, error)
 
+	//Operations on Bans table
+	CreateBan(utils.Ban) (string, error)
+	GetBan(utils.Ban) (string, error)
+	DeleteBan(utils.Ban) (string, error)
+
+	//Operations on Photos table
 	CreatePhoto(utils.Photo) (int, string, error)
 	GetPhoto(int) (utils.Photo, string, error)
+	DeletePhoto(utils.Photo) (string, error)
 
+	//Operations on Likes table
 	CreateLike(utils.Like) (string, error)
+	GetLike(utils.Like) (string, error)
 	DeleteLike(utils.Like) (string, error)
 
+	//Operations on Comment table
 	CreateComment(utils.Comment) (int, string, error)
+	GetComment(int) (utils.Comment, string, error)
 	DeleteComment(int) (string, error)
-	//DeletePhoto(int) (string, error)
-	//Like(int, utils.Like) (string, error)
-	//Unlike(int, int) (string, error)
 
 	//GetStream(int) ([]utils.Photo, string, error)
 	Ping() error
@@ -83,9 +93,9 @@ func New(db *sql.DB) (AppDatabase, error) {
 	var tableName string
 	err := db.QueryRow(`SELECT name FROM sqlite_master WHERE type = 'table' and name = 'Users';`).Scan(&tableName)
 	if errors.Is(err, sql.ErrNoRows) {
-		// Creates Users table		#LastMod - 28/11
+		// Creates Users table		#LastMod - 5/12
 		sqlStmt := `CREATE TABLE Users
-			(Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, 
+			(Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
 			Username TEXT NOT NULL UNIQUE,
 			Name TEXT,
 			Surname TEXT,
@@ -94,40 +104,42 @@ func New(db *sql.DB) (AppDatabase, error) {
 		if err != nil {
 			return nil, fmt.Errorf("error creating 'Users' table: %w", err)
 		}
-		// Creates Photos table		#LastMod - 28/11
+		// Creates Photos table		#LastMod - 5/12
 		sqlStmt = `CREATE TABLE Photos 
-			(Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, 
+			(Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
 			UserID INTEGER,
 			Image BLOB NOT NULL,
 			Caption TEXT,
-			UploadTimestamp TEXT NOT NULL
+			UploadTimestamp TEXT NOT NULL,
 			FOREIGN KEY(UserID) REFERENCES Users(Id));`
 		_, err = db.Exec(sqlStmt)
 		if err != nil {
 			return nil, fmt.Errorf("error creating 'Photos' table: %w", err)
 		}
-		// Creates Comments table		#LastMod - 28/11
+		// Creates Comments table		#LastMod - 5/12
 		sqlStmt = `CREATE TABLE Comments 
-			(Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, 
+			(Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
 			UserID INTEGER,
+			PhotoID INTEGER,
 			Content TEXT NOT NULL,
+			FOREIGN KEY(PhotoID) REFERENCES Photos(Id) ON DELETE CASCADE,
 			FOREIGN KEY(UserID) REFERENCES Users(Id));`
 		_, err = db.Exec(sqlStmt)
 		if err != nil {
 			return nil, fmt.Errorf("error creating 'Comments' table: %w", err)
 		}
-		// Creates Likes table		#LastMod - 28/11
+		// Creates Likes table		#LastMod - 5/12
 		sqlStmt = `CREATE TABLE Likes 
 			(UserID INTEGER,
 			PhotoID INTEGER,
 			PRIMARY KEY(UserID, PhotoID),
-			FOREIGN KEY(PhotoID) REFERENCES Photos(Id),
+			FOREIGN KEY(PhotoID) REFERENCES Photos(Id) ON DELETE CASCADE,
 			FOREIGN KEY(UserID) REFERENCES Users(Id));`
 		_, err = db.Exec(sqlStmt)
 		if err != nil {
 			return nil, fmt.Errorf("error creating 'Likes' table: %w", err)
 		}
-		// Creates Follows table		#LastMod - 28/11
+		// Creates Follows table		#LastMod - 5/12
 		sqlStmt = `CREATE TABLE Follows 
 			(FollowerID INTEGER,
 			FollowedID INTEGER,
@@ -138,7 +150,7 @@ func New(db *sql.DB) (AppDatabase, error) {
 		if err != nil {
 			return nil, fmt.Errorf("error creating 'Follows' table: %w", err)
 		}
-		// Creates Bans table		#LastMod - 28/11
+		// Creates Bans table		#LastMod - 5/12
 		sqlStmt = `CREATE TABLE Bans 
 			(BannerID INTEGER,
 			BannedID INTEGER,

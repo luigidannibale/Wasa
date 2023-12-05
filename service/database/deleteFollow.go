@@ -1,38 +1,25 @@
 package database
 
 import (
-	"errors"
 	"fmt"
+
+	"github.com/luigidannibale/Wasa/service/utils"
 )
 
-func (db *appdbimpl) DeleteFollow(userID int, userToUnfollowID int) (string, error) {
-	user, s, e := db.GetUser(userID)
-	if e != nil {
-		if e.Error() == "NotFound" {
-			return "Couldn't find the user", errors.New("UserNotFound")
-		}
-		if e.Error() == "InternalServerError" {
-			return s, errors.New("InternalServerError")
-		}
-	}
-	userToUnfollow, s, e := db.GetUser(userToUnfollowID)
-	if e != nil {
-		if e.Error() == "NotFound" {
-			return "Couldn't find the user to unfollow", errors.New("FollowedNotFound")
-		}
-		if e.Error() == "InternalServerError" {
-			return s, errors.New("InternalServerError")
-		}
-	}
+/*
+Errors that can be returned: (NotFound, InternalServerError)
+*/
+func (db *appdbimpl) DeleteFollow(follow utils.Follow) (string, error) {
+	userID, userToUnfollowID := follow.FollowerID, follow.FollowedID
 
-	res, err := db.c.Exec(`DELETE FROM Follows WHERE FollowerID = ? AND FollowedID = ?`, user.Id, userToUnfollow.Id)
+	res, err := db.c.Exec(`DELETE FROM Follows WHERE FollowerID = ? AND FollowedID = ?`, userID, userToUnfollowID)
 	if x, y := res.RowsAffected(); x == 0 && y == nil {
-		return fmt.Sprintf("User %s is not a follower of %s", user.Username, userToUnfollow.Username), errors.New("FollowedNotFound")
+		return fmt.Sprintf("Couldn't find the user to unfollow %d in the following of user %d", userID, userToUnfollowID), NotFound
 	}
 	if err != nil {
-		return "An error occurred on the server" + err.Error(), errors.New("InternalServerError")
+		return err.Error(), InternalServerError
 	}
 
-	return fmt.Sprintf("User %s is no longer following %s", user.Username, userToUnfollow.Username), nil
+	return fmt.Sprintf("User %d is no longer following %d", userID, userToUnfollowID), nil
 
 }

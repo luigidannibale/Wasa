@@ -6,11 +6,18 @@ import (
 	"strconv"
 
 	"github.com/julienschmidt/httprouter"
+	"github.com/luigidannibale/Wasa/service/database"
+	"github.com/luigidannibale/Wasa/service/utils"
 )
 
 func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("content-type", "application/json")
 
+	/*Authentication part :
+	- takes the 2 userID (from auth and from params,)
+	- validates 1 of them
+	- checks if them are equal
+	*/
 	userIDauth, e := strconv.Atoi(r.Header.Get("Authorization"))
 	if e != nil {
 		http.Error(w, "Couldn't identify userId for authentication "+e.Error(), http.StatusUnauthorized)
@@ -18,8 +25,14 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 	}
 	e = rt.db.VerifyUserId(userIDauth)
 	if e != nil {
-		http.Error(w, "The userID provided for authentication can't be found", http.StatusUnauthorized)
-		return
+		switch e {
+		case database.NotFound:
+			http.Error(w, "The userID provided for authentication can't be found", http.StatusUnauthorized)
+			return
+		case database.InternalServerError:
+			http.Error(w, "An error occurred on ther server while identifying userID", http.StatusInternalServerError)
+			return
+		}
 	}
 	userIDparam, err := strconv.Atoi(ps.ByName("userID"))
 	if err != nil {
@@ -32,29 +45,48 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 	}
 	userID := userIDauth
 
-	userToUnbanID, err := strconv.Atoi(ps.ByName("BannedID"))
+	//Takes the id of the user to unban, and validates it
+	userToUnbanID, err := strconv.Atoi(ps.ByName("bannedID"))
 	if err != nil {
-		http.Error(w, "Could not convert the userToUnbanID", http.StatusBadRequest)
+		http.Error(w, "Could not convert the bannedID", http.StatusBadRequest)
+		return
+	}
+	e = rt.db.VerifyUserId(userToUnbanID)
+	if e != nil {
+		http.Error(w, "The user to unban can't be found", http.StatusNotFound)
 		return
 	}
 
+	//Checks if the user is trying to unban himself
 	if userID == userToUnbanID {
 		http.Error(w, "The banner and banned can't have the same id", http.StatusForbidden)
 		return
 	}
-	s, err := rt.db.DeleteBan(userID, userToUnbanID)
 
+	//Creates the ban that must be deleted from DB
+	var ban utils.Ban
+	ban.BannerID = userID
+	ban.BannedID = userToUnbanID
+
+	//Deletes the ban from DB
+	s, err := rt.db.DeleteBan(ban)
+
+	//Checks for DB errors
 	if err != nil {
-		if e := err.Error(); e == "UserNotFound" || e == "BannedNotFound" {
+		switch err {
+		case database.NotFound:
 			http.Error(w, s, http.StatusNotFound)
-		} else {
-			w.WriteHeader(http.StatusInternalServerError)
+			return
+		case database.InternalServerError:
+			http.Error(w, "An error has occurred on the server "+s, http.StatusInternalServerError)
+			return
 		}
-	} else {
-		w.WriteHeader(http.StatusCreated)
 	}
+
+	//Operation successful, creates an OK response
+	w.WriteHeader(http.StatusOK)
 	e = json.NewEncoder(w).Encode(s)
 	if e != nil {
-		http.Error(w, s, http.StatusInternalServerError)
+		http.Error(w, "Ban deleted successfully but an error occurred while encoding the message", http.StatusInternalServerError)
 	}
 }

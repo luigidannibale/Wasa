@@ -1,9 +1,8 @@
 package database
 
-import (
-	"errors"
-)
-
+/*
+Errors that can be returned: (NotFound, InternalServerError)
+*/
 func (db *appdbimpl) DeleteComment(commentID int) (string, error) {
 
 	res, err := db.c.Exec(`DELETE OR IGNORE 
@@ -11,10 +10,10 @@ func (db *appdbimpl) DeleteComment(commentID int) (string, error) {
 							WHERE CommentId = ?`, commentID)
 
 	if x, y := res.RowsAffected(); x == 0 && y == nil {
-		return "No commment with such id", errors.New("NotFound")
+		return "No commment with such id", NotFound
 	}
 	if err != nil {
-		return "An error occcurred on the server" + err.Error(), errors.New("InternalServerError")
+		return err.Error(), InternalServerError
 	}
 	return "Comment deleted successfully", nil
 }

@@ -17,10 +17,21 @@ type User struct {
 	DateOfBirth Date   `json:"dateOfBirth"`
 }
 
-// to insert regex validation
-func (u User) Validate() error {
+func (u User) ValidateUsername() error {
 	if l := len(u.Username); l < 3 || l > 16 {
 		return errors.New("username lenght not valid")
+	}
+	m, e := regexp.MatchString("^[a-zA-Z0-9._]{3,16}$", u.Username)
+	if !m {
+		return e
+	}
+	return nil
+}
+
+// to insert regex validation
+func (u User) Validate() error {
+	if e := u.ValidateUsername(); e != nil {
+		return e
 	}
 	if l := len(u.Name); l < 3 || l > 25 {
 		return errors.New("name lenght not valid")
@@ -28,11 +39,7 @@ func (u User) Validate() error {
 	if l := len(u.Surname); l < 3 || l > 25 {
 		return errors.New("surname lenght not valid")
 	}
-	m, e := regexp.MatchString("^[a-zA-Z0-9._]{3,16}$", u.Username)
-	if !m {
-		return e
-	}
-	m, e = regexp.MatchString("^[a-zA-Z]{3,25}$", u.Name)
+	m, e := regexp.MatchString("^[a-zA-Z]{3,25}$", u.Name)
 	if !m {
 		return e
 	}
@@ -44,6 +51,16 @@ func (u User) Validate() error {
 	return e
 }
 
+type Ban struct {
+	BannerID int `json:"bannerID"`
+	BannedID int `json:"bannedID"`
+}
+
+type Follow struct {
+	FollowerID int `json:"FollowerID"`
+	FollowedID int `json:"FollowedID"`
+}
+
 type Like struct {
 	UserID  int `json:"userID"`
 	PhotoID int `json:"photoID"`
@@ -51,11 +68,12 @@ type Like struct {
 type Comment struct {
 	Id      int    `json:"id"`
 	UserID  int    `json:"userID"`
+	PhotoID int    `json:"photoID"`
 	Content string `json:"content"`
 }
 
 func (c Comment) validate() error {
-	m, e := regexp.MatchString(".*{0,1024}$", c.Content)
+	m, e := regexp.MatchString(".*{1,1024}$", c.Content)
 	if !m {
 		return e
 	}

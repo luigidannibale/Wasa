@@ -105,8 +105,7 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError" 
     
-    #setMyUserName - LastMod : 4/12 - Status : Working
-    #updateUser - put - to implement
+    #setMyUserName - LastMod : 5/12 - Status : Working    
     /users/{userID}/:
       parameters:
       - $ref : "#/components/parameters/userID"
@@ -117,9 +116,7 @@ paths:
           - Working
         summary: Changes the username        
         description: |
-          Takes a user (by the id) and a name and sets the name as the new username of such user. 
-          If the username was already set with such name nothing happens.          
-          If the user can't be found error 404 is threw.
+          Takes a user (by the id) and a name and sets the name as the new username of such user.           
         parameters:
           - name: username 
             in: query
@@ -144,7 +141,42 @@ paths:
             $ref : "#/components/responses/Conflict"
           "500":
             $ref : "#/components/responses/InternalServerError"
-          
+
+    #updateUser - LastMod : 5/12 - Status : Working
+    /users/{userID}/updateUser:
+      parameters:
+      - $ref : "#/components/parameters/userID"
+      put:
+        operationId: updateUser
+        tags:
+          - User
+          - Working
+        summary: Updates the user with new data
+        description: |
+          Takes a user (by the id) and a new user profile and updates the user, with the new data.
+        requestBody:
+          content:
+            application/json:
+              schema:
+                $ref : "#/components/schemas/User"  
+        responses:
+          "200":
+            $ref : "#/components/responses/OK"
+          "201":
+            $ref : "#/components/responses/Created"
+          "400":
+            $ref : "#/components/responses/BadRequest"
+          "401":
+            $ref : "#/components/responses/Unauthorized"                    
+          "403":
+            $ref : "#/components/responses/Forbidden"
+          "404":
+            $ref : "#/components/responses/NotFound"
+          "409":
+            $ref : "#/components/responses/Conflict"
+          "500":
+            $ref : "#/components/responses/InternalServerError"
+         
     #getMyStream - LastMod : 30/11 - Status : Not Working
     /users/{userID}/getMyStream:
       parameters:
@@ -238,7 +270,7 @@ paths:
           "500": 
             $ref : "#/components/responses/InternalServerError"
     
-    #banUser - LastMod : 4/12 - Status : Not Working
+    #banUser - LastMod : 5/12 - Status : Working
     /users/{userID}/banned/:
       parameters:
       - $ref : "#/components/parameters/userID"
@@ -275,7 +307,7 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError"
     
-    #unbanUser - LastMod : 4/12 - - Status : Not Working
+    #unbanUser - LastMod : 4/12 - - Status : Working
     /users/{userID}/banned/{bannedID}/:
       parameters:
       - $ref : "#/components/parameters/userID"
@@ -345,6 +377,7 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError" 
     
+    #getPhoto - get - to implement
     #deletePhoto - LastMod : 30/11 - Status : Not Working
     /photos/{photoID}:
       parameters:
@@ -368,7 +401,7 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError" 
     
-    #likePhoto - LastMod : 30/11 - Status : Not Working
+    #likePhoto - LastMod : 5/12 - Status : Working
     /photos/{photoID}/likes/:
       parameters:
         - $ref : "#/components/parameters/photoID"
@@ -376,7 +409,7 @@ paths:
         operationId: likePhoto
         tags: 
           - Photos Interactions
-          - Not Working
+          - Working
         summary: Puts a like to a photo
         description: |
           Takes a userID and creates a like of that user to the photo, 
@@ -395,6 +428,7 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError"
     
+    #getLike - get - to implement
     #unlikePhoto - LastMod : 30/11 - Status : Not Working
     /photos/{photoID}/likes/{likeID}/:
       parameters: 
@@ -702,13 +736,13 @@ components:
           description: the content of the comment
           type: string
           example: "Nice photo"
-          pattern: ".*{0,1024}$"
-          minLength: 0
+          pattern: ".*{1,1024}$"
+          minLength: 1
           maxLength: 1024    
     Message: #can be referenced using $ref : "#/components/schemas/Message"      
       description: a simple text message
       type: string
-      example: "Error"
+      example: "This is the outcome"
       pattern: ".*"
       minLength: 0
       maxLength: 1024

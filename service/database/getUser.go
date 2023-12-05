@@ -7,9 +7,9 @@ import (
 	"github.com/luigidannibale/Wasa/service/utils"
 )
 
-/*Returns user searched by the id,
-a string message,
-and an error */
+/*
+Errors that can be returned: (NotFound, InternalServerError)
+*/
 func (db *appdbimpl) GetUser(userID int) (utils.User, string, error) {
 	var user utils.User
 	var name, surname, dateOfBirth sql.NullString
@@ -30,7 +30,7 @@ func (db *appdbimpl) GetUser(userID int) (utils.User, string, error) {
 		return user, "User found successfully", nil
 	}
 	if errors.Is(e, sql.ErrNoRows) {
-		return user, "Couldn't find the user", errors.New("NotFound")
+		return user, "Couldn't find the user", NotFound
 	}
-	return user, "An error occured on the server : " + e.Error(), errors.New("InternalServerError")
+	return user, e.Error(), InternalServerError
 }

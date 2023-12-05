@@ -1,30 +1,30 @@
 package database
 
 import (
-	"errors"
-
 	"github.com/luigidannibale/Wasa/service/utils"
 )
 
+/*
+Errors that can be returned: (InternalServerError)
+*/
 func (db *appdbimpl) CreateUserByUsername(username string) (int, string, error) {
 	var userID int
 	u, s, e := db.GetUserByUsername(username)
 	if e != nil {
-		if e.Error() == "NotFound" {
-			err := db.c.QueryRow(`	INSERT INTO Users(Username)
-									VALUES (?)
-									RETURNING Id`, username).Scan(&userID)
+		switch e {
+		case NotFound:
+			err := db.c.QueryRow(`INSERT INTO Users(Username) VALUES (?) RETURNING Id`, username).Scan(&userID)
 			if err == nil {
 				return userID, "Created", nil
 			}
-			return userID, "An error occured on the server " + err.Error(), errors.New("InternalServerError")
-		}
-		if e.Error() == "InternalServerError" {
-			return userID, s, errors.New("InternalServerError")
+			return userID, err.Error(), InternalServerError
+		case InternalServerError:
+			return userID, s, InternalServerError
 		}
 	}
 	return u.Id, "Logged", nil
 }
+
 func (db *appdbimpl) CreateUser(user utils.User) (int, string, error) {
 	var userID int
 	userID, s, e := db.CreateUserByUsername(user.Username)
