@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -20,19 +21,18 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps http
 	*/
 	userIDauth, e := strconv.Atoi(r.Header.Get("Authorization"))
 	if e != nil {
-		http.Error(w, "Couldn't identify userId for authentication", http.StatusUnauthorized)
+		http.Error(w, "Couldn't identify userId for authentication "+e.Error(), http.StatusUnauthorized)
 		return
 	}
 	u, s, e := rt.db.GetUser(userIDauth)
 	if e != nil {
-		switch e {
-		case database.NotFound:
+		if errors.Is(e, database.ErrNotFound) {
 			http.Error(w, "The userID provided for authentication can't be found", http.StatusUnauthorized)
-			return
-		case database.InternalServerError:
-			http.Error(w, "An error occurred on ther server while identifying userID", http.StatusInternalServerError)
-			return
 		}
+		if errors.Is(e, database.ErrInternalServerError) {
+			http.Error(w, "An error occurred on ther server while identifying userID", http.StatusInternalServerError)
+		}
+		return
 	}
 	userIDparam, e := strconv.Atoi(ps.ByName("userID"))
 	if e != nil {
@@ -45,10 +45,15 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps http
 	}
 	userID := userIDauth
 
-	//Takes the username and validates it
-	username := r.URL.Query().Get("username")
-	var userToUpdate utils.User
+	// Takes the username from the body and validates it
+	var username string
+	e = json.NewDecoder(r.Body).Decode(&username)
+	if e != nil {
+		http.Error(w, "Couldn't decode the username "+e.Error(), http.StatusBadRequest)
+		return
+	}
 
+	var userToUpdate utils.User
 	userToUpdate.Id = userID
 	userToUpdate.Username = username
 
@@ -58,33 +63,33 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps http
 	}
 
 	if u.Username == username {
-		//Operation successful, creates a OK response
+		// Operation successful, creates a OK response
 		w.WriteHeader(http.StatusOK)
 		e = json.NewEncoder(w).Encode("Username was already set so")
 		if e != nil {
-			http.Error(w, "Successful operation, the username was already set so, but an error occurred encoding the message", http.StatusInternalServerError)
+			http.Error(w, "Successful operation, the username was already set so, but an error occurred encoding the message "+e.Error(), http.StatusInternalServerError)
 		}
 	}
 
-	//Update the user (with only the username)
+	// Update the user (with only the username)
 	user, s, err := rt.db.UpdateUser(userToUpdate)
 
-	//Checks for DB errors
+	// Checks for DB errors
 	if err != nil {
-		switch err {
-		case database.UsernameTaken:
+		if errors.Is(e, database.ErrUsernameTaken) {
 			http.Error(w, s, http.StatusConflict)
 			return
-		case database.InternalServerError:
-			http.Error(w, "An error occurred on the server "+s, http.StatusInternalServerError)
+		}
+		if errors.Is(e, database.ErrInternalServerError) {
+			http.Error(w, "An error has occurred on the server while updating the username "+s, http.StatusInternalServerError)
 			return
 		}
 	}
 
-	//Operation successful, creates a CREATED response
+	// Operation successful, creates a CREATED response
 	w.WriteHeader(http.StatusCreated)
 	e = json.NewEncoder(w).Encode("Username set successfully, new username : " + user.Username)
 	if e != nil {
-		http.Error(w, "Successful operation, the username has been updated, but an error occurred encoding the message", http.StatusInternalServerError)
+		http.Error(w, "Successful operation, the username has been updated, but an error occurred encoding the message "+e.Error(), http.StatusInternalServerError)
 	}
 }

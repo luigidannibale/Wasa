@@ -30,7 +30,7 @@ func (db *appdbimpl) GetUser(userID int) (utils.User, string, error) {
 		return user, "User found successfully", nil
 	}
 	if errors.Is(e, sql.ErrNoRows) {
-		return user, "Couldn't find the user", NotFound
+		return user, "Couldn't find the user", ErrNotFound
 	}
-	return user, e.Error(), InternalServerError
+	return user, e.Error(), ErrInternalServerError
 }

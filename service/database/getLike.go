@@ -19,7 +19,7 @@ func (db *appdbimpl) GetLike(like utils.Like) (string, error) {
 		return "Like found successfully", nil
 	}
 	if errors.Is(e.Err(), sql.ErrNoRows) {
-		return "Couldn't find the like", NotFound
+		return "Couldn't find the like", ErrNotFound
 	}
-	return e.Err().Error(), InternalServerError
+	return e.Err().Error(), ErrInternalServerError
 }

@@ -52,7 +52,7 @@ func remove[T interface{}](slice []T, s int) []T {
 	return append(slice[:s], slice[s+1:]...)
 }
 func StringToDate(s string) Date {
-	//s is in "dd-month-yyyy" format
+	// s is in "dd-month-yyyy" format
 	var d Date
 	x := strings.Split(s, "-")
 	day, _ := strconv.Atoi(x[0])
@@ -69,7 +69,7 @@ func DateToString(d Date) string {
 	return s
 }
 func StringToTimestamp(s string) Timestamp {
-	//s is in "dd-month-yyyy" format
+	// s is in "dd-month-yyyy" format
 	var t Timestamp
 	/*x := strings.Split(s, "-")
 	day, _ := strconv.Atoi(x[0])
@@ -82,7 +82,7 @@ func StringToTimestamp(s string) Timestamp {
 
 func TimestampToString(t Timestamp) string {
 	var s string = "dd-month-yyyy"
-	//s = strconv.Itoa(d.Day) + "-" + d.Month + "-" + strconv.Itoa(d.Year)
+	// s = strconv.Itoa(d.Day) + "-" + d.Month + "-" + strconv.Itoa(d.Year)
 	return s
 }
 func Now() Timestamp {

@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -25,14 +26,13 @@ func (rt *_router) unfollowUser(w http.ResponseWriter, r *http.Request, ps httpr
 	}
 	e = rt.db.VerifyUserId(userIDauth)
 	if e != nil {
-		switch e {
-		case database.NotFound:
+		if errors.Is(e, database.ErrNotFound) {
 			http.Error(w, "The userID provided for authentication can't be found", http.StatusUnauthorized)
-			return
-		case database.InternalServerError:
-			http.Error(w, "An error occurred on ther server while identifying userID", http.StatusInternalServerError)
-			return
 		}
+		if errors.Is(e, database.ErrInternalServerError) {
+			http.Error(w, "An error occurred on ther server while identifying userID", http.StatusInternalServerError)
+		}
+		return
 	}
 	userIDparam, err := strconv.Atoi(ps.ByName("userID"))
 	if err != nil {
@@ -45,7 +45,7 @@ func (rt *_router) unfollowUser(w http.ResponseWriter, r *http.Request, ps httpr
 	}
 	userID := userIDauth
 
-	//Takes the id of the user to unfollow, and validates it
+	// Takes the id of the user to unfollow, and validates it
 	userToUnfollowID, err := strconv.Atoi(ps.ByName("followedID"))
 	if err != nil {
 		http.Error(w, "Could not convert the followedID", http.StatusBadRequest)
@@ -57,32 +57,31 @@ func (rt *_router) unfollowUser(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 
-	//Checks if user is trying to unfollow himself
+	// Checks if user is trying to unfollow himself
 	if userID == userToUnfollowID {
 		http.Error(w, "The follower and followed can't have the same id", http.StatusForbidden)
 		return
 	}
 
-	//Creates the follow that must be deleted from DB
+	// Creates the follow that must be deleted from DB
 	var follow utils.Follow
 	follow.FollowerID = userID
 	follow.FollowedID = userToUnfollowID
 
-	//Deletes the follow from DB
+	// Deletes the follow from DB
 	s, err := rt.db.DeleteFollow(follow)
 
-	//Checks for DB errors
+	// Checks for DB errors
 	if err != nil {
-		switch err {
-		case database.NotFound:
+		if errors.Is(err, database.ErrNotFound) {
 			http.Error(w, s, http.StatusNotFound)
-			return
-		case database.InternalServerError:
-			http.Error(w, "An error occurred on the server "+s, http.StatusInternalServerError)
-			return
 		}
+		if errors.Is(err, database.ErrInternalServerError) {
+			http.Error(w, "An error occurred on the server while deleting the follow"+s, http.StatusInternalServerError)
+		}
+		return
 	}
-	//Operation successful, creates an OK response
+	// Operation successful, creates an OK response
 	w.WriteHeader(http.StatusOK)
 	e = json.NewEncoder(w).Encode(s)
 	if e != nil {

@@ -28,7 +28,6 @@ func (u User) ValidateUsername() error {
 	return nil
 }
 
-// to insert regex validation
 func (u User) Validate() error {
 	if e := u.ValidateUsername(); e != nil {
 		return e
@@ -72,7 +71,7 @@ type Comment struct {
 	Content string `json:"content"`
 }
 
-func (c Comment) validate() error {
+func (c Comment) Validate() error {
 	m, e := regexp.MatchString(".*{1,1024}$", c.Content)
 	if !m {
 		return e

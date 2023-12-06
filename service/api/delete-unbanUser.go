@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -25,14 +26,13 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 	}
 	e = rt.db.VerifyUserId(userIDauth)
 	if e != nil {
-		switch e {
-		case database.NotFound:
+		if errors.Is(e, database.ErrNotFound) {
 			http.Error(w, "The userID provided for authentication can't be found", http.StatusUnauthorized)
-			return
-		case database.InternalServerError:
-			http.Error(w, "An error occurred on ther server while identifying userID", http.StatusInternalServerError)
-			return
 		}
+		if errors.Is(e, database.ErrInternalServerError) {
+			http.Error(w, "An error occurred on ther server while identifying userID", http.StatusInternalServerError)
+		}
+		return
 	}
 	userIDparam, err := strconv.Atoi(ps.ByName("userID"))
 	if err != nil {
@@ -45,7 +45,7 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 	}
 	userID := userIDauth
 
-	//Takes the id of the user to unban, and validates it
+	//  Takes the id of the user to unban, and validates it
 	userToUnbanID, err := strconv.Atoi(ps.ByName("bannedID"))
 	if err != nil {
 		http.Error(w, "Could not convert the bannedID", http.StatusBadRequest)
@@ -57,33 +57,32 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 
-	//Checks if the user is trying to unban himself
+	//  Checks if the user is trying to unban himself
 	if userID == userToUnbanID {
 		http.Error(w, "The banner and banned can't have the same id", http.StatusForbidden)
 		return
 	}
 
-	//Creates the ban that must be deleted from DB
+	//  Creates the ban that must be deleted from DB
 	var ban utils.Ban
 	ban.BannerID = userID
 	ban.BannedID = userToUnbanID
 
-	//Deletes the ban from DB
+	//  Deletes the ban from DB
 	s, err := rt.db.DeleteBan(ban)
 
-	//Checks for DB errors
+	//  Checks for DB errors
 	if err != nil {
-		switch err {
-		case database.NotFound:
+		if errors.Is(err, database.ErrNotFound) {
 			http.Error(w, s, http.StatusNotFound)
-			return
-		case database.InternalServerError:
-			http.Error(w, "An error has occurred on the server "+s, http.StatusInternalServerError)
-			return
 		}
+		if errors.Is(err, database.ErrInternalServerError) {
+			http.Error(w, "An error has occurred on the server while deleting the ban"+s, http.StatusInternalServerError)
+		}
+		return
 	}
 
-	//Operation successful, creates an OK response
+	//  Operation successful, creates an OK response
 	w.WriteHeader(http.StatusOK)
 	e = json.NewEncoder(w).Encode(s)
 	if e != nil {

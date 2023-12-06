@@ -8,10 +8,9 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/luigidannibale/Wasa/service/database"
-	"github.com/luigidannibale/Wasa/service/utils"
 )
 
-func (rt *_router) getUserProfile(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (rt *_router) getPhoto(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("content-type", "application/json")
 
 	/*Authentication part :
@@ -33,18 +32,26 @@ func (rt *_router) getUserProfile(w http.ResponseWriter, r *http.Request, ps htt
 		}
 		return
 	}
-	// Takes the username from params and validates it
-	username := r.URL.Query().Get("username")
-	var u utils.User
-	u.Username = username
 
-	if e := u.ValidateUsername(); e != nil {
-		http.Error(w, "Username not valid "+e.Error(), http.StatusBadRequest)
+	// Takes the photoID from params and validates it
+	photoID, e := strconv.Atoi(r.URL.Query().Get("photoID"))
+	if e != nil {
+		http.Error(w, "Error taking the photoID "+e.Error(), http.StatusBadRequest)
+		return
+	}
+	_, s, e := rt.db.GetPhoto(photoID)
+	if e != nil {
+		if errors.Is(e, database.ErrNotFound) {
+			http.Error(w, s, http.StatusNotFound)
+		}
+		if errors.Is(e, database.ErrInternalServerError) {
+			http.Error(w, "An error occurred while validating the photo "+s, http.StatusInternalServerError)
+		}
 		return
 	}
 
-	// Gets the user by the username
-	user, s, err := rt.db.GetUserByUsername(username)
+	// Gets the like
+	photo, s, err := rt.db.GetPhoto(photoID)
 
 	// Checks for DB errors
 	if err != nil {
@@ -52,15 +59,15 @@ func (rt *_router) getUserProfile(w http.ResponseWriter, r *http.Request, ps htt
 			http.Error(w, s, http.StatusNotFound)
 		}
 		if errors.Is(err, database.ErrInternalServerError) {
-			http.Error(w, "An error occurred on ther server while taking the user"+s, http.StatusInternalServerError)
+			http.Error(w, "An error occurred on ther server while getting the photo "+s, http.StatusInternalServerError)
 		}
 		return
 	}
 
 	// Operation successful, creates an OK response
 	w.WriteHeader(http.StatusOK)
-	e = json.NewEncoder(w).Encode(user)
+	e = json.NewEncoder(w).Encode(photo)
 	if e != nil {
-		http.Error(w, "Operation successful but an error occured while returning the user "+e.Error(), http.StatusInternalServerError)
+		http.Error(w, "Operation successful but an error occured while returning the photo "+e.Error(), http.StatusInternalServerError)
 	}
 }

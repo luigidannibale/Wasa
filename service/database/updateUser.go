@@ -15,17 +15,17 @@ func (db *appdbimpl) UpdateUser(user utils.User) (utils.User, string, error) {
 
 	if e != nil {
 		switch e {
-		case NotFound:
-			return user, "Could not find the user with such id", NotFound
-		case InternalServerError:
-			return user, s, InternalServerError
+		case ErrNotFound:
+			return user, "Could not find the user with such id", ErrNotFound
+		case ErrInternalServerError:
+			return user, s, ErrInternalServerError
 		}
 	}
 
 	userNull, _, e1 := db.GetUserByUsername(user.Username)
 
 	if e1 == nil && userNull.Id != user.Id {
-		return user, "This username is already used by someone else", UsernameTaken
+		return user, "This username is already used by someone else", ErrUsernameTaken
 	}
 	if &user.Name == nil {
 		user.Name = oldUser.Name
@@ -44,8 +44,8 @@ func (db *appdbimpl) UpdateUser(user utils.User) (utils.User, string, error) {
 		return user, "User updated successfully", nil
 	}
 	if errors.Is(err, sql.ErrNoRows) {
-		return user, err.Error(), InternalServerError
+		return user, err.Error(), ErrInternalServerError
 	}
-	return user, err.Error(), InternalServerError
+	return user, err.Error(), ErrInternalServerError
 
 }

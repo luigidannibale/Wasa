@@ -35,8 +35,7 @@ security:
 
 paths:    
     
-    #doLogin - LastMod : 2/12 - Status : Working
-    #getUserProfile - LastMod : 4/12 - Status : Working
+    #doLogin - LastMod : 2/12 - Status : Working    
     /users/:
       post:
         operationId: doLogin
@@ -75,6 +74,12 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError"        
                    
+      
+    #updateUser - LastMod : 6/12 - Status : Working
+    #getUserProfile - LastMod : 6/12 - Status : Working
+    /users/{userID}/profile:
+      parameters:
+      - $ref : "#/components/parameters/userID"
       get:
         operationId: getUserProfile
         tags: 
@@ -96,7 +101,7 @@ paths:
             content:
               application/json:      
                 schema:
-                  $ref : "#/components/schemas/User"                    
+                  $ref : "#/components/schemas/Message"                    
           "400":
             $ref : "#/components/responses/BadRequest" 
           "401":
@@ -105,48 +110,6 @@ paths:
             $ref : "#/components/responses/NotFound" 
           "500":
             $ref : "#/components/responses/InternalServerError" 
-    
-    #setMyUserName - LastMod : 5/12 - Status : Working    
-    /users/{userID}/:
-      parameters:
-      - $ref : "#/components/parameters/userID"
-      put:
-        operationId: setMyUserName
-        tags:
-          - User
-          - Working
-        summary: Changes the username        
-        description: |
-          Takes a user (by the id) and a name and sets the name as the new username of such user.           
-        parameters:
-          - name: username 
-            in: query
-            description: Name to set to the user
-            required: true
-            schema:
-              $ref : "#/components/schemas/User/properties/username"
-        responses:
-          "200":
-            $ref : "#/components/responses/OK"
-          "201":
-            $ref : "#/components/responses/Created"
-          "400":
-            $ref : "#/components/responses/BadRequest"
-          "401":
-            $ref : "#/components/responses/Unauthorized"                    
-          "403":
-            $ref : "#/components/responses/Forbidden"
-          "404":
-            $ref : "#/components/responses/NotFound"
-          "409":
-            $ref : "#/components/responses/Conflict"
-          "500":
-            $ref : "#/components/responses/InternalServerError"
-
-    #updateUser - LastMod : 5/12 - Status : Working
-    /users/{userID}/updateUser:
-      parameters:
-      - $ref : "#/components/parameters/userID"
       put:
         operationId: updateUser
         tags:
@@ -156,6 +119,7 @@ paths:
         description: |
           Takes a user (by the id) and a new user profile and updates the user, with the new data.
         requestBody:
+          description: The new data of the user
           content:
             application/json:
               schema:
@@ -177,9 +141,44 @@ paths:
             $ref : "#/components/responses/Conflict"
           "500":
             $ref : "#/components/responses/InternalServerError"
-         
+    #setMyUserName - LastMod : 6/12 - Status : Working    
+    /users/{userID}/profile/username:      
+      parameters:
+      - $ref : "#/components/parameters/userID"
+      put:
+        operationId: setMyUserName
+        tags:
+          - User
+          - Working
+        summary: Changes the username        
+        description: |
+          Takes a user (by the id) and a name and sets the name as the new username of such user.           
+        requestBody:
+          description: The username to set
+          content:
+            application/json:
+              schema:
+                $ref : "#/components/schemas/User/properties/username"          
+        responses:
+          "200":
+            $ref : "#/components/responses/OK"
+          "201":
+            $ref : "#/components/responses/Created"
+          "400":
+            $ref : "#/components/responses/BadRequest"
+          "401":
+            $ref : "#/components/responses/Unauthorized"                    
+          "403":
+            $ref : "#/components/responses/Forbidden"
+          "404":
+            $ref : "#/components/responses/NotFound"
+          "409":
+            $ref : "#/components/responses/Conflict"
+          "500":
+            $ref : "#/components/responses/InternalServerError"   
+
     #getMyStream - LastMod : 30/11 - Status : Not Working
-    /users/{userID}/getMyStream:
+    /users/{userID}/profile/stream:
       parameters:
         - $ref : "#/components/parameters/userID"
       get:
@@ -378,7 +377,7 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError" 
     
-    #getPhoto     - LastMod : 6/12 - Status : Not Implemented
+    #getPhoto     - LastMod : 6/12 - Status : Not Working
     #deletePhoto  - LastMod : 6/12 - Status : Not Implemented
     /photos/{photoID}:
       parameters:
@@ -387,7 +386,7 @@ paths:
         operationId: getPhoto
         tags:
           - Photos
-          - Not Implemented
+          - Not Working
         description: 
           Gets a photo by the id.
         summary: Gets a photo
@@ -427,6 +426,8 @@ paths:
             $ref : "#/components/responses/InternalServerError" 
     
     #likePhoto - LastMod : 5/12 - Status : Working
+    #getLike     - LastMod : 6/12 - Status : Not Working
+    #unlikePhoto - LastMod : 6/12 - Status : Not Working
     /photos/{photoID}/likes/:
       parameters:
         - $ref : "#/components/parameters/photoID"
@@ -452,13 +453,6 @@ paths:
             $ref : "#/components/responses/NotFound"            
           "500":
             $ref : "#/components/responses/InternalServerError"
-    
-    #getLike     - LastMod : 6/12 - Status : Not Implemented
-    #unlikePhoto - LastMod : 6/12 - Status : Not Working
-    /photos/{photoID}/likes/{likeID}/:
-      parameters: 
-        - $ref : "#/components/parameters/photoID"
-        - $ref : "#/components/parameters/likeID"
       get:
         operationId: getLike
         tags:
@@ -501,7 +495,7 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError" 
     
-    #commentPhoto - LastMod : 6/12 - Status : Not Implemented
+    #commentPhoto - LastMod : 6/12 - Status : Not Working
     /photos/{photoID}/comments/:
       parameters:
         - $ref : "#/components/parameters/photoID"
@@ -509,7 +503,7 @@ paths:
         operationId: commentPhoto
         tags: 
           - Photos Interactions
-          - Not Implemented
+          - Not Working
         summary: Comments a photo
         description: |
           Takes a userID and the text message of the comment and creates 
@@ -535,7 +529,7 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError"
     
-    #getComment - LastMod : 6/12 - Status : Not Implemented
+    #getComment - LastMod : 6/12 - Status : Not Working
     #uncommentPhoto - LastMod : 6/12 - Status : Not Implemented
     /photos/{photoID}/comments/{commentID}/:
       parameters: 
@@ -546,7 +540,7 @@ paths:
         operationId: getComment
         tags: 
           - Photos Interactions
-          - Not Implemented
+          - Not Working
         summary: Gets the comment details
         description: Takes a comment id and returns the comment
         responses:
@@ -555,7 +549,7 @@ paths:
             content:
               application/json:
                 schema:
-                   $ref : "#/components/schemas/Comment"
+                   $ref : "#/components/schemas/Message"
           "400":
             $ref : "#/components/responses/BadRequest" 
           "401":
@@ -626,14 +620,7 @@ components:
       description: ID of the comment
       required: true
       schema:
-        $ref : "#/components/schemas/Comment/properties/id"
-    likeID: #can be referenced using $ref : "#/components/parameters/likeID"
-      name: likeID
-      in: path
-      description: ID of the like
-      required: true
-      schema:
-        $ref : "#/components/schemas/Like/properties/id"
+        $ref : "#/components/schemas/Comment/properties/id"    
   
   schemas:  #LastMod - 1/12
     User: #can be referenced using $ref : "#/components/schemas/User"         
@@ -737,7 +724,7 @@ components:
           description: caption of the photo
           type: string  
           example: Look what a beautiful photo
-          pattern: ".*{0,100}$"
+          pattern: ".{0,100}$"
           minLength: 0
           maxLength: 100
         uploadTimestamp:
@@ -745,32 +732,10 @@ components:
     Stream: #can be referenced using $ref : "#/components/schemas/Stream"      
       type: array
       description: a stream of photos
+      minItems: 0
+      maxItems: 200
       items: 
-        $ref : "#/components/schemas/Photo"
-    UserProfile: #can be referenced using $ref : "#/components/schemas/UserProfile"
-      type: object
-      description: a user profile composed of a user, followed list, following list, stream
-      properties:
-        user:
-          $ref : "#/components/schemas/User"
-        followed:          
-          type: array
-          description: list of users followed by the user
-          items: 
-            $ref : "#/components/schemas/User"
-        following:
-          type: array
-          description: list of users that follow the user
-          items: 
-            $ref : "#/components/schemas/User"
-        stream:
-          $ref : "#/components/schemas/Stream"    
-    Like: #can be referenced using $ref : "#/components/schemas/Like"
-      type: object
-      description: a like composed by id
-      properties:        
-        id:
-          $ref : "#/components/schemas/User/properties/id"
+        $ref : "#/components/schemas/Photo"    
     Comment: #can be referenced using $ref : "#/components/schemas/Comment"
       type: object
       description: a comment composed of id, userID, content
@@ -786,14 +751,14 @@ components:
           description: the content of the comment
           type: string
           example: "Nice photo"
-          pattern: ".*{1,1024}$"
+          pattern: ".{1,1024}$"
           minLength: 1
           maxLength: 1024    
     Message: #can be referenced using $ref : "#/components/schemas/Message"      
       description: a simple text message
       type: string
       example: "This is the outcome"
-      pattern: ".*"
+      pattern: ".{0,1024}"
       minLength: 0
       maxLength: 1024
       

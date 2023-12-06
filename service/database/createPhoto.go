@@ -14,7 +14,7 @@ func (db *appdbimpl) CreatePhoto(photo utils.Photo) (int, string, error) {
 							VALUES (?,?,?,?)
 							RETURNING Id`, photo.UserId, photo.Image, photo.Caption, utils.TimestampToString(photo.UploadTimestamp)).Scan(&photoID)
 	if err != nil {
-		return photoID, err.Error(), InternalServerError
+		return photoID, err.Error(), ErrInternalServerError
 	}
 	return photoID, "Photo uploaded successfully", nil
 }

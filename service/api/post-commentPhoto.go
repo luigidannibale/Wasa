@@ -12,7 +12,7 @@ import (
 	"github.com/luigidannibale/Wasa/service/utils"
 )
 
-func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (rt *_router) commentPhoto(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("content-type", "application/json")
 
 	/*Authentication part :
@@ -34,26 +34,36 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 		}
 		return
 	}
-
-	// Takes caption from params and image from body
-	caption := r.URL.Query().Get("caption")
-	var image string
-	e = json.NewDecoder(r.Body).Decode(&image)
+	// Takes the photoID from params and validates it
+	photoID, e := strconv.Atoi(r.URL.Query().Get("photoID"))
 	if e != nil {
-		http.Error(w, "Couldn't convert the image "+e.Error(), http.StatusBadRequest)
+		http.Error(w, "Error taking the photoID "+e.Error(), http.StatusBadRequest)
+		return
 	}
+	_, s, e := rt.db.GetPhoto(photoID)
+	if e != nil {
+		if errors.Is(e, database.ErrNotFound) {
+			http.Error(w, s, http.StatusNotFound)
+		}
+		if errors.Is(e, database.ErrInternalServerError) {
+			http.Error(w, "An error occurred while validating the photo "+s, http.StatusInternalServerError)
+		}
+		return
+	}
+	// Takes content from params
+	content := r.URL.Query().Get("content")
 
-	var photo utils.Photo
-	photo.UserId = userID
-	photo.Caption = caption
-	photo.Image = image
-	photo.UploadTimestamp = utils.Now()
-	if e = photo.Validate(); e != nil {
+	var comment utils.Comment
+	comment.PhotoID = photoID
+	comment.UserID = userID
+	comment.Content = content
+
+	if e = comment.Validate(); e != nil {
 		http.Error(w, "Couldn't validate the photo "+e.Error(), http.StatusBadRequest)
 	}
 
-	// Creates the photo and gets the Id
-	photoId, s, e := rt.db.CreatePhoto(photo)
+	// Creates the comment and gets the Id
+	commentID, s, e := rt.db.CreateComment(comment)
 	if e != nil {
 		if errors.Is(e, database.ErrInternalServerError) {
 			http.Error(w, "An error occurred on the server creating the comment "+s, http.StatusInternalServerError)
@@ -63,8 +73,8 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 
 	// Operation successful, creates a CREATED response
 	w.WriteHeader(http.StatusCreated)
-	e = json.NewEncoder(w).Encode(fmt.Sprintf("Photo uploaded successfully with id %d", photoId))
+	e = json.NewEncoder(w).Encode(fmt.Sprintf("Comment posted successfully with id %d", commentID))
 	if e != nil {
-		http.Error(w, fmt.Sprintf("Photo uploaded successfully with id %d, but an error occurred while encoding the message ", photoId)+e.Error(), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("Comment posted successfully with id %d, but an error occurred while encoding the message ", commentID)+e.Error(), http.StatusInternalServerError)
 	}
 }

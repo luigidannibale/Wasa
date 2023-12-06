@@ -7,8 +7,8 @@ func (err ConstError) Error() string {
 }
 
 const (
-	NotFound            = ConstError("NotFound")
-	InternalServerError = ConstError("InternalServerError")
-	AlreadyDone         = ConstError("AlreadyDone")
-	UsernameTaken       = ConstError("UsernameTaken")
+	ErrNotFound            = ConstError("NotFound")
+	ErrInternalServerError = ConstError("InternalServerError")
+	ErrAlreadyDone         = ConstError("AlreadyDone")
+	ErrUsernameTaken       = ConstError("UsernameTaken")
 )

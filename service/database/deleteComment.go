@@ -10,10 +10,10 @@ func (db *appdbimpl) DeleteComment(commentID int) (string, error) {
 							WHERE CommentId = ?`, commentID)
 
 	if x, y := res.RowsAffected(); x == 0 && y == nil {
-		return "No commment with such id", NotFound
+		return "No commment with such id", ErrNotFound
 	}
 	if err != nil {
-		return err.Error(), InternalServerError
+		return err.Error(), ErrInternalServerError
 	}
 	return "Comment deleted successfully", nil
 }

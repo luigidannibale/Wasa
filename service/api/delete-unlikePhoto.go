@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -24,14 +25,13 @@ func (rt *_router) unlikePhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	}
 	e = rt.db.VerifyUserId(userID)
 	if e != nil {
-		switch e {
-		case database.NotFound:
+		if errors.Is(e, database.ErrNotFound) {
 			http.Error(w, "The userID provided for authentication can't be found", http.StatusUnauthorized)
-			return
-		case database.InternalServerError:
-			http.Error(w, "An error occurred on ther server while identifying userID", http.StatusInternalServerError)
-			return
 		}
+		if errors.Is(e, database.ErrInternalServerError) {
+			http.Error(w, "An error occurred on ther server while identifying userID", http.StatusInternalServerError)
+		}
+		return
 	}
 
 	//Takes the id of the photo, and validates it
@@ -40,16 +40,15 @@ func (rt *_router) unlikePhoto(w http.ResponseWriter, r *http.Request, ps httpro
 		http.Error(w, "Could not convert the photoID", http.StatusBadRequest)
 		return
 	}
-	_, _, e = rt.db.GetPhoto(photoID)
+	_, s, e := rt.db.GetPhoto(photoID)
 	if e != nil {
-		switch e {
-		case database.NotFound:
-			http.Error(w, "The photo can't be found", http.StatusNotFound)
-			return
-		case database.InternalServerError:
-			http.Error(w, "An error occurred while validating the photo "+e.Error(), http.StatusInternalServerError)
-			return
+		if errors.Is(e, database.ErrNotFound) {
+			http.Error(w, s, http.StatusNotFound)
 		}
+		if errors.Is(e, database.ErrInternalServerError) {
+			http.Error(w, "An error occurred while validating the photo "+e.Error(), http.StatusInternalServerError)
+		}
+		return
 	}
 
 	//Creates the like that must be deleted from DB
@@ -58,18 +57,17 @@ func (rt *_router) unlikePhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	like.UserID = userID
 
 	//Deletes the like from DB
-	s, err := rt.db.DeleteLike(like)
+	s, err = rt.db.DeleteLike(like)
 
 	//Checks for DB errors
 	if err != nil {
-		switch err {
-		case database.NotFound:
+		if errors.Is(err, database.ErrNotFound) {
 			http.Error(w, s, http.StatusNotFound)
-			return
-		case database.InternalServerError:
-			http.Error(w, "An error occurred on the server "+s, http.StatusInternalServerError)
-			return
 		}
+		if errors.Is(err, database.ErrInternalServerError) {
+			http.Error(w, "An error occurred on the server while deleting the like"+s, http.StatusInternalServerError)
+		}
+		return
 	}
 	//Operation successful, creates an OK response
 	w.WriteHeader(http.StatusOK)

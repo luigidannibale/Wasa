@@ -15,7 +15,7 @@ func (db *appdbimpl) CreateBan(ban utils.Ban) (string, error) {
 	res, err := db.c.Exec(`INSERT OR IGNORE INTO Bans(BannerID,BannedID)
 									VALUES (?,?)`, userID, userToBanID)
 	if x, y := res.RowsAffected(); x == 0 && y == nil {
-		return "Already banned", AlreadyDone
+		return "Already banned", ErrAlreadyDone
 	}
 	if err != nil {
 		return err.Error(), errors.New("InternalServerError")

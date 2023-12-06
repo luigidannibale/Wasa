@@ -19,7 +19,7 @@ func (db *appdbimpl) GetFollow(follow utils.Follow) (string, error) {
 		return "Follow found successfully", nil
 	}
 	if errors.Is(e.Err(), sql.ErrNoRows) {
-		return "Couldn't find the follow", NotFound
+		return "Couldn't find the follow", ErrNotFound
 	}
-	return e.Err().Error(), InternalServerError
+	return e.Err().Error(), ErrInternalServerError
 }

@@ -14,10 +14,10 @@ func (db *appdbimpl) CreateFollow(follow utils.Follow) (string, error) {
 	res, err := db.c.Exec(`INSERT OR IGNORE INTO Follows(FollowerID,FollowedID) VALUES (?,?)`, userID, userToFollowID)
 
 	if err != nil {
-		return err.Error(), InternalServerError
+		return err.Error(), ErrInternalServerError
 	}
 	if x, y := res.RowsAffected(); x == 0 && y == nil {
-		return "Already following", AlreadyDone
+		return "Already following", ErrAlreadyDone
 	}
 	return fmt.Sprintf("User %d started following %d", userID, userToFollowID), nil
 

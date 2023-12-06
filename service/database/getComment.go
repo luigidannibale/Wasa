@@ -19,7 +19,7 @@ func (db *appdbimpl) GetComment(commentID int) (utils.Comment, string, error) {
 		return comment, "Comment found successfully", nil
 	}
 	if errors.Is(e, sql.ErrNoRows) {
-		return comment, "Couldn't find the user", NotFound
+		return comment, "Couldn't find the user", ErrNotFound
 	}
-	return comment, e.Error(), InternalServerError
+	return comment, e.Error(), ErrInternalServerError
 }

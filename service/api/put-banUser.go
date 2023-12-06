@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"strconv"
 
 	"net/http"
@@ -26,14 +27,13 @@ func (rt *_router) banUser(w http.ResponseWriter, r *http.Request, ps httprouter
 	}
 	e = rt.db.VerifyUserId(userIDauth)
 	if e != nil {
-		switch e {
-		case database.NotFound:
+		if errors.Is(e, database.ErrNotFound) {
 			http.Error(w, "The userID provided for authentication can't be found", http.StatusUnauthorized)
-			return
-		case database.InternalServerError:
-			http.Error(w, "An error occurred on ther server while identifying userID", http.StatusInternalServerError)
-			return
 		}
+		if errors.Is(e, database.ErrInternalServerError) {
+			http.Error(w, "An error occurred on ther server while identifying userID", http.StatusInternalServerError)
+		}
+		return
 	}
 	userIDparam, err := strconv.Atoi(ps.ByName("userID"))
 	if err != nil {
@@ -46,7 +46,7 @@ func (rt *_router) banUser(w http.ResponseWriter, r *http.Request, ps httprouter
 	}
 	userID := userIDauth
 
-	//Takes the id of the user to ban, and validates it
+	// Takes the id of the user to ban, and validates it
 	userToBanID, err := strconv.Atoi(r.URL.Query().Get("userToBanID"))
 	if err != nil {
 		http.Error(w, "Could not convert the userToBanID", http.StatusBadRequest)
@@ -54,41 +54,44 @@ func (rt *_router) banUser(w http.ResponseWriter, r *http.Request, ps httprouter
 	}
 	e = rt.db.VerifyUserId(userToBanID)
 	if e != nil {
-		http.Error(w, "The userToBanID can't be found", http.StatusNotFound)
+		if errors.Is(e, database.ErrNotFound) {
+			http.Error(w, "The userToBanID can't be found", http.StatusNotFound)
+		}
+		if errors.Is(e, database.ErrInternalServerError) {
+			http.Error(w, "An error occurred on ther server while identifying userToBanID", http.StatusInternalServerError)
+		}
 		return
 	}
 
-	//Checks if the user is trying to ban himself
+	// Checks if the user is trying to ban himself
 	if userID == userToBanID {
 		http.Error(w, "The banner and banned can't have the same id", http.StatusForbidden)
 		return
 	}
 
-	//Creates the ban that must be put in the DB
+	// Creates the ban that must be put in the DB
 	var ban utils.Ban
 	ban.BannerID = userID
 	ban.BannedID = userToBanID
 
-	//Puts the ban in the db
+	// Puts the ban in the db
 	s, err := rt.db.CreateBan(ban)
 
-	//Checks for DB errrors
+	// Checks for DB errrors
 	if err != nil {
-		switch err {
-		case database.AlreadyDone:
+		if errors.Is(err, database.ErrAlreadyDone) {
 			w.WriteHeader(http.StatusOK)
-			break
-		case database.InternalServerError:
-			http.Error(w, "An error has occurred on the server "+s, http.StatusInternalServerError)
+		}
+		if errors.Is(err, database.ErrInternalServerError) {
+			http.Error(w, "An error has occurred on the server while creating the ban "+s, http.StatusInternalServerError)
 			return
 		}
 	} else {
 		w.WriteHeader(http.StatusCreated)
 	}
-
-	//Operation successful, creates an OK, or a CREATED response
+	// Operation successful, creates an OK, or a CREATED response
 	e = json.NewEncoder(w).Encode(s)
 	if e != nil {
-		http.Error(w, "Ban created but an error occurred while encoding the message ", http.StatusInternalServerError)
+		http.Error(w, "Ban created but an error occurred while encoding the message "+e.Error(), http.StatusInternalServerError)
 	}
 }

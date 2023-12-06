@@ -19,7 +19,7 @@ func (db *appdbimpl) GetBan(ban utils.Ban) (string, error) {
 		return "Ban found successfully", nil
 	}
 	if errors.Is(e.Err(), sql.ErrNoRows) {
-		return "Couldn't find the ban", NotFound
+		return "Couldn't find the ban", ErrNotFound
 	}
-	return e.Err().Error(), InternalServerError
+	return e.Err().Error(), ErrInternalServerError
 }

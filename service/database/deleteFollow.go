@@ -14,10 +14,10 @@ func (db *appdbimpl) DeleteFollow(follow utils.Follow) (string, error) {
 
 	res, err := db.c.Exec(`DELETE FROM Follows WHERE FollowerID = ? AND FollowedID = ?`, userID, userToUnfollowID)
 	if x, y := res.RowsAffected(); x == 0 && y == nil {
-		return fmt.Sprintf("Couldn't find the user to unfollow %d in the following of user %d", userID, userToUnfollowID), NotFound
+		return fmt.Sprintf("Couldn't find the user to unfollow %d in the following of user %d", userID, userToUnfollowID), ErrNotFound
 	}
 	if err != nil {
-		return err.Error(), InternalServerError
+		return err.Error(), ErrInternalServerError
 	}
 
 	return fmt.Sprintf("User %d is no longer following %d", userID, userToUnfollowID), nil

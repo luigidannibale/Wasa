@@ -27,7 +27,7 @@ func (db *appdbimpl) GetPhoto(photoID int) (utils.Photo, string, error) {
 	}
 	fmt.Println("err" + e.Error())
 	if errors.Is(e, sql.ErrNoRows) {
-		return photo, "Couldn't find the user", NotFound
+		return photo, "Couldn't find the photo", ErrNotFound
 	}
-	return photo, e.Error(), InternalServerError
+	return photo, e.Error(), ErrInternalServerError
 }
