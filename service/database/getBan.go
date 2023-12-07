@@ -12,7 +12,7 @@ Errors that can be returned: (NotFound, InternalServerError)
 */
 func (db *appdbimpl) GetBan(ban utils.Ban) (string, error) {
 
-	e := db.c.QueryRow(`SELECT (BannerID, BannedID)
+	e := db.c.QueryRow(`SELECT BannerID, BannedID
 						FROM Bans
 						WHERE BannerID = ? AND BannedID = ?`, ban.BannerID, ban.BannedID)
 	if e.Err() == nil {

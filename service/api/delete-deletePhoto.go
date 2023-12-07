@@ -66,7 +66,7 @@ func (rt *_router) deletePhoto(w http.ResponseWriter, r *http.Request, ps httpro
 			http.Error(w, s, http.StatusNotFound)
 		}
 		if errors.Is(err, database.ErrInternalServerError) {
-			http.Error(w, "An error has occurred on the server while deleting the ban"+s, http.StatusInternalServerError)
+			http.Error(w, "An error has occurred on the server while deleting the photo "+s, http.StatusInternalServerError)
 		}
 		return
 	}

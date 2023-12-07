@@ -433,8 +433,8 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError" 
     
-    #getPhoto     - LastMod : 6/12 - Status : Not Working
-    #deletePhoto  - LastMod : 6/12 - Status : Not Implemented
+    #getPhoto     - LastMod : 6/12 - Status : Working
+    #deletePhoto  - LastMod : 6/12 - Status : Working
     /photos/{photoID}:
       parameters:
         - $ref : "#/components/parameters/photoID"
@@ -442,7 +442,7 @@ paths:
         operationId: getPhoto
         tags:
           - Photos
-          - Not Working
+          - Working
         description: 
           Gets a photo by the id.
         summary: Gets a photo
@@ -465,7 +465,7 @@ paths:
         operationId: deletePhoto
         tags:
           - Photos
-          - Not Working
+          - Working
         description: |
           Deletes a photo by the id.          
         summary: Deletes a photo
@@ -484,8 +484,8 @@ paths:
             $ref : "#/components/responses/InternalServerError" 
     
     #likePhoto   - LastMod : 5/12 - Status : Working    
-    #getLike     - LastMod : 6/12 - Status : Not Working
-    #unlikePhoto - LastMod : 6/12 - Status : Not Working
+    #getLike     - LastMod : 6/12 - Status : Working
+    #unlikePhoto - LastMod : 6/12 - Status : Working
     /photos/{photoID}/likes/:
       parameters:
         - $ref : "#/components/parameters/photoID"
@@ -515,7 +515,7 @@ paths:
         operationId: getLike
         tags:
           - Photos Interactions
-          - Not Working
+          - Working
         description: 
           Gets a like
         summary: Gets a like
@@ -538,7 +538,7 @@ paths:
         operationId: unlikePhoto
         tags:
           - Photos Interactions
-          - Not Working
+          - Working
         summary: Deletes a like to the photo
         description: |
           Takes a userID, if it matches the user that has put the like, the like is deleted,
@@ -553,7 +553,7 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError" 
     
-    #commentPhoto    - LastMod : 6/12 - Status : Not Working
+    #commentPhoto    - LastMod : 6/12 - Status : Working
     #getCommentsList - LastMod : 7/12 - Status : Not Implemented
     /photos/{photoID}/comments/:
       parameters:
@@ -562,7 +562,7 @@ paths:
         operationId: commentPhoto
         tags: 
           - Photos Interactions
-          - Not Working
+          - Working
         summary: Comments a photo
         description: |
           Takes a userID and the text message of the comment and creates 

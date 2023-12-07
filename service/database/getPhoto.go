@@ -3,7 +3,6 @@ package database
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 
 	"github.com/luigidannibale/Wasa/service/utils"
 )
@@ -25,7 +24,6 @@ func (db *appdbimpl) GetPhoto(photoID int) (utils.Photo, string, error) {
 	if e == nil {
 		return photo, "Photo found successfully", nil
 	}
-	fmt.Println("err" + e.Error())
 	if errors.Is(e, sql.ErrNoRows) {
 		return photo, "Couldn't find the photo", ErrNotFound
 	}

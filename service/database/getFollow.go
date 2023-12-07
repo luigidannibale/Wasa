@@ -12,7 +12,7 @@ Errors that can be returned: (NotFound, InternalServerError)
 */
 func (db *appdbimpl) GetFollow(follow utils.Follow) (string, error) {
 
-	e := db.c.QueryRow(`SELECT (FollowerID, FollowedID)
+	e := db.c.QueryRow(`SELECT FollowerID, FollowedID
 						FROM Follows
 						WHERE FollowerID = ? AND FollowedID = ?`, follow.FollowerID, follow.FollowedID)
 	if e.Err() == nil {

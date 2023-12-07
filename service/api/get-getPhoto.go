@@ -34,7 +34,7 @@ func (rt *_router) getPhoto(w http.ResponseWriter, r *http.Request, ps httproute
 	}
 
 	// Takes the photoID from params and validates it
-	photoID, e := strconv.Atoi(r.URL.Query().Get("photoID"))
+	photoID, e := strconv.Atoi(ps.ByName("photoID"))
 	if e != nil {
 		http.Error(w, "Error taking the photoID "+e.Error(), http.StatusBadRequest)
 		return

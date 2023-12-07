@@ -35,7 +35,7 @@ func (rt *_router) commentPhoto(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 	// Takes the photoID from params and validates it
-	photoID, e := strconv.Atoi(r.URL.Query().Get("photoID"))
+	photoID, e := strconv.Atoi(ps.ByName("photoID"))
 	if e != nil {
 		http.Error(w, "Error taking the photoID "+e.Error(), http.StatusBadRequest)
 		return
@@ -60,6 +60,7 @@ func (rt *_router) commentPhoto(w http.ResponseWriter, r *http.Request, ps httpr
 
 	if e = comment.Validate(); e != nil {
 		http.Error(w, "Couldn't validate the photo "+e.Error(), http.StatusBadRequest)
+		return
 	}
 
 	// Creates the comment and gets the Id

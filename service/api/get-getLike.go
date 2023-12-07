@@ -20,7 +20,7 @@ func (rt *_router) getLike(w http.ResponseWriter, r *http.Request, ps httprouter
 	*/
 	userID, er := strconv.Atoi(r.Header.Get("Authorization"))
 	if er != nil {
-		http.Error(w, "Couldn't identify userId for authentication", http.StatusUnauthorized)
+		http.Error(w, "Couldn't identify userId for authentication "+er.Error(), http.StatusUnauthorized)
 		return
 	}
 	e := rt.db.VerifyUserId(userID)
@@ -35,7 +35,7 @@ func (rt *_router) getLike(w http.ResponseWriter, r *http.Request, ps httprouter
 	}
 
 	// Takes the photoID from params and validates it
-	photoID, e := strconv.Atoi(r.URL.Query().Get("photoID"))
+	photoID, e := strconv.Atoi(ps.ByName("photoID"))
 	if e != nil {
 		http.Error(w, "Error taking the photoID "+e.Error(), http.StatusBadRequest)
 		return
@@ -65,7 +65,7 @@ func (rt *_router) getLike(w http.ResponseWriter, r *http.Request, ps httprouter
 			http.Error(w, s, http.StatusNotFound)
 		}
 		if errors.Is(err, database.ErrInternalServerError) {
-			http.Error(w, "An error occurred on ther server while getting the like"+s, http.StatusInternalServerError)
+			http.Error(w, "An error occurred on ther server while getting the like "+s, http.StatusInternalServerError)
 		}
 		return
 	}

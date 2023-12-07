@@ -72,7 +72,7 @@ type Comment struct {
 }
 
 func (c Comment) Validate() error {
-	m, e := regexp.MatchString(".*{1,1024}$", c.Content)
+	m, e := regexp.MatchString(".{1,1024}$", c.Content)
 	if !m {
 		return e
 	}
@@ -139,7 +139,7 @@ func (p Photo) Validate() error {
 	if e := p.UploadTimestamp.Validate(); e != nil {
 		return e
 	}
-	m, e := regexp.MatchString(".*{0,100}$", p.Caption)
+	m, e := regexp.MatchString(".{0,100}$", p.Caption)
 	if !m {
 		return e
 	}
