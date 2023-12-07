@@ -73,9 +73,8 @@ paths:
             $ref : "#/components/responses/BadRequest" 
           "500":
             $ref : "#/components/responses/InternalServerError"        
-                   
-      
-    #updateUser - LastMod : 6/12 - Status : Working
+                     
+    #updateUser     - LastMod : 6/12 - Status : Working
     #getUserProfile - LastMod : 6/12 - Status : Working
     /users/{userID}/profile:
       parameters:
@@ -141,6 +140,7 @@ paths:
             $ref : "#/components/responses/Conflict"
           "500":
             $ref : "#/components/responses/InternalServerError"
+    
     #setMyUserName - LastMod : 6/12 - Status : Working    
     /users/{userID}/profile/username:      
       parameters:
@@ -176,7 +176,7 @@ paths:
             $ref : "#/components/responses/Conflict"
           "500":
             $ref : "#/components/responses/InternalServerError"   
-
+    
     #getMyStream - LastMod : 30/11 - Status : Not Working
     /users/{userID}/profile/stream:
       parameters:
@@ -205,8 +205,9 @@ paths:
             $ref : "#/components/responses/NotFound"
           "500":
             $ref : "#/components/responses/InternalServerError"
-          
-    #followUser - LastMod : 4/12 - Status : Working
+    
+    #getFollowedList - LastMod : 7/12 - Status : Not Working
+    #followUser      - LastMod : 4/12 - Status : Working
     /users/{userID}/followed/:
       parameters:
       - $ref : "#/components/parameters/userID"
@@ -243,7 +244,34 @@ paths:
             $ref : "#/components/responses/NotFound"            
           "500":
             $ref : "#/components/responses/InternalServerError"
-    
+      get:
+        operationId: getFollowedList
+        tags:
+          - User Interactions
+          - Not Working
+        summary: Gets the list of all the followed from the users
+        description: Gets the list of all the followed from the users
+        responses:
+          "200":
+            description: Successful, returning the list of followed
+            content:
+              application/json:
+                schema:
+                  type: array
+                  description: The list of followed
+                  minItems: 0
+                  maxItems: 100
+                  items: 
+                    $ref : "#/components/schemas/User"
+          "400":
+            $ref : "#/components/responses/BadRequest" 
+          "401":
+            $ref : "#/components/responses/Unauthorized"
+          "404":
+            $ref : "#/components/responses/NotFound" 
+          "500":
+            $ref : "#/components/responses/InternalServerError"
+      
     #unfollowUser - LastMod : 4/12 - Status : Working
     /users/{userID}/followed/{followedID}/:
       parameters:
@@ -272,7 +300,8 @@ paths:
           "500": 
             $ref : "#/components/responses/InternalServerError"
     
-    #banUser - LastMod : 5/12 - Status : Working
+    #getBannedList - LastMod : 7/12 - Status : Not Working
+    #banUser       - LastMod : 5/12 - Status : Working
     /users/{userID}/banned/:
       parameters:
       - $ref : "#/components/parameters/userID"
@@ -308,7 +337,34 @@ paths:
             $ref : "#/components/responses/NotFound"            
           "500":
             $ref : "#/components/responses/InternalServerError"
-    
+      get:
+        operationId: getBannedList
+        tags:
+          - User Interactions
+          - Not Working
+        summary: Gets the list of all the banned from the users
+        description: Gets the list of all the banned from the users
+        responses:
+          "200":
+            description: Successful, returning the list of banned
+            content:
+              application/json:
+                schema:
+                  type: array
+                  description: The list of banned
+                  minItems: 0
+                  maxItems: 100
+                  items: 
+                    $ref : "#/components/schemas/User"
+          "400":
+            $ref : "#/components/responses/BadRequest" 
+          "401":
+            $ref : "#/components/responses/Unauthorized"
+          "404":
+            $ref : "#/components/responses/NotFound" 
+          "500":
+            $ref : "#/components/responses/InternalServerError"
+          
     #unbanUser - LastMod : 4/12 - - Status : Working
     /users/{userID}/banned/{bannedID}/:
       parameters:
@@ -409,7 +465,7 @@ paths:
         operationId: deletePhoto
         tags:
           - Photos
-          - Not Implemented
+          - Not Working
         description: |
           Deletes a photo by the id.          
         summary: Deletes a photo
@@ -420,12 +476,14 @@ paths:
             $ref : "#/components/responses/BadRequest" 
           "401":
             $ref : "#/components/responses/Unauthorized" 
+          "403":
+           $ref : "#/components/responses/Forbidden"
           "404":
            $ref : "#/components/responses/NotFound" 
           "500":
             $ref : "#/components/responses/InternalServerError" 
     
-    #likePhoto - LastMod : 5/12 - Status : Working
+    #likePhoto   - LastMod : 5/12 - Status : Working    
     #getLike     - LastMod : 6/12 - Status : Not Working
     #unlikePhoto - LastMod : 6/12 - Status : Not Working
     /photos/{photoID}/likes/:
@@ -480,7 +538,7 @@ paths:
         operationId: unlikePhoto
         tags:
           - Photos Interactions
-          - Not Implemented
+          - Not Working
         summary: Deletes a like to the photo
         description: |
           Takes a userID, if it matches the user that has put the like, the like is deleted,
@@ -495,7 +553,8 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError" 
     
-    #commentPhoto - LastMod : 6/12 - Status : Not Working
+    #commentPhoto    - LastMod : 6/12 - Status : Not Working
+    #getCommentsList - LastMod : 7/12 - Status : Not Implemented
     /photos/{photoID}/comments/:
       parameters:
         - $ref : "#/components/parameters/photoID"
@@ -528,8 +587,35 @@ paths:
             $ref : "#/components/responses/NotFound" 
           "500":
             $ref : "#/components/responses/InternalServerError"
-    
-    #getComment - LastMod : 6/12 - Status : Not Working
+      get:
+        operationId: getCommentsList
+        tags:
+          - Photos Interactions
+          - Not Implemented
+        summary: Gets the list of all the comments to the photo
+        description: Gets the list of all the comments to the photo        
+        responses:
+          "200":
+            description: Successful, returning the list of comments
+            content:
+              application/json:
+                schema:
+                  type: array
+                  description: The list of comments
+                  minItems: 0
+                  maxItems: 100
+                  items: 
+                    $ref : "#/components/schemas/Comment"
+          "400":
+            $ref : "#/components/responses/BadRequest" 
+          "401":
+            $ref : "#/components/responses/Unauthorized"
+          "404":
+            $ref : "#/components/responses/NotFound" 
+          "500":
+            $ref : "#/components/responses/InternalServerError"
+          
+    #getComment     - LastMod : 6/12 - Status : Not Working
     #uncommentPhoto - LastMod : 6/12 - Status : Not Implemented
     /photos/{photoID}/comments/{commentID}/:
       parameters: 
@@ -563,7 +649,7 @@ paths:
         operationId: uncommentPhoto
         tags:
           - Photos Interactions
-          - Not Implemented
+          - Not Working
         summary: Deletes a comment to the photo
         description: |
           Deletes a comment to the photo, useing both photoID and commentID.

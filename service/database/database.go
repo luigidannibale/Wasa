@@ -49,11 +49,13 @@ type AppDatabase interface {
 	GetUserByUsername(string) (utils.User, string, error)
 
 	//Operations on Follows table
+	GetFollowedList(int) ([]utils.User, string, error)
 	CreateFollow(utils.Follow) (string, error)
 	GetFollow(utils.Follow) (string, error)
 	DeleteFollow(utils.Follow) (string, error)
 
 	//Operations on Bans table
+	GetBannedList(int) ([]utils.User, string, error)
 	CreateBan(utils.Ban) (string, error)
 	GetBan(utils.Ban) (string, error)
 	DeleteBan(utils.Ban) (string, error)
