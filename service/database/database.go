@@ -91,79 +91,59 @@ func New(db *sql.DB) (AppDatabase, error) {
 		return nil, errors.New("database is required when building a AppDatabase")
 	}
 
-	// Check if table exists. If not, the database is empty, and we need to create the structure
 	var tableName string
+
+	// Creates Users table if not already existing #LastMod - 10/12
 	err := db.QueryRow(`SELECT name FROM sqlite_master WHERE type = 'table' and name = 'Users';`).Scan(&tableName)
 	if errors.Is(err, sql.ErrNoRows) {
-		// Creates Users table		#LastMod - 5/12
-		sqlStmt := `CREATE TABLE Users
-			(Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
-			Username TEXT NOT NULL UNIQUE,
-			Name TEXT,
-			Surname TEXT,
-			DateOfBirth TEXT);`
-		_, err = db.Exec(sqlStmt)
+		err = CreateUsersTable(db)
 		if err != nil {
 			return nil, fmt.Errorf("error creating 'Users' table: %w", err)
 		}
-		// Creates Photos table		#LastMod - 5/12
-		sqlStmt = `CREATE TABLE Photos 
-			(Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
-			UserID INTEGER,
-			Image BLOB NOT NULL,
-			Caption TEXT,
-			UploadTimestamp TEXT NOT NULL,
-			FOREIGN KEY(UserID) REFERENCES Users(Id));`
-		_, err = db.Exec(sqlStmt)
+	}
+	// Creates Photos table if not already existing #LastMod - 10/12
+	err = db.QueryRow(`SELECT name FROM sqlite_master WHERE type = 'table' and name = 'Photos';`).Scan(&tableName)
+	if errors.Is(err, sql.ErrNoRows) {
+		err = CreatePhotosTable(db)
 		if err != nil {
 			return nil, fmt.Errorf("error creating 'Photos' table: %w", err)
 		}
-		// Creates Comments table		#LastMod - 5/12
-		sqlStmt = `CREATE TABLE Comments 
-			(Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
-			UserID INTEGER,
-			PhotoID INTEGER,
-			Content TEXT NOT NULL,
-			FOREIGN KEY(PhotoID) REFERENCES Photos(Id) ON DELETE CASCADE,
-			FOREIGN KEY(UserID) REFERENCES Users(Id));`
-		_, err = db.Exec(sqlStmt)
+	}
+	// Creates Comments table if not already existing #LastMod - 10/12
+	err = db.QueryRow(`SELECT name FROM sqlite_master WHERE type = 'table' and name = 'Comments';`).Scan(&tableName)
+	if errors.Is(err, sql.ErrNoRows) {
+		err = CreateCommentsTable(db)
 		if err != nil {
 			return nil, fmt.Errorf("error creating 'Comments' table: %w", err)
 		}
-		// Creates Likes table		#LastMod - 5/12
-		sqlStmt = `CREATE TABLE Likes 
-			(UserID INTEGER,
-			PhotoID INTEGER,
-			PRIMARY KEY(UserID, PhotoID),
-			FOREIGN KEY(PhotoID) REFERENCES Photos(Id) ON DELETE CASCADE,
-			FOREIGN KEY(UserID) REFERENCES Users(Id));`
-		_, err = db.Exec(sqlStmt)
+	}
+	// Creates Likes table if not already existing #LastMod - 10/12
+	err = db.QueryRow(`SELECT name FROM sqlite_master WHERE type = 'table' and name = 'Likes';`).Scan(&tableName)
+	if errors.Is(err, sql.ErrNoRows) {
+		err = CreateLikesTable(db)
 		if err != nil {
 			return nil, fmt.Errorf("error creating 'Likes' table: %w", err)
 		}
-		// Creates Follows table		#LastMod - 5/12
-		sqlStmt = `CREATE TABLE Follows 
-			(FollowerID INTEGER,
-			FollowedID INTEGER,
-			PRIMARY KEY(FollowerID, FollowedID),
-			FOREIGN KEY(FollowerID) REFERENCES Users(Id),
-			FOREIGN KEY(FollowedID) REFERENCES Users(Id));`
-		_, err = db.Exec(sqlStmt)
+	}
+	// Creates Follows table if not already existing #LastMod - 10/12
+	err = db.QueryRow(`SELECT name FROM sqlite_master WHERE type = 'table' and name = 'Follows';`).Scan(&tableName)
+	if errors.Is(err, sql.ErrNoRows) {
+		err = CreateFollowsTable(db)
 		if err != nil {
 			return nil, fmt.Errorf("error creating 'Follows' table: %w", err)
 		}
-		// Creates Bans table		#LastMod - 5/12
-		sqlStmt = `CREATE TABLE Bans 
-			(BannerID INTEGER,
-			BannedID INTEGER,
-			PRIMARY KEY(BannerID, BannedID),
-			FOREIGN KEY(BannerID) REFERENCES Users(Id),
-			FOREIGN KEY(BannedID) REFERENCES Users(Id));`
-		_, err = db.Exec(sqlStmt)
+	}
+	// Creates Bans table if not already existing #LastMod - 10/12
+	err = db.QueryRow(`SELECT name FROM sqlite_master WHERE type = 'table' and name = 'Bans';`).Scan(&tableName)
+	if errors.Is(err, sql.ErrNoRows) {
+		err = CreateBansTable(db)
 		if err != nil {
 			return nil, fmt.Errorf("error creating 'Bans' table: %w", err)
 		}
 	}
+
+	// Populates the DB with some values
+	PopulateDB(db)
 
 	return &appdbimpl{
 		c: db,
@@ -172,4 +152,154 @@ func New(db *sql.DB) (AppDatabase, error) {
 
 func (db *appdbimpl) Ping() error {
 	return db.c.Ping()
+}
+
+func CreateUsersTable(db *sql.DB) error {
+	var sqlStmt string
+	var err error
+	sqlStmt = `CREATE TABLE Users
+			(Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
+			Username TEXT NOT NULL UNIQUE,
+			Name TEXT,
+			Surname TEXT,
+			DateOfBirth TEXT);`
+	_, err = db.Exec(sqlStmt)
+	return err
+}
+func CreatePhotosTable(db *sql.DB) error {
+	var sqlStmt string
+	var err error
+	sqlStmt = `CREATE TABLE Photos 
+			(Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
+			UserID INTEGER,
+			Image BLOB NOT NULL,
+			Caption TEXT,
+			UploadTimestamp TEXT NOT NULL,
+			FOREIGN KEY(UserID) REFERENCES Users(Id));`
+	_, err = db.Exec(sqlStmt)
+	return err
+}
+func CreateCommentsTable(db *sql.DB) error {
+	var sqlStmt string
+	var err error
+	sqlStmt = `CREATE TABLE Comments 
+			(Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
+			UserID INTEGER,
+			PhotoID INTEGER,
+			Content TEXT NOT NULL,
+			FOREIGN KEY(PhotoID) REFERENCES Photos(Id) ON DELETE CASCADE,
+			FOREIGN KEY(UserID) REFERENCES Users(Id));`
+	_, err = db.Exec(sqlStmt)
+	return err
+}
+func CreateLikesTable(db *sql.DB) error {
+	var sqlStmt string
+	var err error
+	sqlStmt = `CREATE TABLE Likes 
+			(UserID INTEGER,
+			PhotoID INTEGER,
+			PRIMARY KEY(UserID, PhotoID),
+			FOREIGN KEY(PhotoID) REFERENCES Photos(Id) ON DELETE CASCADE,
+			FOREIGN KEY(UserID) REFERENCES Users(Id));`
+	_, err = db.Exec(sqlStmt)
+	return err
+}
+func CreateFollowsTable(db *sql.DB) error {
+	var sqlStmt string
+	var err error
+	sqlStmt = `CREATE TABLE Follows 
+			(FollowerID INTEGER,
+			FollowedID INTEGER,
+			PRIMARY KEY(FollowerID, FollowedID),
+			FOREIGN KEY(FollowerID) REFERENCES Users(Id),
+			FOREIGN KEY(FollowedID) REFERENCES Users(Id));`
+	_, err = db.Exec(sqlStmt)
+	return err
+}
+func CreateBansTable(db *sql.DB) error {
+	var sqlStmt string
+	var err error
+	sqlStmt = `CREATE TABLE Bans 
+			(BannerID INTEGER,
+			BannedID INTEGER,
+			PRIMARY KEY(BannerID, BannedID),
+			FOREIGN KEY(BannerID) REFERENCES Users(Id),
+			FOREIGN KEY(BannedID) REFERENCES Users(Id));`
+	_, err = db.Exec(sqlStmt)
+	return err
+}
+func PopulateDB(db *sql.DB) error {
+	var sqlStmt string
+	var err error
+
+	sqlStmt = `INSERT INTO Users (Username,Name,Surname,DateOfBirth)
+				VALUES
+						("Gigi","Luigi","Dannibale","16-December-2002"),
+						("Paoletto","Paolo","Rossi","23-December-2002"),
+						("Gianni","Gianfranco","Verdi","19-December-2002"),
+						("Paolino","Paolo","Bianchi","15-January-2002"),
+						("Fra","Francesco","Crema","19-January-2002");`
+	_, err = db.Exec(sqlStmt)
+	if err != nil {
+		return fmt.Errorf("error populating users table: %w", err)
+	}
+
+	sqlStmt = `INSERT INTO Follows (FollowerID,FollowedID)
+				VALUES
+						(1,2),
+						(1,3),
+						(2,1),						
+						(2,4),
+						(3,4);`
+	_, err = db.Exec(sqlStmt)
+	if err != nil {
+		return fmt.Errorf("error populating follows table: %w", err)
+	}
+
+	sqlStmt = `INSERT INTO Bans (BannerID,BannedID)
+				VALUES
+						(1,4),
+						(2,3),
+						(3,1),
+						(3,2);`
+	_, err = db.Exec(sqlStmt)
+	if err != nil {
+		return fmt.Errorf("error populating bans table: %w", err)
+	}
+
+	sqlStmt = `INSERT INTO Photos (UserID,Image,Caption,UploadTimestamp)
+				VALUES
+						(1,"","First photo","14-January-2015-14-16-12"),
+						(2,"","Second photo","15-January-2015-14-16-12"),
+						(3,"","Third photo","16-January-2015-14-16-12"),
+						(4,"","Fourth photo","17-January-2015-14-16-12");`
+	_, err = db.Exec(sqlStmt)
+	if err != nil {
+		return fmt.Errorf("error populating photos table: %w", err)
+	}
+
+	sqlStmt = `INSERT INTO Comments (UserID,PhotoID,Content)
+				VALUES
+						(1,1,"this is my comment to my photo"),
+						(1,2,"nice pic"),
+						(2,2,"this is my comment to my photo"),
+						(2,1,"wow"),
+						(3,3,"this is my comment to my photo"),
+						(4,4,"this is my comment to my photo");`
+	_, err = db.Exec(sqlStmt)
+	if err != nil {
+		return fmt.Errorf("error populating comments table: %w", err)
+	}
+
+	sqlStmt = `INSERT INTO Likes (UserID,PhotoID)
+				VALUES
+						(1,2),
+						(1,3),
+						(2,1);`
+	_, err = db.Exec(sqlStmt)
+	if err != nil {
+		return fmt.Errorf("error populating likes table: %w", err)
+	}
+
+	return nil
 }
