@@ -21,9 +21,24 @@ func (db *appdbimpl) GetBannedList(userID int) ([]utils.User, string, error) {
 		}
 		return banned, e.Error(), ErrInternalServerError
 	}
-	e = rows.Scan(&banned)
-	if e != nil {
-		return banned, e.Error(), ErrInternalServerError
+	var bannedIDs []int
+	defer rows.Close()
+	for rows.Next() {
+		var id int
+		err := rows.Scan(&id)
+		if err != nil {
+			return banned, e.Error(), ErrInternalServerError
+		}
+		bannedIDs = append(bannedIDs, id)
 	}
+
+	for i := 0; i < len(bannedIDs); i++ {
+		u, _, e := db.GetUser(bannedIDs[i])
+		if e != nil {
+			return banned, e.Error(), ErrInternalServerError
+		}
+		banned = append(banned, u)
+	}
+
 	return banned, "List of banned found successfully", nil
 }
