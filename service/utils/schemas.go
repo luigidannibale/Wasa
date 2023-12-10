@@ -3,6 +3,9 @@ package utils
 import (
 	"errors"
 	"regexp"
+	"time"
+
+	"github.com/rickb777/date"
 )
 
 type Validable interface {
@@ -10,11 +13,11 @@ type Validable interface {
 }
 
 type User struct {
-	Id          int    `json:"id"`
-	Username    string `json:"username"`
-	Name        string `json:"name"`
-	Surname     string `json:"surname"`
-	DateOfBirth Date   `json:"dateOfBirth"`
+	Id          int       `json:"id"`
+	Username    string    `json:"username"`
+	Name        string    `json:"name"`
+	Surname     string    `json:"surname"`
+	DateOfBirth date.Date `json:"dateOfBirth"`
 }
 
 func (u User) ValidateUsername() error {
@@ -46,7 +49,6 @@ func (u User) Validate() error {
 	if !m {
 		return e
 	}
-	e = u.DateOfBirth.validate()
 	return e
 }
 
@@ -78,6 +80,7 @@ func (c Comment) Validate() error {
 	return nil
 }
 
+/*
 type Date struct {
 	Year  int    `json:"year"`
 	Month string `json:"month"`
@@ -97,15 +100,16 @@ func (d Date) validate() error {
 	}
 
 	return nil
-}
+}*/
 
+/*
 type Timestamp struct {
 	Date    Date `json:"date"`
 	Hour    int  `json:"hour"`
 	Minutes int  `json:"minutes"`
 	Seconds int  `json:"seconds"`
-}
-
+}*/
+/*
 func (d Timestamp) Validate() error {
 	if d.Hour < 0 || d.Hour > 23 {
 		return errors.New("bad hour")
@@ -118,14 +122,14 @@ func (d Timestamp) Validate() error {
 	}
 
 	return nil
-}
+}*/
 
 type Photo struct {
 	Id              int       `json:"id"`
 	UserId          int       `json:"userId"`
 	Image           string    `json:"image"`
 	Caption         string    `json:"caption"`
-	UploadTimestamp Timestamp `json:"uploadTimestamp"`
+	UploadTimestamp time.Time `json:"uploadTimestamp"`
 }
 
 func (p Photo) Validate() error {
@@ -134,9 +138,6 @@ func (p Photo) Validate() error {
 	}
 	if l := len(p.Caption); l < 0 || l > 100 {
 		return errors.New("caption not acceptable")
-	}
-	if e := p.UploadTimestamp.Validate(); e != nil {
-		return e
 	}
 	if l := len(p.Caption); l < 1 || l > 100 {
 		return errors.New("caption lenght not valid")

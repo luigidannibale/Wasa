@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/luigidannibale/Wasa/service/database"
@@ -47,7 +48,7 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	photo.UserId = userID
 	photo.Caption = caption
 	photo.Image = image
-	photo.UploadTimestamp = utils.Now()
+	photo.UploadTimestamp = time.Now()
 	if e = photo.Validate(); e != nil {
 		http.Error(w, "Couldn't validate the photo "+e.Error(), http.StatusBadRequest)
 	}

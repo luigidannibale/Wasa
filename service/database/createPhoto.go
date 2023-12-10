@@ -12,7 +12,7 @@ func (db *appdbimpl) CreatePhoto(photo utils.Photo) (int, string, error) {
 
 	err := db.c.QueryRow(`INSERT INTO Photos(UserID,Image,Caption,UploadTimestamp)
 							VALUES (?,?,?,?)
-							RETURNING Id`, photo.UserId, photo.Image, photo.Caption, utils.TimestampToString(photo.UploadTimestamp)).Scan(&photoID)
+							RETURNING Id`, photo.UserId, photo.Image, photo.Caption, photo.UploadTimestamp.String()).Scan(&photoID)
 	if err != nil {
 		return photoID, err.Error(), ErrInternalServerError
 	}

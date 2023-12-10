@@ -63,6 +63,7 @@ type AppDatabase interface {
 	//Operations on Photos table
 	CreatePhoto(utils.Photo) (int, string, error)
 	GetPhoto(int) (utils.Photo, string, error)
+	GetPhotos(int) ([]utils.Photo, string, error)
 	DeletePhoto(utils.Photo) (string, error)
 
 	//Operations on Likes table
@@ -74,6 +75,7 @@ type AppDatabase interface {
 	CreateComment(utils.Comment) (int, string, error)
 	GetComment(int) (utils.Comment, string, error)
 	DeleteComment(int) (string, error)
+	GetCommentsList(int) ([]utils.Comment, string, error)
 
 	//GetStream(int) ([]utils.Photo, string, error)
 	Ping() error

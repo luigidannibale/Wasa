@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"errors"
+	"time"
 
 	"github.com/luigidannibale/Wasa/service/utils"
 )
@@ -20,7 +21,11 @@ func (db *appdbimpl) GetPhoto(photoID int) (utils.Photo, string, error) {
 	if caption.Valid {
 		photo.Caption = caption.String
 	}
-	photo.UploadTimestamp = utils.StringToTimestamp(ts)
+	ut, er := time.Parse(time.Layout, ts)
+	if er != nil {
+		return photo, er.Error(), ErrInternalServerError
+	}
+	photo.UploadTimestamp = ut
 	if e == nil {
 		return photo, "Photo found successfully", nil
 	}

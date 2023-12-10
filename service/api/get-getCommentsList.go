@@ -10,7 +10,7 @@ import (
 	"github.com/luigidannibale/Wasa/service/database"
 )
 
-func (rt *_router) getComment(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (rt *_router) getCommentsList(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("content-type", "application/json")
 
 	/*Authentication part :
@@ -32,7 +32,6 @@ func (rt *_router) getComment(w http.ResponseWriter, r *http.Request, ps httprou
 		}
 		return
 	}
-
 	// Takes the photoID from params and validates it
 	photoID, e := strconv.Atoi(ps.ByName("photoID"))
 	if e != nil {
@@ -49,15 +48,9 @@ func (rt *_router) getComment(w http.ResponseWriter, r *http.Request, ps httprou
 		}
 		return
 	}
-	// Takes the commentID from params and validates it
-	commentID, e := strconv.Atoi(ps.ByName("commentID"))
-	if e != nil {
-		http.Error(w, "Error taking the commentID "+e.Error(), http.StatusBadRequest)
-		return
-	}
 
-	// Gets the comment
-	comment, s, err := rt.db.GetComment(commentID)
+	// Gets the list of comment
+	commentsList, s, err := rt.db.GetCommentsList(photoID)
 
 	// Checks for DB errors
 	if err != nil {
@@ -65,21 +58,15 @@ func (rt *_router) getComment(w http.ResponseWriter, r *http.Request, ps httprou
 			http.Error(w, s, http.StatusNotFound)
 		}
 		if errors.Is(err, database.ErrInternalServerError) {
-			http.Error(w, "An error occurred on ther server while getting the comment"+s, http.StatusInternalServerError)
+			http.Error(w, "An error occurred on ther server while getting the list of comments "+s, http.StatusInternalServerError)
 		}
-		return
-	}
-
-	// Checks if the comment is of another photo
-	if comment.PhotoID != photoID {
-		http.Error(w, "There is no comment to this photo with such id", http.StatusNotFound)
 		return
 	}
 
 	// Operation successful, creates an OK response
 	w.WriteHeader(http.StatusOK)
-	e = json.NewEncoder(w).Encode(comment)
+	e = json.NewEncoder(w).Encode(commentsList)
 	if e != nil {
-		http.Error(w, "Operation successful but an error occured while returning the comment "+e.Error(), http.StatusInternalServerError)
+		http.Error(w, "Operation successful but an error occured while returning the list of comments "+e.Error(), http.StatusInternalServerError)
 	}
 }

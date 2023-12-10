@@ -12,7 +12,7 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.GET("/users", rt.getUserProfile)
 	rt.router.PUT("/users/:userID/profile", rt.updateUser)
 	rt.router.PUT("/users/:userID/profile/username", rt.setMyUserName)
-	// rt.router.GET("/users/:userID/profile/stream", rt.getMyStream)
+	rt.router.GET("/users/:userID/profile/stream", rt.getMyStream)
 
 	rt.router.GET("/users/:userID/followed", rt.getFollowedList)
 	rt.router.PUT("/users/:userID/followed", rt.followUser)
@@ -30,10 +30,10 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.GET("/photos/:photoID/likes", rt.getLike)
 	rt.router.DELETE("/photos/:photoID/likes", rt.unlikePhoto)
 
-	// rt.router.GET("/photos/:photoID/comments", rt.getCommentsList)
+	rt.router.GET("/photos/:photoID/comments", rt.getCommentsList)
 	rt.router.POST("/photos/:photoID/comments", rt.commentPhoto)
-	rt.router.GET("/photos/:photoID/comments/:likeID", rt.getComment)
-	rt.router.DELETE("/photos/:photoID/comments/:likeID", rt.uncommentPhoto)
+	rt.router.GET("/photos/:photoID/comments/:commentID", rt.getComment)
+	rt.router.DELETE("/photos/:photoID/comments/:commentID", rt.uncommentPhoto)
 
 	//  Special routes
 	rt.router.GET("/liveness", rt.liveness)

@@ -38,7 +38,7 @@ func (db *appdbimpl) UpdateUser(user utils.User) (utils.User, string, error) {
 	}
 	_, err := db.c.Exec(`	UPDATE Users
 							SET Username = ? ,Name = ? ,Surname = ?,DateOfBirth = ?
-							Where Id = ?`, user.Username, user.Name, user.Surname, utils.DateToString(user.DateOfBirth), user.Id)
+							Where Id = ?`, user.Username, user.Name, user.Surname, user.DateOfBirth.String(), user.Id)
 
 	if err == nil {
 		return user, "User updated successfully", nil

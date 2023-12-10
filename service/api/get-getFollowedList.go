@@ -33,7 +33,7 @@ func (rt *_router) getFollowedList(w http.ResponseWriter, r *http.Request, ps ht
 		return
 	}
 
-	// Gets the like
+	// Gets the list of followed
 	followedList, s, err := rt.db.GetFollowedList(userID)
 
 	// Checks for DB errors
@@ -42,7 +42,7 @@ func (rt *_router) getFollowedList(w http.ResponseWriter, r *http.Request, ps ht
 			http.Error(w, s, http.StatusNotFound)
 		}
 		if errors.Is(err, database.ErrInternalServerError) {
-			http.Error(w, "An error occurred on ther server while getting the like"+s, http.StatusInternalServerError)
+			http.Error(w, "An error occurred on ther server while getting the list of followed"+s, http.StatusInternalServerError)
 		}
 		return
 	}

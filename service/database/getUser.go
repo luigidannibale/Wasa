@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/luigidannibale/Wasa/service/utils"
+	"github.com/rickb777/date"
 )
 
 /*
@@ -24,7 +25,11 @@ func (db *appdbimpl) GetUser(userID int) (utils.User, string, error) {
 		user.Surname = surname.String
 	}
 	if dateOfBirth.Valid {
-		user.DateOfBirth = utils.StringToDate(dateOfBirth.String)
+		d, er := date.AutoParse(dateOfBirth.String)
+		if er != nil {
+			return user, er.Error(), ErrInternalServerError
+		}
+		user.DateOfBirth = d
 	}
 	if e == nil {
 		return user, "User found successfully", nil

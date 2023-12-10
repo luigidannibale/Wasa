@@ -12,11 +12,14 @@ require (
 	gopkg.in/yaml.v2 v2.4.0
 )
 
+require github.com/rickb777/plural v1.4.1 // indirect
+
 require (
 	github.com/felixge/httpsnoop v1.0.3 // indirect
-	github.com/google/go-cmp v0.5.8 // indirect
+	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/kr/pretty v0.1.0 // indirect
+	github.com/rickb777/date v1.20.5
 	golang.org/x/sys v0.11.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
