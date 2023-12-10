@@ -72,9 +72,8 @@ type Comment struct {
 }
 
 func (c Comment) Validate() error {
-	m, e := regexp.MatchString(".{1,1024}$", c.Content)
-	if !m {
-		return e
+	if l := len(c.Content); l < 1 || l > 1024 {
+		return errors.New("content lenght not valid")
 	}
 	return nil
 }
@@ -139,9 +138,8 @@ func (p Photo) Validate() error {
 	if e := p.UploadTimestamp.Validate(); e != nil {
 		return e
 	}
-	m, e := regexp.MatchString(".{0,100}$", p.Caption)
-	if !m {
-		return e
+	if l := len(p.Caption); l < 1 || l > 100 {
+		return errors.New("caption lenght not valid")
 	}
 	return nil
 }

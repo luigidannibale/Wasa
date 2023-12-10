@@ -5,38 +5,6 @@ import (
 	"strings"
 )
 
-/*
-const (
-	userType int = iota
-	photoType
-	likeType
-	commentType
-)
-
-func validateDataByID(idType int, id int) error {
-	var keys []int
-	if idType == userType {
-		//This should be taken from db
-		users := map[int]User{}
-		keys = make([]int, 0, len(users))
-		for k := range users {
-			keys = append(keys, k)
-		}
-	} else if idType == photoType {
-		//This should be taken from db
-		photos := map[int]Photo{}
-		keys = make([]int, 0, len(photos))
-		for k := range photos {
-			keys = append(keys, k)
-		}
-	}
-
-	if !arrayContains(keys, id) {
-		return errors.New("StatusNotFound")
-	}
-	return nil
-}*/
-
 func arrayContains[T comparable](array []T, val T) bool {
 	for _, v := range array {
 		// checking if the array contains the given value
@@ -69,20 +37,26 @@ func DateToString(d Date) string {
 	return s
 }
 func StringToTimestamp(s string) Timestamp {
-	// s is in "dd-month-yyyy" format
+	// s is in "dd-month-yyyy-hh-mm-ss" format
 	var t Timestamp
-	/*x := strings.Split(s, "-")
+	x := strings.Split(s, "-")
 	day, _ := strconv.Atoi(x[0])
 	year, _ := strconv.Atoi(x[2])
-	d.Day = day
-	d.Month = x[1]
-	d.Year = year */
+	hour, _ := strconv.Atoi(x[3])
+	minutes, _ := strconv.Atoi(x[4])
+	seconds, _ := strconv.Atoi(x[5])
+	t.Date.Day = day
+	t.Date.Month = x[1]
+	t.Date.Year = year
+	t.Hour = hour
+	t.Minutes = minutes
+	t.Seconds = seconds
 	return t
 }
 
 func TimestampToString(t Timestamp) string {
-	var s string = "dd-month-yyyy"
-	// s = strconv.Itoa(d.Day) + "-" + d.Month + "-" + strconv.Itoa(d.Year)
+	var s string = "dd-month-yyyy-hh-mm-ss"
+	s = DateToString(t.Date) + "-" + strconv.Itoa(t.Hour) + "-" + strconv.Itoa(t.Minutes) + "-" + strconv.Itoa(t.Seconds)
 	return s
 }
 func Now() Timestamp {

@@ -810,8 +810,8 @@ components:
           description: caption of the photo
           type: string  
           example: Look what a beautiful photo
-          pattern: ".{0,100}$"
-          minLength: 0
+          pattern: ".{1,100}$"
+          minLength: 1
           maxLength: 100
         uploadTimestamp:
           $ref: "#/components/schemas/Timestamp"
