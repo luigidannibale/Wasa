@@ -12,8 +12,9 @@ Errors that can be returned: (NotFound, InternalServerError)
 */
 func (db *appdbimpl) GetFollowedList(userID int) ([]utils.User, string, error) {
 	var followed []utils.User
-	rows, e := db.c.Query(`SELECT FollowedID
+	rows, e := db.c.Query(`SELECT Id, Username, Name, Surname, DateOfBirth
 						FROM Follows
+						JOIN Users ON FollowedID = Id
 						WHERE FollowerID = ?`, userID)
 	if e != nil {
 		if errors.Is(e, sql.ErrNoRows) {
@@ -21,20 +22,11 @@ func (db *appdbimpl) GetFollowedList(userID int) ([]utils.User, string, error) {
 		}
 		return followed, e.Error(), ErrInternalServerError
 	}
-	var followedIDs []int
 	defer rows.Close()
 	for rows.Next() {
-		var id int
-		err := rows.Scan(&id)
+		var u utils.User
+		err := rows.Scan(&u.Id, &u.Username, &u.Name, &u.Surname, &u.DateOfBirth)
 		if err != nil {
-			return followed, e.Error(), ErrInternalServerError
-		}
-		followedIDs = append(followedIDs, id)
-	}
-
-	for i := 0; i < len(followedIDs); i++ {
-		u, _, e := db.GetUser(followedIDs[i])
-		if e != nil {
 			return followed, e.Error(), ErrInternalServerError
 		}
 		followed = append(followed, u)

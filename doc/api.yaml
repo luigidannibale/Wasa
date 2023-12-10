@@ -394,13 +394,13 @@ paths:
           "500": 
             $ref : "#/components/responses/InternalServerError"
     
-    #uploadPhoto  - LastMod : 6/12 - Status : Not Working
+    #uploadPhoto  - LastMod : 6/12 - Status : Working
     /photos/:
       post:
         operationId: uploadPhoto
         tags:
           - Photos
-          - Not Working
+          - Working
         summary: Post a new photo
         description: |
           Takes a photo and a user, the user posts the photo.          
@@ -806,7 +806,7 @@ components:
           type: string
           format: binary          
           minLength: 0
-          maxLength: 40960
+          maxLength: 40960000
         caption:
           description: caption of the photo
           type: string  

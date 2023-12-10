@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 	"time"
@@ -38,19 +39,21 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 
 	// Takes caption from params and image from body
 	caption := r.URL.Query().Get("caption")
-	var image string
-	e = json.NewDecoder(r.Body).Decode(&image)
+
+	image, e := io.ReadAll(r.Body)
 	if e != nil {
 		http.Error(w, "Couldn't convert the image "+e.Error(), http.StatusBadRequest)
+		return
 	}
 
 	var photo utils.Photo
 	photo.UserId = userID
 	photo.Caption = caption
-	photo.Image = image
+	photo.Image = string(image)
 	photo.UploadTimestamp = time.Now()
 	if e = photo.Validate(); e != nil {
 		http.Error(w, "Couldn't validate the photo "+e.Error(), http.StatusBadRequest)
+		return
 	}
 
 	// Creates the photo and gets the Id

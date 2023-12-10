@@ -8,7 +8,6 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/luigidannibale/Wasa/service/database"
-	"github.com/luigidannibale/Wasa/service/utils"
 )
 
 func (rt *_router) getMyStream(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -45,33 +44,21 @@ func (rt *_router) getMyStream(w http.ResponseWriter, r *http.Request, ps httpro
 	}
 	userID := userIDauth
 
-	users, s, err := rt.db.GetFollowedList(userID)
-	// Checks for DB errors
+	stream, s, err := rt.db.GetStream(userID)
 	if err != nil {
 		if errors.Is(err, database.ErrNotFound) {
 			http.Error(w, s, http.StatusNotFound)
 		}
 		if errors.Is(err, database.ErrInternalServerError) {
-			http.Error(w, "An error occurred on ther server while taking the user "+s, http.StatusInternalServerError)
+			http.Error(w, "An error occurred on ther server while taking the stream "+s, http.StatusInternalServerError)
 		}
 		return
 	}
-
-	var stream []utils.Photo
-	for i := 0; i < len(users); i++ {
-		photos, s, err := rt.db.GetPhotos(users[i].Id)
+	/*
+		stream, err = utils.SortStreamByLast(stream)
 		if err != nil {
-			http.Error(w, "An error occurred on ther server while taking the photos "+s, http.StatusInternalServerError)
-		}
-		for x := 0; x < len(photos); x++ {
-			stream = append(stream, photos[x])
-		}
-	}
 
-	stream, err = utils.SortStreamByLast(stream)
-	if err != nil {
-
-	}
+		}*/
 
 	// Operation successful, creates an OK response
 	w.WriteHeader(http.StatusOK)

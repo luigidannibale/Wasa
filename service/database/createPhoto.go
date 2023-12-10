@@ -1,6 +1,8 @@
 package database
 
 import (
+	"time"
+
 	"github.com/luigidannibale/Wasa/service/utils"
 )
 
@@ -12,7 +14,7 @@ func (db *appdbimpl) CreatePhoto(photo utils.Photo) (int, string, error) {
 
 	err := db.c.QueryRow(`INSERT INTO Photos(UserID,Image,Caption,UploadTimestamp)
 							VALUES (?,?,?,?)
-							RETURNING Id`, photo.UserId, photo.Image, photo.Caption, photo.UploadTimestamp.String()).Scan(&photoID)
+							RETURNING Id`, photo.UserId, photo.Image, photo.Caption, photo.UploadTimestamp.Format(time.Layout)).Scan(&photoID)
 	if err != nil {
 		return photoID, err.Error(), ErrInternalServerError
 	}

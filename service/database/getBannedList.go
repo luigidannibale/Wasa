@@ -12,33 +12,25 @@ Errors that can be returned: (NotFound, InternalServerError)
 */
 func (db *appdbimpl) GetBannedList(userID int) ([]utils.User, string, error) {
 	var banned []utils.User
-	rows, e := db.c.Query(`SELECT BannedID
+	rows, e := db.c.Query(`SELECT Id, Username, Name, Surname, DateOfBirth
 						FROM Bans
-						WHERE BannerID = ?`, userID)
+						JOIN Users ON BannedID = Id
+						WHERE BannerID = ? `, userID)
 	if e != nil {
 		if errors.Is(e, sql.ErrNoRows) {
 			return banned, "Couldn't find any banned", ErrNotFound
 		}
 		return banned, e.Error(), ErrInternalServerError
 	}
-	var bannedIDs []int
+
 	defer rows.Close()
 	for rows.Next() {
-		var id int
-		err := rows.Scan(&id)
+		var u utils.User
+		err := rows.Scan(&u.Id, &u.Username, &u.Name, &u.Surname, &u.DateOfBirth)
 		if err != nil {
-			return banned, e.Error(), ErrInternalServerError
-		}
-		bannedIDs = append(bannedIDs, id)
-	}
-
-	for i := 0; i < len(bannedIDs); i++ {
-		u, _, e := db.GetUser(bannedIDs[i])
-		if e != nil {
 			return banned, e.Error(), ErrInternalServerError
 		}
 		banned = append(banned, u)
 	}
-
 	return banned, "List of banned found successfully", nil
 }

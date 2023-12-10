@@ -133,7 +133,7 @@ type Photo struct {
 }
 
 func (p Photo) Validate() error {
-	if l := len(p.Image); l < 0 || l > 40960 {
+	if l := len(p.Image); l < 0 || l > 40960000 {
 		return errors.New("photo not acceptable")
 	}
 	if l := len(p.Caption); l < 0 || l > 100 {
