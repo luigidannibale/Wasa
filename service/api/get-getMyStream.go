@@ -54,11 +54,6 @@ func (rt *_router) getMyStream(w http.ResponseWriter, r *http.Request, ps httpro
 		}
 		return
 	}
-	/*
-		stream, err = utils.SortStreamByLast(stream)
-		if err != nil {
-
-		}*/
 
 	// Operation successful, creates an OK response
 	w.WriteHeader(http.StatusOK)

@@ -46,8 +46,9 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps http
 	userID := userIDauth
 
 	// Takes the username from the body and validates it
-	var username string
-	e = json.NewDecoder(r.Body).Decode(&username)
+	var un map[string]string
+	e = json.NewDecoder(r.Body).Decode(&un)
+	username := un["username"]
 	if e != nil {
 		http.Error(w, "Couldn't decode the username "+e.Error(), http.StatusBadRequest)
 		return
@@ -56,6 +57,9 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps http
 	var userToUpdate utils.User
 	userToUpdate.Id = userID
 	userToUpdate.Username = username
+	userToUpdate.Name = u.Name
+	userToUpdate.Surname = u.Surname
+	userToUpdate.DateOfBirth = u.DateOfBirth
 
 	if e := userToUpdate.ValidateUsername(); e != nil {
 		http.Error(w, "Username not valid "+e.Error(), http.StatusBadRequest)
@@ -69,6 +73,7 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps http
 		if e != nil {
 			http.Error(w, "Successful operation, the username was already set so, but an error occurred encoding the message "+e.Error(), http.StatusInternalServerError)
 		}
+		return
 	}
 
 	// Update the user (with only the username)
@@ -76,11 +81,11 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps http
 
 	// Checks for DB errors
 	if err != nil {
-		if errors.Is(e, database.ErrUsernameTaken) {
+		if errors.Is(err, database.ErrUsernameTaken) {
 			http.Error(w, s, http.StatusConflict)
 			return
 		}
-		if errors.Is(e, database.ErrInternalServerError) {
+		if errors.Is(err, database.ErrInternalServerError) {
 			http.Error(w, "An error has occurred on the server while updating the username "+s, http.StatusInternalServerError)
 			return
 		}

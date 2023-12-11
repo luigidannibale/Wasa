@@ -51,15 +51,19 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 		http.Error(w, "Could not convert the bannedID", http.StatusBadRequest)
 		return
 	}
-	e = rt.db.VerifyUserId(userToUnbanID)
-	if e != nil {
-		http.Error(w, "The user to unban can't be found", http.StatusNotFound)
-		return
-	}
-
 	//  Checks if the user is trying to unban himself
 	if userID == userToUnbanID {
 		http.Error(w, "The banner and banned can't have the same id", http.StatusForbidden)
+		return
+	}
+	e = rt.db.VerifyUserId(userToUnbanID)
+	if e != nil {
+		if errors.Is(err, database.ErrNotFound) {
+			http.Error(w, "The user to unban can't be found", http.StatusNotFound)
+		}
+		if errors.Is(err, database.ErrInternalServerError) {
+			http.Error(w, "An error has occurred on the server while looking for the user to unban ", http.StatusInternalServerError)
+		}
 		return
 	}
 

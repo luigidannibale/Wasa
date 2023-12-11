@@ -16,7 +16,8 @@ func (db *appdbimpl) GetStream(userID int) ([]utils.Photo, string, error) {
 	rows, e := db.c.Query(`SELECT Id, Image, Caption, UploadTimestamp
 						FROM Photos
 						JOIN Follows ON userID = FollowedID 
-						WHERE FollowerID = ?`, userID)
+						WHERE FollowerID = ?
+						ORDER BY UploadTimestamp DESC`, userID)
 	if e != nil {
 		if errors.Is(e, sql.ErrNoRows) {
 			return stream, "Couldn't find any photo", ErrNotFound

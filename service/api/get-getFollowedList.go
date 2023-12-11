@@ -14,15 +14,31 @@ func (rt *_router) getFollowedList(w http.ResponseWriter, r *http.Request, ps ht
 	w.Header().Set("content-type", "application/json")
 
 	/*Authentication part :
-	- takes userID from auth
-	- validates it
+	- takes the 2 userID (from auth and from params,)
+	- validates 1 of them
+	- checks if them are equal
 	*/
-	userID, er := strconv.Atoi(r.Header.Get("Authorization"))
-	if er != nil {
-		http.Error(w, "Couldn't identify userId for authentication", http.StatusUnauthorized)
+	userIDauth, e := strconv.Atoi(r.Header.Get("Authorization"))
+	if e != nil {
+		http.Error(w, "Couldn't identify userId for authentication "+e.Error(), http.StatusUnauthorized)
 		return
 	}
-	e := rt.db.VerifyUserId(userID)
+	e = rt.db.VerifyUserId(userIDauth)
+	if e != nil {
+		if errors.Is(e, database.ErrNotFound) {
+			http.Error(w, "The userID provided for authentication can't be found", http.StatusUnauthorized)
+		}
+		if errors.Is(e, database.ErrInternalServerError) {
+			http.Error(w, "An error occurred on ther server while identifying userID", http.StatusInternalServerError)
+		}
+		return
+	}
+	userIDparam, err := strconv.Atoi(ps.ByName("userID"))
+	if err != nil {
+		http.Error(w, "Could not convert the userID "+err.Error(), http.StatusBadRequest)
+		return
+	}
+	e = rt.db.VerifyUserId(userIDparam)
 	if e != nil {
 		if errors.Is(e, database.ErrNotFound) {
 			http.Error(w, "The userID provided for authentication can't be found", http.StatusUnauthorized)
@@ -33,8 +49,21 @@ func (rt *_router) getFollowedList(w http.ResponseWriter, r *http.Request, ps ht
 		return
 	}
 
+	// Check if the user searched banned the one who is trying to search him
+	if userIDauth != userIDparam {
+		e = rt.db.CheckBan(userIDparam, userIDauth)
+		if e == nil {
+			http.Error(w, "Couldn't find the user", http.StatusNotFound)
+			return
+		}
+		if errors.Is(e, database.ErrInternalServerError) {
+			http.Error(w, "An error occurred on ther server", http.StatusInternalServerError)
+			return
+		}
+	}
+
 	// Gets the list of followed
-	followedList, s, err := rt.db.GetFollowedList(userID)
+	followedList, s, err := rt.db.GetFollowedList(userIDparam)
 
 	// Checks for DB errors
 	if err != nil {

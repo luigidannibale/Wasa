@@ -69,6 +69,17 @@ func (rt *_router) followUser(w http.ResponseWriter, r *http.Request, ps httprou
 		return
 	}
 
+	// Check if the user searched banned the one who is trying to search him
+	e = rt.db.CheckBan(userToFollowID, userID)
+	if e == nil {
+		http.Error(w, "Couldn't find the user", http.StatusNotFound)
+		return
+	}
+	if errors.Is(e, database.ErrInternalServerError) {
+		http.Error(w, "An error occurred on ther server", http.StatusInternalServerError)
+		return
+	}
+
 	// Creates the follow that must be put in the DB
 	var follow utils.Follow
 	follow.FollowerID = userID

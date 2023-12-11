@@ -57,6 +57,17 @@ func (rt *_router) getUserProfile(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 
+	// Check if the user searched banned the one who is trying to search him
+	e = rt.db.CheckBan(user.Id, userID)
+	if e == nil {
+		http.Error(w, "Couldn't find the user", http.StatusNotFound)
+		return
+	}
+	if errors.Is(e, database.ErrInternalServerError) {
+		http.Error(w, "An error occurred on ther server", http.StatusInternalServerError)
+		return
+	}
+
 	// Operation successful, creates an OK response
 	w.WriteHeader(http.StatusOK)
 	e = json.NewEncoder(w).Encode(user)

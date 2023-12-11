@@ -24,26 +24,25 @@ tags:
     description: Operations of users on their photos (e.g. post a photo, delete, etc.)
   - name: Photos Interactions
     description: Operations of users on others users photos (e.g. post a photo, delete, etc.)
+  - name: Working BanSafe
+    description: (debug tag) Methods implemented and operative, and checks for bans
   - name: Working
     description: (debug tag) Methods implemented and operative 
-  - name: Not Working
-    description: (debug tag) Methods that are not fully operative
-  - name: Not Implemented
-    description: (debug tag) Methods to be implemented 
+  
 security:
   - UserAuth: []
 
 paths:    
     
-    #doLogin - LastMod : 2/12 - Status : Working    
-    #getUserProfile - LastMod : 6/12 - Status : Working
+    #doLogin - LastMod : 2/12 - Status : Working BanSafe   
+    #getUserProfile - LastMod : 11/12 - Status : Working BanSafe
     /users/:
       post:
         operationId: doLogin
         security: []
         tags: 
           - User
-          - Working
+          - Working BanSafe
         summary: Logs in a user
         description: |-
           If the user does not exist, it will be created,
@@ -78,7 +77,7 @@ paths:
         operationId: getUserProfile
         tags: 
           - User
-          - Working
+          - Working BanSafe
         summary: Returns the profile of the user.
         description: |
           The profile of the user is returned, so all the details about the user.
@@ -105,7 +104,7 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError"      
     
-    #updateUser     - LastMod : 6/12 - Status : Working    
+    #updateUser     - LastMod : 11/12 - Status : Working BanSafe  
     /users/{userID}/profile:
       parameters:
       - $ref : "#/components/parameters/userID"
@@ -114,7 +113,7 @@ paths:
         operationId: updateUser
         tags:
           - User
-          - Working
+          - Working BanSafe
         summary: Updates the user with new data
         description: |
           Takes a user (by the id) and a new user profile and updates the user, with the new data.
@@ -142,7 +141,7 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError"
     
-    #setMyUserName - LastMod : 6/12 - Status : Working    
+    #setMyUserName - LastMod : 6/12 - Status : Working BanSafe 
     /users/{userID}/profile/username:      
       parameters:
       - $ref : "#/components/parameters/userID"
@@ -150,7 +149,7 @@ paths:
         operationId: setMyUserName
         tags:
           - User
-          - Working
+          - Working BanSafe
         summary: Changes the username        
         description: |
           Takes a user (by the id) and a name and sets the name as the new username of such user.           
@@ -178,7 +177,8 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError"   
     
-    #getMyStream - LastMod : 30/11 - Status : Not Working
+    # The stream must be sorted - To implement
+    #getMyStream - LastMod : 30/11 - Status : Working BanSafe
     /users/{userID}/profile/stream:
       parameters:
         - $ref : "#/components/parameters/userID"
@@ -186,7 +186,7 @@ paths:
         operationId: getMyStream
         tags:
           - User
-          - Not Working
+          - Working BanSafe
         summary: Gets the user his stream 
         description: |
           Takes an user id and returns his stream (stream of photos of users 
@@ -207,8 +207,8 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError"
     
-    #getFollowedList - LastMod : 10/12 - Status : Working
-    #followUser      - LastMod : 4/12 - Status : Working
+    #getFollowedList - LastMod : 11/12 - Status : Working BanSafe
+    #followUser      - LastMod : 11/12 - Status : Working BanSafe
     /users/{userID}/followed/:
       parameters:
       - $ref : "#/components/parameters/userID"
@@ -217,7 +217,7 @@ paths:
         operationId: followUser
         tags:
           - User Interactions
-          - Working
+          - Working BanSafe
         summary: Follows a user
         description: |
           The actual user (userID) starts following the given user (userToFollowID).
@@ -249,7 +249,7 @@ paths:
         operationId: getFollowedList
         tags:
           - User Interactions
-          - Working
+          - Working BanSafe
         summary: Gets the list of all the followed from the users
         description: Gets the list of all the followed from the users
         responses:
@@ -273,7 +273,7 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError"
       
-    #unfollowUser - LastMod : 4/12 - Status : Working
+    #unfollowUser - LastMod : 4/12 - Status : Working BanSafe
     /users/{userID}/followed/{followedID}/:
       parameters:
       - $ref : "#/components/parameters/userID"
@@ -283,7 +283,7 @@ paths:
         operationId: unfollowUser
         tags:
           - User Interactions
-          - Working
+          - Working BanSafe
         summary: Unfollows a user
         description: |
           The actual user (userID) unfollows the given user (followedID).          
@@ -301,8 +301,8 @@ paths:
           "500": 
             $ref : "#/components/responses/InternalServerError"
     
-    #getBannedList - LastMod : 10/12 - Status : Working
-    #banUser       - LastMod : 5/12 - Status : Working
+    #getBannedList - LastMod : 10/12 - Status : Working BanSafe
+    #banUser       - LastMod : 5/12 - Status : Working BanSafe
     /users/{userID}/banned/:
       parameters:
       - $ref : "#/components/parameters/userID"
@@ -311,7 +311,7 @@ paths:
         operationId: banUser
         tags:
           - User Interactions
-          - Working
+          - Working BanSafe
         summary: Bans a user
         description: |
           The actual user (user ID) bans the given user (userToBanID).
@@ -342,7 +342,7 @@ paths:
         operationId: getBannedList
         tags:
           - User Interactions
-          - Working
+          - Working BanSafe
         summary: Gets the list of all the banned from the users
         description: Gets the list of all the banned from the users
         responses:
@@ -366,7 +366,7 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError"
           
-    #unbanUser - LastMod : 4/12 - - Status : Working
+    #unbanUser - LastMod : 4/12 - - Status : Working BanSafe
     /users/{userID}/banned/{bannedID}/:
       parameters:
       - $ref : "#/components/parameters/userID"
@@ -376,7 +376,7 @@ paths:
         operationId: unbanUser
         tags:
           - User Interactions
-          - Working
+          - Working BanSafe
         summary: Unbans a user
         description: |
           The actual user (user ID) unbans the given user (unbanned ID).           
@@ -394,13 +394,13 @@ paths:
           "500": 
             $ref : "#/components/responses/InternalServerError"
     
-    #uploadPhoto  - LastMod : 6/12 - Status : Working
+    #uploadPhoto  - LastMod : 11/12 - Status : Working BanSafe
     /photos/:
       post:
         operationId: uploadPhoto
         tags:
           - Photos
-          - Working
+          - Working BanSafe
         summary: Post a new photo
         description: |
           Takes a photo and a user, the user posts the photo.          
@@ -434,16 +434,16 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError" 
     
-    #getPhoto     - LastMod : 6/12 - Status : Working
-    #deletePhoto  - LastMod : 6/12 - Status : Working
+    #getPhoto     - LastMod : 11/12 - Status : Working BanSafe
+    #deletePhoto  - LastMod : 6/12 - Status : Working BanSafe
     /photos/{photoID}:
       parameters:
         - $ref : "#/components/parameters/photoID"
       get:
         operationId: getPhoto
         tags:
-          - Photos
-          - Working
+          - Photos Interactions
+          - Working BanSafe
         description: 
           Gets a photo by the id.
         summary: Gets a photo
@@ -465,8 +465,8 @@ paths:
       delete:
         operationId: deletePhoto
         tags:
-          - Photos
-          - Working
+          - Photos 
+          - Working BanSafe
         description: |
           Deletes a photo by the id.          
         summary: Deletes a photo
@@ -709,7 +709,7 @@ components:
       schema:
         $ref : "#/components/schemas/Comment/properties/id"    
   
-  schemas:  #LastMod - 1/12
+  schemas:  #LastMod - 11/12
     User: #can be referenced using $ref : "#/components/schemas/User"         
       type: object
       description: a user composed of id, username, name, surname, date of birth
@@ -743,55 +743,18 @@ components:
         dateOfBirth:        
           $ref : "#/components/schemas/Date"
     Date :  #can be referenced using $ref : "#/components/schemas/Date"
-      type : object
-      description: a date composed of day,month,year
-      properties:
-        year:
-          description: year of the date
-          type: integer            
-          minimum:  1900
-        month:
-          description: month of the date
-          type: string
-          enum:
-            - January
-            - February
-            - March
-            - April
-            - May
-            - June
-            - July
-            - August
-            - September
-            - October
-            - November
-            - December
-        day:
-          description: day of the date
-          type: integer
-          minimum: 1
-          maximum: 31
+      type : string
+      description: a date composed of year,month,day
+      minLength: 10
+      maxLength: 10
+      pattern: "[0-9]{4}-[0-9]{2}-[0-9]{2}"
+      example: "2003-01-10"      
     Timestamp: #can be referenced using $ref : "#/components/schemas/Timestamp"
-      type: object
+      type: string
       description: a timestamp composed of date, hour, minutes, seconds
-      properties: 
-        date:
-          $ref : "#/components/schemas/Date"
-        hour:
-          description: hour of the timestamp
-          type: integer
-          minimum: 0
-          maximum: 23
-        minutes:
-          description: minutes of the timestamp
-          type: integer
-          minimum: 0
-          maximum: 59
-        seconds:
-          description: seconds of the timestamp
-          type: integer
-          minimum: 0
-          maximum: 59    
+      pattern: "[0-9]{2}\/[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}[A|P]M '[0-9]{2} .[0-9]{4}"
+      example: "12/11 03:08:38PM '23 +0100" 
+      
     Photo: #can be referenced using $ref : "#/components/schemas/Photo"
       type: object 
       description: a photo composed of id, image, caption, upload timestamp
@@ -904,3 +867,5 @@ components:
         application/json:
           schema:
             $ref : "#/components/schemas/Message"
+
+  

@@ -28,7 +28,7 @@ func (rt *_router) deletePhoto(w http.ResponseWriter, r *http.Request, ps httpro
 			http.Error(w, "The userID provided for authentication can't be found", http.StatusUnauthorized)
 		}
 		if errors.Is(e, database.ErrInternalServerError) {
-			http.Error(w, "An error occurred on ther server while identifying userID", http.StatusInternalServerError)
+			http.Error(w, "An error occurred on ther server while identifying userID ", http.StatusInternalServerError)
 		}
 		return
 	}

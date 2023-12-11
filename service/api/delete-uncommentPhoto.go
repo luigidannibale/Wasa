@@ -39,7 +39,7 @@ func (rt *_router) uncommentPhoto(w http.ResponseWriter, r *http.Request, ps htt
 		http.Error(w, "Could not convert the photoID", http.StatusBadRequest)
 		return
 	}
-	photo, s, e := rt.db.GetPhoto(photoID)
+	_, s, e := rt.db.GetPhoto(photoID)
 	if e != nil {
 		if errors.Is(e, database.ErrNotFound) {
 			http.Error(w, s, http.StatusNotFound)
@@ -68,8 +68,8 @@ func (rt *_router) uncommentPhoto(w http.ResponseWriter, r *http.Request, ps htt
 		}
 		return
 	}
-	// Only the user that commented and the one that posted the photo can delete comments from a photo
-	if comment.UserID != userID && photo.UserId != userID {
+	// Only the user that commented can delete comments from a photo
+	if comment.UserID != userID {
 		http.Error(w, "The user is not authorized to delete this comment", http.StatusUnauthorized)
 		return
 	}

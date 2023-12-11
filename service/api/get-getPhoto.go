@@ -50,7 +50,7 @@ func (rt *_router) getPhoto(w http.ResponseWriter, r *http.Request, ps httproute
 		return
 	}
 
-	// Gets the like
+	// Gets the photo
 	photo, s, err := rt.db.GetPhoto(photoID)
 
 	// Checks for DB errors
@@ -61,6 +61,17 @@ func (rt *_router) getPhoto(w http.ResponseWriter, r *http.Request, ps httproute
 		if errors.Is(err, database.ErrInternalServerError) {
 			http.Error(w, "An error occurred on ther server while getting the photo "+s, http.StatusInternalServerError)
 		}
+		return
+	}
+
+	// Check if the user that posted the searched photo banned the one who is trying to search it
+	e = rt.db.CheckBan(photo.UserId, userID)
+	if e == nil {
+		http.Error(w, "Couldn't find the photo", http.StatusNotFound)
+		return
+	}
+	if errors.Is(e, database.ErrInternalServerError) {
+		http.Error(w, "An error occurred on ther server", http.StatusInternalServerError)
 		return
 	}
 

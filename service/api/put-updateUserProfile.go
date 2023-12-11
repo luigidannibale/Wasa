@@ -39,6 +39,7 @@ func (rt *_router) updateUser(w http.ResponseWriter, r *http.Request, ps httprou
 		http.Error(w, "Couldn't decode userID "+e.Error(), http.StatusBadRequest)
 		return
 	}
+
 	if userIDauth != userIDparam {
 		http.Error(w, "Authentication userID and parameter userID don't match", http.StatusForbidden)
 		return
@@ -51,12 +52,7 @@ func (rt *_router) updateUser(w http.ResponseWriter, r *http.Request, ps httprou
 		http.Error(w, "Couldn't decode the user "+e.Error(), http.StatusBadRequest)
 		return
 	}
-
-	// Checks if userId from auth is the same of the id of the given user
-	if user.Id != userID {
-		http.Error(w, "Authentication userID and the id of the given user don't match", http.StatusForbidden)
-		return
-	}
+	user.Id = userID
 
 	// Updates the user
 	user, s, err := rt.db.UpdateUser(user)

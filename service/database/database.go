@@ -58,6 +58,7 @@ type AppDatabase interface {
 	GetBannedList(int) ([]utils.User, string, error)
 	CreateBan(utils.Ban) (string, error)
 	GetBan(utils.Ban) (string, error)
+	CheckBan(int, int) error
 	DeleteBan(utils.Ban) (string, error)
 
 	//Operations on Photos table
@@ -236,11 +237,11 @@ func PopulateDB(db *sql.DB) error {
 
 	sqlStmt = `INSERT INTO Users (Username,Name,Surname,DateOfBirth)
 				VALUES
-						("Gigi","Luigi","Dannibale","16-December-2002"),
-						("Paoletto","Paolo","Rossi","23-December-2002"),
-						("Gianni","Gianfranco","Verdi","19-December-2002"),
-						("Paolino","Paolo","Bianchi","15-January-2002"),
-						("Fra","Francesco","Crema","19-January-2002");`
+						("Gigi","Luigi","Dannibale","16-12-2002"),
+						("Paoletto","Paolo","Rossi","23-12-2002"),
+						("Gianni","Gianfranco","Verdi","19-11-2002"),
+						("Paolino","Paolo","Bianchi","15-01-2002"),
+						("Fra","Francesco","Crema","19-02-2002");`
 	_, err = db.Exec(sqlStmt)
 	if err != nil {
 		return fmt.Errorf("error populating users table: %w", err)
@@ -271,10 +272,10 @@ func PopulateDB(db *sql.DB) error {
 
 	sqlStmt = `INSERT INTO Photos (UserID,Image,Caption,UploadTimestamp)
 				VALUES
-						(1,"","First photo","14-January-2015-14-16-12"),
-						(2,"","Second photo","15-January-2015-14-16-12"),
-						(3,"","Third photo","16-January-2015-14-16-12"),
-						(4,"","Fourth photo","17-January-2015-14-16-12");`
+						(1,"","First photo","12/11 03:08:38PM '23 +0100"),
+						(2,"","Second photo","12/11 03:08:38PM '22 +0100"),
+						(3,"","Third photo","12/11 03:08:38PM '21 +0100"),
+						(4,"","Fourth photo","12/11 03:08:38PM '20 +0100");`
 	_, err = db.Exec(sqlStmt)
 	if err != nil {
 		return fmt.Errorf("error populating photos table: %w", err)
