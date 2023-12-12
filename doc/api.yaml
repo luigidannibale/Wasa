@@ -7,6 +7,26 @@ info:
     to keep in touch with your friends by sharing photos of special moments.  
     - [The github private project repository](https://github.com/luigidannibale/Wasa)
     
+    Functional design specifications: 
+    
+    Each user will be presented with a stream of photos (images) in reverse chronological order, with
+    information about when each photo was uploaded (date and time) and how many likes and comments
+    it has. The stream is composed by photos from “following” (other users that the user follows). Users
+    can place (and later remove) a “like” to photos from other users. Also, users can add comments to any
+    image (even those uploaded by themself). Only authors can remove their comments.
+
+    Users can ban other users. If user Alice bans user Eve, Eve won’t be able to see any information about
+    Alice. Alice can decide to remove the ban at any moment.
+    
+    Users will have their profiles. The personal profile page for the user shows: the user’s photos (in reverse
+    chronological order), how many photos have been uploaded, and the user’s followers and following.
+    Users can change their usernames, upload photos, remove photos, and follow/unfollow other users.
+    Removal of an image will also remove likes and comments.
+    
+    A user can search other user profiles via username.
+    
+    A user can log in just by specifying the username. 
+
   version: 1.0.0
   contact:
     email: dannibale.1991254@studenti.uniroma1.it
@@ -25,11 +45,9 @@ tags:
   - name: Photos Interactions
     description: Operations of users on others users photos (e.g. post a photo, delete, etc.)
   - name: Working BanSafe
-    description: (debug tag) Methods implemented and operative, and checks for bans
-  - name: Working ToCheck
-    description: (debug tag) Methods implemented and operative, and checks for bans
-  - name: Working
-    description: (debug tag) Methods implemented and operative 
+    description: | 
+      (debug tag) Methods implemented and operative, and checks for bans 
+      (if a is banned by b, a will not find b profile, b photos etc.)  
   
 security:
   - UserAuth: []
@@ -178,8 +196,7 @@ paths:
             $ref : "#/components/responses/Conflict"
           "500":
             $ref : "#/components/responses/InternalServerError"   
-    
-    # The stream must be sorted - To implement
+        
     #getMyStream - LastMod : 30/11 - Status : Working BanSafe
     /users/{userID}/profile/stream:
       parameters:
@@ -275,7 +292,7 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError"
       
-    #unfollowUser - LastMod : 4/12 - Status : Working BanSafe
+    #unfollowUser - LastMod : 11/12 - Status : Working BanSafe
     /users/{userID}/followed/{followedID}/:
       parameters:
       - $ref : "#/components/parameters/userID"
@@ -303,8 +320,8 @@ paths:
           "500": 
             $ref : "#/components/responses/InternalServerError"
     
-    #getBannedList - LastMod : 10/12 - Status : Working BanSafe
-    #banUser       - LastMod : 5/12 - Status : Working BanSafe
+    #getBannedList - LastMod : 11/12 - Status : Working BanSafe
+    #banUser       - LastMod : 11/12 - Status : Working BanSafe
     /users/{userID}/banned/:
       parameters:
       - $ref : "#/components/parameters/userID"
@@ -368,7 +385,7 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError"
           
-    #unbanUser - LastMod : 4/12 - - Status : Working BanSafe
+    #unbanUser - LastMod : 11/12 - - Status : Working BanSafe
     /users/{userID}/banned/{bannedID}/:
       parameters:
       - $ref : "#/components/parameters/userID"
@@ -437,7 +454,7 @@ paths:
             $ref : "#/components/responses/InternalServerError" 
     
     #getPhoto     - LastMod : 11/12 - Status : Working BanSafe
-    #deletePhoto  - LastMod : 6/12 - Status : Working BanSafe
+    #deletePhoto  - LastMod : 11/12 - Status : Working BanSafe
     /photos/{photoID}:
       parameters:
         - $ref : "#/components/parameters/photoID"
@@ -486,10 +503,10 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError" 
     
-    #getLikesList - To be implemented
-    #likePhoto   - LastMod : 5/12 - Status : Working ToCheck
-    #getLike     - LastMod : 6/12 - Status : Working ToCheck
-    #unlikePhoto - LastMod : 6/12 - Status : Working ToCheck
+    
+    #likePhoto   - LastMod : 11/12 - Status : Working BanSafe
+    #getLike     - LastMod : 11/12 - Status : Working BanSafe
+    #unlikePhoto - LastMod : 11/12 - Status : Working BanSafe
     /photos/{photoID}/likes/:
       parameters:
         - $ref : "#/components/parameters/photoID"
@@ -497,7 +514,7 @@ paths:
         operationId: likePhoto
         tags: 
           - Photos Interactions
-          - Working ToCheck
+          - Working BanSafe
         summary: Puts a like to a photo
         description: |
           Takes a userID and creates a like of that user to the photo, 
@@ -519,7 +536,7 @@ paths:
         operationId: getLike
         tags:
           - Photos Interactions
-          - Working ToCheck
+          - Working BanSafe
         description: 
           Gets a like
         summary: Gets a like
@@ -542,7 +559,7 @@ paths:
         operationId: unlikePhoto
         tags:
           - Photos Interactions
-          - Working ToCheck
+          - Working BanSafe
         summary: Deletes a like to the photo
         description: |
           Takes a userID, if it matches the user that has put the like, the like is deleted,
@@ -557,8 +574,38 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError" 
     
-    #commentPhoto    - LastMod : 6/12 - Status : Working ToCheck
-    #getCommentsList - LastMod : 10/12 - Status : Working ToCheck
+    #getLikersList - LastMod : 11/12 - Status : Working BanSafe
+    /photos/{photoID}/likes/list:
+      get:
+        operationId: getLikersList
+        tags:
+          - Photos Interactions
+          - Working BanSafe
+        summary: Gets the list of all the id of users that liked to the photo
+        description: Gets the list of all the id of users that liked to the photo
+        responses:
+          "200":
+            description: Successful, returning the list of likers
+            content:
+              application/json:
+                schema:
+                  type: array
+                  description: The list of likers
+                  minItems: 0
+                  maxItems: 100
+                  items: 
+                    $ref : "#/components/schemas/User/properties/id"
+          "400":
+            $ref : "#/components/responses/BadRequest" 
+          "401":
+            $ref : "#/components/responses/Unauthorized"
+          "404":
+            $ref : "#/components/responses/NotFound" 
+          "500":
+            $ref : "#/components/responses/InternalServerError"
+    
+    #commentPhoto    - LastMod : 11/12 - Status : Working BanSafe
+    #getCommentsList - LastMod : 10/12 - Status : Working BanSafe
     /photos/{photoID}/comments/:
       parameters:
         - $ref : "#/components/parameters/photoID"
@@ -566,7 +613,7 @@ paths:
         operationId: commentPhoto
         tags: 
           - Photos Interactions
-          - Working ToCheck
+          - Working BanSafe
         summary: Comments a photo
         description: |
           Takes a userID and the text message of the comment and creates 
@@ -595,7 +642,7 @@ paths:
         operationId: getCommentsList
         tags:
           - Photos Interactions
-          - Working ToCheck
+          - Working BanSafe
         summary: Gets the list of all the comments to the photo
         description: Gets the list of all the comments to the photo        
         responses:
@@ -619,8 +666,8 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError"
           
-    #getComment     - LastMod : 10/12 - Status : Working ToCheck
-    #uncommentPhoto - LastMod : 10/12 - Status : Working ToCheck
+    #getComment     - LastMod : 10/12 - Status : Working BanSafe
+    #uncommentPhoto - LastMod : 10/12 - Status : Working BanSafe
     /photos/{photoID}/comments/{commentID}/:
       parameters: 
         - $ref : "#/components/parameters/photoID"
@@ -630,7 +677,7 @@ paths:
         operationId: getComment
         tags: 
           - Photos Interactions
-          - Working ToCheck
+          - Working BanSafe
         summary: Gets the comment details
         description: Takes a comment id and returns the comment
         responses:
@@ -652,7 +699,7 @@ paths:
         operationId: uncommentPhoto
         tags:
           - Photos Interactions
-          - Working ToCheck
+          - Working BanSafe
         summary: Deletes a comment to the photo
         description: |
           Deletes a comment to the photo, useing both photoID and commentID.

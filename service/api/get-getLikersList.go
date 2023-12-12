@@ -3,16 +3,14 @@ package api
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/luigidannibale/Wasa/service/database"
-	"github.com/luigidannibale/Wasa/service/utils"
 )
 
-func (rt *_router) commentPhoto(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (rt *_router) getLikersList(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("content-type", "application/json")
 
 	/*Authentication part :
@@ -21,7 +19,7 @@ func (rt *_router) commentPhoto(w http.ResponseWriter, r *http.Request, ps httpr
 	*/
 	userID, er := strconv.Atoi(r.Header.Get("Authorization"))
 	if er != nil {
-		http.Error(w, "Couldn't identify userId for authentication "+er.Error(), http.StatusUnauthorized)
+		http.Error(w, "Couldn't identify userId for authentication", http.StatusUnauthorized)
 		return
 	}
 	e := rt.db.VerifyUserId(userID)
@@ -62,32 +60,24 @@ func (rt *_router) commentPhoto(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 
-	// Takes content from params
-	content := r.URL.Query().Get("content")
+	// Gets the list of comment
+	likersList, s, err := rt.db.GetLikersList(photoID)
 
-	var comment utils.Comment
-	comment.PhotoID = photoID
-	comment.UserID = userID
-	comment.Content = content
-
-	if e = comment.Validate(); e != nil {
-		http.Error(w, "Couldn't validate the comment "+e.Error(), http.StatusBadRequest)
-		return
-	}
-
-	// Creates the comment and gets the Id
-	commentID, s, e := rt.db.CreateComment(comment)
-	if e != nil {
-		if errors.Is(e, database.ErrInternalServerError) {
-			http.Error(w, "An error occurred on the server creating the comment "+s, http.StatusInternalServerError)
+	// Checks for DB errors
+	if err != nil {
+		if errors.Is(err, database.ErrNotFound) {
+			http.Error(w, s, http.StatusNotFound)
+		}
+		if errors.Is(err, database.ErrInternalServerError) {
+			http.Error(w, "An error occurred on ther server while getting the list of comments "+s, http.StatusInternalServerError)
 		}
 		return
 	}
 
-	// Operation successful, creates a CREATED response
-	w.WriteHeader(http.StatusCreated)
-	e = json.NewEncoder(w).Encode(fmt.Sprintf("Comment posted successfully with id %d", commentID))
+	// Operation successful, creates an OK response
+	w.WriteHeader(http.StatusOK)
+	e = json.NewEncoder(w).Encode(likersList)
 	if e != nil {
-		http.Error(w, fmt.Sprintf("Comment posted successfully with id %d, but an error occurred while encoding the message ", commentID)+e.Error(), http.StatusInternalServerError)
+		http.Error(w, "Operation successful but an error occured while returning the list of comments "+e.Error(), http.StatusInternalServerError)
 	}
 }

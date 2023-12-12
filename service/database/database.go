@@ -150,6 +150,10 @@ type AppDatabase interface {
 	   Errors that can be returned: (NotFound, InternalServerError)
 	*/
 	DeleteLike(utils.Like) (string, error)
+	/*
+	   Errors that can be returned: (NotFound, InternalServerError)
+	*/
+	GetLikersList(int) ([]int, string, error)
 
 	// --------------------------------------------------------
 
@@ -333,6 +337,8 @@ func PopulateDB(db *sql.DB) error {
 						("Paoletto","Paolo","Rossi","2002-12-23"),
 						("Gianni","Gianfranco","Verdi","2002-11-19"),
 						("Paolino","Paolo","Bianchi","2002-01-15"),
+						("Getto","Giorgio","Verdi","2003-01-15"),
+						("Matto","Matteo","Bianchi","2002-01-15"),
 						("Fra","Francesco","Crema","2004-08-19");`
 	_, err = db.Exec(sqlStmt)
 	if err != nil {
@@ -343,8 +349,10 @@ func PopulateDB(db *sql.DB) error {
 				VALUES
 						(1,2),
 						(1,3),
+						(1,4),
 						(2,1),						
 						(2,4),
+						(3,5),
 						(3,4);`
 	_, err = db.Exec(sqlStmt)
 	if err != nil {
@@ -353,9 +361,11 @@ func PopulateDB(db *sql.DB) error {
 
 	sqlStmt = `INSERT INTO Bans (BannerID,BannedID)
 				VALUES
-						(1,4),
+						(1,5),
+						(1,6),
 						(2,3),
 						(3,1),
+						(5,6),
 						(3,2);`
 	_, err = db.Exec(sqlStmt)
 	if err != nil {
@@ -367,7 +377,10 @@ func PopulateDB(db *sql.DB) error {
 						(1,"","First photo","12/11 03:08:38PM '23 +0100"),
 						(2,"","Second photo","12/11 03:08:38PM '22 +0100"),
 						(3,"","Third photo","12/11 03:08:38PM '21 +0100"),
-						(4,"","Fourth photo","12/11 03:08:38PM '20 +0100");`
+						(4,"","Fourth photo","12/11 03:08:38PM '21 +0100"),
+						(5,"","Fifth photo","12/11 03:08:38PM '21 +0100"),
+						(6,"","Sixth photo","12/11 03:08:38PM '20 +0100");`
+
 	_, err = db.Exec(sqlStmt)
 	if err != nil {
 		return fmt.Errorf("error populating photos table: %w", err)
@@ -380,7 +393,9 @@ func PopulateDB(db *sql.DB) error {
 						(2,2,"this is my comment to my photo"),
 						(2,1,"wow"),
 						(3,3,"this is my comment to my photo"),
-						(4,4,"this is my comment to my photo");`
+						(4,4,"this is my comment to my photo"),
+						(5,5,"this is my comment to my photo"),
+						(6,6,"this is my comment to my photo");`
 	_, err = db.Exec(sqlStmt)
 	if err != nil {
 		return fmt.Errorf("error populating comments table: %w", err)
