@@ -57,7 +57,7 @@ func (rt *_router) deletePhoto(w http.ResponseWriter, r *http.Request, ps httpro
 		return
 	}
 
-	//  Deletes the ban from DB
+	//  Deletes the photo from DB
 	s, err = rt.db.DeletePhoto(photo)
 
 	//  Checks for DB errors
