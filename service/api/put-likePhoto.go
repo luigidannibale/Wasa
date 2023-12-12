@@ -40,7 +40,7 @@ func (rt *_router) likePhoto(w http.ResponseWriter, r *http.Request, ps httprout
 		http.Error(w, "Couldn't identify userId for authentication "+er.Error(), http.StatusUnauthorized)
 		return
 	}
-	_, s, e := rt.db.GetPhoto(photoID)
+	photo, s, e := rt.db.GetPhoto(photoID)
 	if e != nil {
 		if errors.Is(e, database.ErrNotFound) {
 			http.Error(w, s, http.StatusNotFound)
@@ -50,6 +50,17 @@ func (rt *_router) likePhoto(w http.ResponseWriter, r *http.Request, ps httprout
 		}
 		return
 
+	}
+
+	// Check if the user that posted the searched photo banned the one who is trying to search it
+	e = rt.db.CheckBan(photo.UserId, userID)
+	if e == nil {
+		http.Error(w, "Couldn't find the photo", http.StatusNotFound)
+		return
+	}
+	if errors.Is(e, database.ErrInternalServerError) {
+		http.Error(w, "An error occurred on ther server", http.StatusInternalServerError)
+		return
 	}
 
 	// Creates the like that has to be put in the db

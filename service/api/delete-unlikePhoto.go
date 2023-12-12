@@ -40,7 +40,7 @@ func (rt *_router) unlikePhoto(w http.ResponseWriter, r *http.Request, ps httpro
 		http.Error(w, "Could not convert the photoID", http.StatusBadRequest)
 		return
 	}
-	_, s, e := rt.db.GetPhoto(photoID)
+	photo, s, e := rt.db.GetPhoto(photoID)
 	if e != nil {
 		if errors.Is(e, database.ErrNotFound) {
 			http.Error(w, s, http.StatusNotFound)
@@ -51,6 +51,16 @@ func (rt *_router) unlikePhoto(w http.ResponseWriter, r *http.Request, ps httpro
 		return
 	}
 
+	// Check if the user that posted the searched photo banned the one who is trying to search it
+	e = rt.db.CheckBan(photo.UserId, userID)
+	if e == nil {
+		http.Error(w, "Couldn't find the photo", http.StatusNotFound)
+		return
+	}
+	if errors.Is(e, database.ErrInternalServerError) {
+		http.Error(w, "An error occurred on ther server", http.StatusInternalServerError)
+		return
+	}
 	//Creates the like that must be deleted from DB
 	var like utils.Like
 	like.PhotoID = photoID

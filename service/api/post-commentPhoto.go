@@ -40,7 +40,7 @@ func (rt *_router) commentPhoto(w http.ResponseWriter, r *http.Request, ps httpr
 		http.Error(w, "Error taking the photoID "+e.Error(), http.StatusBadRequest)
 		return
 	}
-	_, s, e := rt.db.GetPhoto(photoID)
+	photo, s, e := rt.db.GetPhoto(photoID)
 	if e != nil {
 		if errors.Is(e, database.ErrNotFound) {
 			http.Error(w, s, http.StatusNotFound)
@@ -50,6 +50,18 @@ func (rt *_router) commentPhoto(w http.ResponseWriter, r *http.Request, ps httpr
 		}
 		return
 	}
+
+	// Check if the user that posted the searched photo banned the one who is trying to search it
+	e = rt.db.CheckBan(photo.UserId, userID)
+	if e == nil {
+		http.Error(w, "Couldn't find the photo", http.StatusNotFound)
+		return
+	}
+	if errors.Is(e, database.ErrInternalServerError) {
+		http.Error(w, "An error occurred on ther server", http.StatusInternalServerError)
+		return
+	}
+
 	// Takes content from params
 	content := r.URL.Query().Get("content")
 

@@ -26,6 +26,8 @@ tags:
     description: Operations of users on others users photos (e.g. post a photo, delete, etc.)
   - name: Working BanSafe
     description: (debug tag) Methods implemented and operative, and checks for bans
+  - name: Working ToCheck
+    description: (debug tag) Methods implemented and operative, and checks for bans
   - name: Working
     description: (debug tag) Methods implemented and operative 
   
@@ -484,9 +486,10 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError" 
     
-    #likePhoto   - LastMod : 5/12 - Status : Working    
-    #getLike     - LastMod : 6/12 - Status : Working
-    #unlikePhoto - LastMod : 6/12 - Status : Working
+    #getLikesList - To be implemented
+    #likePhoto   - LastMod : 5/12 - Status : Working ToCheck
+    #getLike     - LastMod : 6/12 - Status : Working ToCheck
+    #unlikePhoto - LastMod : 6/12 - Status : Working ToCheck
     /photos/{photoID}/likes/:
       parameters:
         - $ref : "#/components/parameters/photoID"
@@ -494,7 +497,7 @@ paths:
         operationId: likePhoto
         tags: 
           - Photos Interactions
-          - Working
+          - Working ToCheck
         summary: Puts a like to a photo
         description: |
           Takes a userID and creates a like of that user to the photo, 
@@ -516,7 +519,7 @@ paths:
         operationId: getLike
         tags:
           - Photos Interactions
-          - Working
+          - Working ToCheck
         description: 
           Gets a like
         summary: Gets a like
@@ -539,7 +542,7 @@ paths:
         operationId: unlikePhoto
         tags:
           - Photos Interactions
-          - Working
+          - Working ToCheck
         summary: Deletes a like to the photo
         description: |
           Takes a userID, if it matches the user that has put the like, the like is deleted,
@@ -554,8 +557,8 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError" 
     
-    #commentPhoto    - LastMod : 6/12 - Status : Working
-    #getCommentsList - LastMod : 10/12 - Status : Working
+    #commentPhoto    - LastMod : 6/12 - Status : Working ToCheck
+    #getCommentsList - LastMod : 10/12 - Status : Working ToCheck
     /photos/{photoID}/comments/:
       parameters:
         - $ref : "#/components/parameters/photoID"
@@ -563,7 +566,7 @@ paths:
         operationId: commentPhoto
         tags: 
           - Photos Interactions
-          - Working
+          - Working ToCheck
         summary: Comments a photo
         description: |
           Takes a userID and the text message of the comment and creates 
@@ -592,7 +595,7 @@ paths:
         operationId: getCommentsList
         tags:
           - Photos Interactions
-          - Working
+          - Working ToCheck
         summary: Gets the list of all the comments to the photo
         description: Gets the list of all the comments to the photo        
         responses:
@@ -616,8 +619,8 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError"
           
-    #getComment     - LastMod : 10/12 - Status : Working
-    #uncommentPhoto - LastMod : 10/12 - Status : Working
+    #getComment     - LastMod : 10/12 - Status : Working ToCheck
+    #uncommentPhoto - LastMod : 10/12 - Status : Working ToCheck
     /photos/{photoID}/comments/{commentID}/:
       parameters: 
         - $ref : "#/components/parameters/photoID"
@@ -627,7 +630,7 @@ paths:
         operationId: getComment
         tags: 
           - Photos Interactions
-          - Working
+          - Working ToCheck
         summary: Gets the comment details
         description: Takes a comment id and returns the comment
         responses:
@@ -644,13 +647,12 @@ paths:
           "404":
             $ref : "#/components/responses/NotFound" 
           "500":
-            $ref : "#/components/responses/InternalServerError"
-        
+            $ref : "#/components/responses/InternalServerError"        
       delete:
         operationId: uncommentPhoto
         tags:
           - Photos Interactions
-          - Working
+          - Working ToCheck
         summary: Deletes a comment to the photo
         description: |
           Deletes a comment to the photo, useing both photoID and commentID.

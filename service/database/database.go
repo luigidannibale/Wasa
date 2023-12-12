@@ -41,46 +41,138 @@ import (
 // AppDatabase is the high level interface for the DB
 type AppDatabase interface {
 
-	//Operations on Users table
-	CreateUser(utils.User) (int, string, error)
-	CreateUserByUsername(string) (int, string, error)
-	UpdateUser(utils.User) (utils.User, string, error)
-	GetUser(int) (utils.User, string, error)
-	GetUserByUsername(string) (utils.User, string, error)
+	// Operations on Users table ------------------------------
 
-	//Operations on Follows table
+	/*
+		Errors that can be returned: (InternalServerError)
+	*/
+	CreateUser(utils.User) (int, string, error)
+	/*
+		Errors that can be returned: (InternalServerError)
+	*/
+	CreateUserByUsername(string) (int, string, error)
+	/*
+	   Errors that can be returned: (NotFound, InternalServerError, UsernameTaken)
+	*/
+	UpdateUser(utils.User) (utils.User, string, error)
+	/*
+		Errors that can be returned: (NotFound, InternalServerError)
+	*/
+	GetUser(int) (utils.User, string, error)
+	/*
+	   Errors that can be returned: (NotFound, InternalServerError)
+	*/
+	GetUserByUsername(string) (utils.User, string, error)
+	/*
+	   Errors that can be returned: (NotFound, InternalServerError)
+	*/
+	VerifyUserId(int) error
+
+	// --------------------------------------------------------
+
+	// Operations on Follows table ----------------------------
+
+	/*
+		Errors that can be returned: (NotFound, InternalServerError)
+	*/
 	GetFollowedList(int) ([]utils.User, string, error)
-	CreateFollow(utils.Follow) (string, error)
+	/*
+	   Errors that can be returned: (NotFound, InternalServerError)
+	*/
 	GetFollow(utils.Follow) (string, error)
+	/*
+		Errors that can be returned: (InternalServerError, AlreadyDone)
+	*/
+	CreateFollow(utils.Follow) (string, error)
+	/*
+	   Errors that can be returned: (NotFound, InternalServerError)
+	*/
 	DeleteFollow(utils.Follow) (string, error)
 
-	//Operations on Bans table
+	// --------------------------------------------------------
+
+	// Operations on Bans table -------------------------------
+
+	/*
+		Errors that can be returned: (NotFound, InternalServerError)
+	*/
 	GetBannedList(int) ([]utils.User, string, error)
-	CreateBan(utils.Ban) (string, error)
+	/*
+	   Errors that can be returned: (NotFound, InternalServerError)
+	*/
 	GetBan(utils.Ban) (string, error)
+	/*
+		Errors that can be returned: (InternalServerError, AlreadyDone)
+	*/
+	CreateBan(utils.Ban) (string, error)
+	/*
+	   Errors that can be returned: (NotFound, InternalServerError)
+	*/
 	CheckBan(int, int) error
+	/*
+	   Errors that can be returned: (NotFound, InternalServerError)
+	*/
 	DeleteBan(utils.Ban) (string, error)
 
-	//Operations on Photos table
+	// --------------------------------------------------------
+
+	// Operations on Photos table -----------------------------
+
+	/*
+		Errors that can be returned: (InternalServerError)
+	*/
 	CreatePhoto(utils.Photo) (int, string, error)
+	/*
+	   Errors that can be returned: (NotFound, InternalServerError)
+	*/
 	GetPhoto(int) (utils.Photo, string, error)
+	/*
+	   Errors that can be returned: (NotFound, InternalServerError)
+	*/
 	GetStream(int) ([]utils.Photo, string, error)
+	/*
+	   Errors that can be returned: (NotFound, InternalServerError)
+	*/
 	DeletePhoto(utils.Photo) (string, error)
 
-	//Operations on Likes table
+	// --------------------------------------------------------
+
+	// Operations on Likes table ------------------------------
+	/*
+	   Errors that can be returned: (InternalServerError, AlreadyDone)
+	*/
 	CreateLike(utils.Like) (string, error)
+	/*
+	   Errors that can be returned: (NotFound, InternalServerError)
+	*/
 	GetLike(utils.Like) (string, error)
+	/*
+	   Errors that can be returned: (NotFound, InternalServerError)
+	*/
 	DeleteLike(utils.Like) (string, error)
 
-	//Operations on Comment table
+	// --------------------------------------------------------
+
+	// Operations on Comment table ----------------------------
+	/*
+		Errors that can be returned: (InternalServerError)
+	*/
 	CreateComment(utils.Comment) (int, string, error)
+	/*
+	   Errors that can be returned: (NotFound, InternalServerError)
+	*/
 	GetComment(int) (utils.Comment, string, error)
+	/*
+	   Errors that can be returned: (NotFound, InternalServerError)
+	*/
 	DeleteComment(int) (string, error)
+	/*
+	   Errors that can be returned: (NotFound, InternalServerError)
+	*/
 	GetCommentsList(int) ([]utils.Comment, string, error)
 
-	//GetStream(int) ([]utils.Photo, string, error)
+	// --------------------------------------------------------
 	Ping() error
-	VerifyUserId(int) error
 }
 
 type appdbimpl struct {
@@ -237,11 +329,11 @@ func PopulateDB(db *sql.DB) error {
 
 	sqlStmt = `INSERT INTO Users (Username,Name,Surname,DateOfBirth)
 				VALUES
-						("Gigi","Luigi","Dannibale","16-12-2002"),
-						("Paoletto","Paolo","Rossi","23-12-2002"),
-						("Gianni","Gianfranco","Verdi","19-11-2002"),
-						("Paolino","Paolo","Bianchi","15-01-2002"),
-						("Fra","Francesco","Crema","19-02-2002");`
+						("Gigi","Luigi","Dannibale","2002-12-16"),
+						("Paoletto","Paolo","Rossi","2002-12-23"),
+						("Gianni","Gianfranco","Verdi","2002-11-19"),
+						("Paolino","Paolo","Bianchi","2002-01-15"),
+						("Fra","Francesco","Crema","2004-08-19");`
 	_, err = db.Exec(sqlStmt)
 	if err != nil {
 		return fmt.Errorf("error populating users table: %w", err)

@@ -40,7 +40,7 @@ func (rt *_router) getLike(w http.ResponseWriter, r *http.Request, ps httprouter
 		http.Error(w, "Error taking the photoID "+e.Error(), http.StatusBadRequest)
 		return
 	}
-	_, s, e := rt.db.GetPhoto(photoID)
+	photo, s, e := rt.db.GetPhoto(photoID)
 	if e != nil {
 		if errors.Is(e, database.ErrNotFound) {
 			http.Error(w, s, http.StatusNotFound)
@@ -48,6 +48,17 @@ func (rt *_router) getLike(w http.ResponseWriter, r *http.Request, ps httprouter
 		if errors.Is(e, database.ErrInternalServerError) {
 			http.Error(w, "An error occurred while validating the photo "+s, http.StatusInternalServerError)
 		}
+		return
+	}
+
+	// Check if the user that posted the searched photo banned the one who is trying to search it
+	e = rt.db.CheckBan(photo.UserId, userID)
+	if e == nil {
+		http.Error(w, "Couldn't find the photo", http.StatusNotFound)
+		return
+	}
+	if errors.Is(e, database.ErrInternalServerError) {
+		http.Error(w, "An error occurred on ther server", http.StatusInternalServerError)
 		return
 	}
 
