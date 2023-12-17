@@ -576,6 +576,8 @@ paths:
     
     #getLikersList - LastMod : 11/12 - Status : Working BanSafe
     /photos/{photoID}/likes/list:
+      parameters:
+        - $ref : "#/components/parameters/photoID"
       get:
         operationId: getLikersList
         tags:
@@ -818,7 +820,7 @@ components:
           type: string
           format: binary          
           minLength: 0
-          maxLength: 40960000
+          maxLength: 40960
         caption:
           description: caption of the photo
           type: string  
@@ -898,12 +900,12 @@ components:
         application/json:
           schema:
             $ref : "#/components/schemas/Message"
-    NotAcceptable: #can be referenced using $ref : "#/components/responses/NotAcceptable"
-      description: Resource(s) not acceptable
-      content: 
-        application/json:
-          schema:
-            $ref : "#/components/schemas/Message"
+    #NotAcceptable: #can be referenced using $ref : "#/components/responses/NotAcceptable"
+    #  description: Resource(s) not acceptable
+    #  content: 
+    #    application/json:
+    #      schema:
+    #        $ref : "#/components/schemas/Message"
     Conflict: #can be referenced using $ref : "#/components/responses/Conflict"
       description: The request creates a conflict
       content: 
