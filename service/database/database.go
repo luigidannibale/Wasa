@@ -77,6 +77,10 @@ type AppDatabase interface {
 	*/
 	GetFollowedList(int) ([]utils.User, string, error)
 	/*
+		Errors that can be returned: (NotFound, InternalServerError)
+	*/
+	GetFollowersList(int) ([]utils.User, string, error)
+	/*
 	   Errors that can be returned: (NotFound, InternalServerError)
 	*/
 	GetFollow(utils.Follow) (string, error)
@@ -130,6 +134,10 @@ type AppDatabase interface {
 	   Errors that can be returned: (NotFound, InternalServerError)
 	*/
 	GetStream(int) ([]utils.Photo, string, error)
+	/*
+	   Errors that can be returned: (NotFound, InternalServerError)
+	*/
+	GetMyPhotos(int) ([]utils.Photo, string, error)
 	/*
 	   Errors that can be returned: (NotFound, InternalServerError)
 	*/
@@ -257,7 +265,7 @@ func CreateUsersTable(db *sql.DB) error {
 	var sqlStmt string
 	var err error
 	sqlStmt = `CREATE TABLE Users
-			(Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
+			(Id INTEGER NOT NULL PRIMARY KEY  UNIQUE, 
 			Username TEXT NOT NULL UNIQUE,
 			Name TEXT,
 			Surname TEXT,
@@ -269,7 +277,7 @@ func CreatePhotosTable(db *sql.DB) error {
 	var sqlStmt string
 	var err error
 	sqlStmt = `CREATE TABLE Photos 
-			(Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
+			(Id INTEGER NOT NULL PRIMARY KEY  UNIQUE, 
 			UserID INTEGER,
 			Image BLOB NOT NULL,
 			Caption TEXT,
@@ -282,7 +290,7 @@ func CreateCommentsTable(db *sql.DB) error {
 	var sqlStmt string
 	var err error
 	sqlStmt = `CREATE TABLE Comments 
-			(Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
+			(Id INTEGER NOT NULL PRIMARY KEY  UNIQUE, 
 			UserID INTEGER,
 			PhotoID INTEGER,
 			Content TEXT NOT NULL,

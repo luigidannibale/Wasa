@@ -13,7 +13,9 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.PUT("/users/:userID/profile", rt.updateUser)
 	rt.router.PUT("/users/:userID/profile/username", rt.setMyUserName)
 	rt.router.GET("/users/:userID/profile/stream", rt.getMyStream)
+	rt.router.GET("/users/:userID/profile/photos", rt.getMyPhotos)
 
+	rt.router.GET("/users/:userID/followers", rt.getFollowersList)
 	rt.router.GET("/users/:userID/followed", rt.getFollowedList)
 	rt.router.PUT("/users/:userID/followed", rt.followUser)
 	rt.router.DELETE("/users/:userID/followed/:followedID", rt.unfollowUser)

@@ -40,7 +40,20 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	// Takes caption from params and image from body
 	caption := r.URL.Query().Get("caption")
 
-	image, e := io.ReadAll(r.Body)
+	err := r.ParseMultipartForm(20 << 20) // 20 MB limit
+	if err != nil {
+		http.Error(w, er.Error(), http.StatusBadRequest)
+		return
+	}
+
+	imageFile, _, err := r.FormFile("image")
+	if err != nil {
+		http.Error(w, "Error while retrieving image", http.StatusBadRequest)
+		return
+	}
+	defer imageFile.Close()
+
+	image, e := io.ReadAll(imageFile)
 	if e != nil {
 		http.Error(w, "Couldn't convert the image "+e.Error(), http.StatusBadRequest)
 		return

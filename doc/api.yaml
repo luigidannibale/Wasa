@@ -114,7 +114,7 @@ paths:
             content:
               application/json:      
                 schema:
-                  $ref : "#/components/schemas/Message"                    
+                  $ref : "#/components/schemas/Message"
           "400":
             $ref : "#/components/responses/BadRequest" 
           "401":
@@ -226,6 +226,33 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError"
     
+    #getMyStream - LastMod : 31/12
+    /users/{userID}/profile/photos:
+      parameters:
+        - $ref : "#/components/parameters/userID"
+      get:
+        operationId: getMyPhotos
+        tags:
+          - User          
+        summary: Gets the user his own photos
+        description: |
+          Takes an user id and returns his photos as array of photos.
+        responses:
+          "200":
+            description: Successful, returning the photos
+            content:
+              application/json:
+                schema:
+                  $ref : "#/components/schemas/Stream"
+          "400":
+            $ref : "#/components/responses/BadRequest" 
+          "401":
+            $ref : "#/components/responses/Unauthorized"
+          "404":
+            $ref : "#/components/responses/NotFound"
+          "500":
+            $ref : "#/components/responses/InternalServerError"
+    
     #getFollowedList - LastMod : 11/12 - Status : Working BanSafe
     #followUser      - LastMod : 11/12 - Status : Working BanSafe
     /users/{userID}/followed/:
@@ -269,8 +296,8 @@ paths:
         tags:
           - User Interactions
           - Working BanSafe
-        summary: Gets the list of all the followed from the users
-        description: Gets the list of all the followed from the users
+        summary: Gets the list of all the followed from the user
+        description: Gets the list of all the followed from the user
         responses:
           "200":
             description: Successful, returning the list of followed
@@ -291,7 +318,39 @@ paths:
             $ref : "#/components/responses/NotFound" 
           "500":
             $ref : "#/components/responses/InternalServerError"
-      
+    
+    #getFollowersList - LastMod : 30/12
+    /users/{userID}/followers/:
+      parameters:
+      - $ref : "#/components/parameters/userID"
+      get:
+        operationId: getFollowersList
+        tags:
+          - User Interactions
+          
+        summary: Gets the list of all the follower of the user
+        description: Gets the list of all the follower of the user
+        responses:
+          "200":
+            description: Successful, returning the list of followers
+            content:
+              application/json:
+                schema:
+                  type: array
+                  description: The list of followers
+                  minItems: 0
+                  maxItems: 100
+                  items: 
+                    $ref : "#/components/schemas/User"
+          "400":
+            $ref : "#/components/responses/BadRequest" 
+          "401":
+            $ref : "#/components/responses/Unauthorized"
+          "404":
+            $ref : "#/components/responses/NotFound" 
+          "500":
+            $ref : "#/components/responses/InternalServerError"
+    
     #unfollowUser - LastMod : 11/12 - Status : Working BanSafe
     /users/{userID}/followed/{followedID}/:
       parameters:

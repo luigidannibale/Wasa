@@ -40,6 +40,35 @@ func (db *appdbimpl) GetFollowedList(userID int) ([]utils.User, string, error) {
 /*
 Errors that can be returned: (NotFound, InternalServerError)
 */
+func (db *appdbimpl) GetFollowersList(userID int) ([]utils.User, string, error) {
+	var followers []utils.User
+	rows, e := db.c.Query(`SELECT Id, Username, Name, Surname, DateOfBirth
+						FROM Follows
+						JOIN Users ON FollowerID = Id
+						WHERE FollowedID = ?`, userID)
+	if e != nil {
+		if errors.Is(e, sql.ErrNoRows) {
+			return followers, "Couldn't find any follower", ErrNotFound
+		}
+		return followers, e.Error(), ErrInternalServerError
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var u utils.User
+		err := rows.Scan(&u.Id, &u.Username, &u.Name, &u.Surname, &u.DateOfBirth)
+		if err != nil {
+			return followers, e.Error(), ErrInternalServerError
+		}
+		followers = append(followers, u)
+	}
+
+	return followers, "List of followers found successfully", nil
+
+}
+
+/*
+Errors that can be returned: (NotFound, InternalServerError)
+*/
 func (db *appdbimpl) GetFollow(follow utils.Follow) (string, error) {
 
 	e := db.c.QueryRow(`SELECT FollowerID, FollowedID

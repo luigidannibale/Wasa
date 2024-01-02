@@ -53,7 +53,15 @@ func (db *appdbimpl) UpdateUser(user utils.User) (utils.User, string, error) {
 	if e1 == nil && userNull.Id != user.Id {
 		return user, "This username is already used by someone else", ErrUsernameTaken
 	}
-
+	if len(user.Name) == 0 {
+		user.Name = userNull.Name
+	}
+	if len(user.Surname) == 0 {
+		user.Surname = userNull.Surname
+	}
+	if len(user.DateOfBirth.String()) == 0 {
+		user.DateOfBirth = userNull.DateOfBirth
+	}
 	res, err := db.c.Exec(`	UPDATE Users
 							SET Username = ? ,Name = ? ,Surname = ?,DateOfBirth = ?
 							Where Id = ?`, user.Username, user.Name, user.Surname, user.DateOfBirth.String(), user.Id)
