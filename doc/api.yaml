@@ -31,10 +31,6 @@ info:
   contact:
     email: dannibale.1991254@studenti.uniroma1.it
 
-externalDocs:
-  description: Find out more about project specification
-  url: http://gamificationlab.uniroma1.it/notes/Project.pdf
-
 tags:
   - name: User
     description: Operations of users on his profile (e.g. creation, change username, etc.)
@@ -52,11 +48,10 @@ tags:
 security:
   - UserAuth: []
 
-paths:    
-    
+paths:        
     #doLogin - LastMod : 2/12 - Status : Working BanSafe   
     #getUserProfile - LastMod : 11/12 - Status : Working BanSafe
-    /users/:
+    /users:
       post:
         operationId: doLogin
         security: []
@@ -255,7 +250,7 @@ paths:
     
     #getFollowedList - LastMod : 11/12 - Status : Working BanSafe
     #followUser      - LastMod : 11/12 - Status : Working BanSafe
-    /users/{userID}/followed/:
+    /users/{userID}/followed:
       parameters:
       - $ref : "#/components/parameters/userID"
       
@@ -304,12 +299,7 @@ paths:
             content:
               application/json:
                 schema:
-                  type: array
-                  description: The list of followed
-                  minItems: 0
-                  maxItems: 100
-                  items: 
-                    $ref : "#/components/schemas/User"
+                  $ref : "#/components/schemas/ListOfUsers"
           "400":
             $ref : "#/components/responses/BadRequest" 
           "401":
@@ -320,7 +310,7 @@ paths:
             $ref : "#/components/responses/InternalServerError"
     
     #getFollowersList - LastMod : 30/12
-    /users/{userID}/followers/:
+    /users/{userID}/followers:
       parameters:
       - $ref : "#/components/parameters/userID"
       get:
@@ -336,12 +326,7 @@ paths:
             content:
               application/json:
                 schema:
-                  type: array
-                  description: The list of followers
-                  minItems: 0
-                  maxItems: 100
-                  items: 
-                    $ref : "#/components/schemas/User"
+                  $ref : "#/components/schemas/ListOfUsers"
           "400":
             $ref : "#/components/responses/BadRequest" 
           "401":
@@ -352,7 +337,7 @@ paths:
             $ref : "#/components/responses/InternalServerError"
     
     #unfollowUser - LastMod : 11/12 - Status : Working BanSafe
-    /users/{userID}/followed/{followedID}/:
+    /users/{userID}/followed/{followedID}:
       parameters:
       - $ref : "#/components/parameters/userID"
       - $ref : "#/components/parameters/followedID"
@@ -381,7 +366,7 @@ paths:
     
     #getBannedList - LastMod : 11/12 - Status : Working BanSafe
     #banUser       - LastMod : 11/12 - Status : Working BanSafe
-    /users/{userID}/banned/:
+    /users/{userID}/banned:
       parameters:
       - $ref : "#/components/parameters/userID"
       
@@ -429,12 +414,7 @@ paths:
             content:
               application/json:
                 schema:
-                  type: array
-                  description: The list of banned
-                  minItems: 0
-                  maxItems: 100
-                  items: 
-                    $ref : "#/components/schemas/User"
+                  $ref : "#/components/schemas/ListOfUsers"                  
           "400":
             $ref : "#/components/responses/BadRequest" 
           "401":
@@ -445,7 +425,7 @@ paths:
             $ref : "#/components/responses/InternalServerError"
           
     #unbanUser - LastMod : 11/12 - - Status : Working BanSafe
-    /users/{userID}/banned/{bannedID}/:
+    /users/{userID}/banned/{bannedID}:
       parameters:
       - $ref : "#/components/parameters/userID"
       - $ref : "#/components/parameters/bannedID"
@@ -457,7 +437,7 @@ paths:
           - Working BanSafe
         summary: Unbans a user
         description: |
-          The actual user (user ID) unbans the given user (unbanned ID).           
+          The actual user (user ID) unbans the given user (banned ID).           
         responses:
           "200": 
             $ref : "#/components/responses/OK"
@@ -473,7 +453,7 @@ paths:
             $ref : "#/components/responses/InternalServerError"
     
     #uploadPhoto  - LastMod : 11/12 - Status : Working BanSafe
-    /photos/:
+    /photos:
       post:
         operationId: uploadPhoto
         tags:
@@ -485,17 +465,17 @@ paths:
           If the user id does not match a user error 404 is threw.
         parameters:
           - name: caption
-            in: query
-            required: false
+            in: query            
             description: the caption of the photo
+            required: true
             schema:
               $ref: "#/components/schemas/Photo/properties/caption"
         requestBody:
+          description: the image
           content:          
             image/*:
               schema:
-                type: string
-                format: binary
+                $ref: "#/components/schemas/Photo/properties/image"
         responses:
           "201":
             description: Successful, photo posted, returning photo id
@@ -560,13 +540,12 @@ paths:
           "404":
            $ref : "#/components/responses/NotFound" 
           "500":
-            $ref : "#/components/responses/InternalServerError" 
-    
+            $ref : "#/components/responses/InternalServerError"     
     
     #likePhoto   - LastMod : 11/12 - Status : Working BanSafe
     #getLike     - LastMod : 11/12 - Status : Working BanSafe
     #unlikePhoto - LastMod : 11/12 - Status : Working BanSafe
-    /photos/{photoID}/likes/:
+    /photos/{photoID}/likes:
       parameters:
         - $ref : "#/components/parameters/photoID"
       put:
@@ -667,7 +646,7 @@ paths:
     
     #commentPhoto    - LastMod : 11/12 - Status : Working BanSafe
     #getCommentsList - LastMod : 10/12 - Status : Working BanSafe
-    /photos/{photoID}/comments/:
+    /photos/{photoID}/comments:
       parameters:
         - $ref : "#/components/parameters/photoID"
       post:
@@ -682,12 +661,13 @@ paths:
         parameters:
           - name: content
             in: query
+            description: the caption of the comment
             schema:
               $ref : "#/components/schemas/Comment/properties/content"
         responses:
           "201":
             description: Successful, commment created, returning id
-            content:
+            content:              
               application/json:
                 schema:
                   $ref : "#/components/schemas/Message"
@@ -729,7 +709,7 @@ paths:
           
     #getComment     - LastMod : 10/12 - Status : Working BanSafe
     #uncommentPhoto - LastMod : 10/12 - Status : Working BanSafe
-    /photos/{photoID}/comments/{commentID}/:
+    /photos/{photoID}/comments/{commentID}:
       parameters: 
         - $ref : "#/components/parameters/photoID"
         - $ref : "#/components/parameters/commentID"
@@ -778,40 +758,40 @@ paths:
     
 components:  
   securitySchemes: # LastMod - 2/12
-    UserAuth: #can be referenced using $ref : "#/components/SecuritySchemes/UserAuth"
+    UserAuth: 
       type: http
       scheme: bearer
   
   parameters: # LastMod - 28/11
-    userID: #can be referenced using $ref : "#/components/parameters/userID"
+    userID: 
       name: userID
       in: path
       description: Id of the user
       required: true
       schema:
         $ref : "#/components/schemas/User/properties/id"
-    followedID: #can be referenced using $ref : "#/components/parameters/followedID"
+    followedID: 
       name: followedID
       in: path
       description: Id of the followed user
       required: true
       schema:
         $ref : "#/components/schemas/User/properties/id"
-    bannedID: #can be referenced using $ref : "#/components/parameters/bannedID"
+    bannedID: 
       name: bannedID
       in: path
       description: Id of the banned user
       required: true
       schema:
         $ref : "#/components/schemas/User/properties/id"
-    photoID: #can be referenced using $ref : "#/components/parameters/photoID"
+    photoID: 
       name: photoID
       in: path
       description: ID of the photo
       required: true
       schema:
         $ref : "#/components/schemas/Photo/properties/id"    
-    commentID: #can be referenced using $ref : "#/components/parameters/commentID"
+    commentID: 
       name: commentID
       in: path
       description: ID of the comment
@@ -820,7 +800,7 @@ components:
         $ref : "#/components/schemas/Comment/properties/id"    
   
   schemas:  #LastMod - 11/12
-    User: #can be referenced using $ref : "#/components/schemas/User"         
+    User:          
       type: object
       description: a user composed of id, username, name, surname, date of birth
       properties:
@@ -852,20 +832,19 @@ components:
           maxLength: 25
         dateOfBirth:        
           $ref : "#/components/schemas/Date"
-    Date :  #can be referenced using $ref : "#/components/schemas/Date"
+    Date :  
       type : string
       description: a date composed of year,month,day
       minLength: 10
-      maxLength: 10
+      maxLength: 10      
       pattern: "[0-9]{4}-[0-9]{2}-[0-9]{2}"
       example: "2003-01-10"      
-    Timestamp: #can be referenced using $ref : "#/components/schemas/Timestamp"
+    Timestamp: 
       type: string
       description: a timestamp composed of date, hour, minutes, seconds
       pattern: "[0-9]{2}\/[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}[A|P]M '[0-9]{2} .[0-9]{4}"
-      example: "12/11 03:08:38PM '23 +0100" 
-      
-    Photo: #can be referenced using $ref : "#/components/schemas/Photo"
+      example: "12/11 03:08:38PM '23 +0100"      
+    Photo: 
       type: object 
       description: a photo composed of id, image, caption, upload timestamp
       properties:
@@ -878,8 +857,8 @@ components:
           description: image of the photo
           type: string
           format: binary          
-          minLength: 0
-          maxLength: 40960
+          #minLength: 0
+          #maxLength: 40960
         caption:
           description: caption of the photo
           type: string  
@@ -889,14 +868,14 @@ components:
           maxLength: 100
         uploadTimestamp:
           $ref: "#/components/schemas/Timestamp"
-    Stream: #can be referenced using $ref : "#/components/schemas/Stream"      
+    Stream:       
       type: array
       description: a stream of photos
-      minItems: 0
+      minItems: 0      
       maxItems: 200
       items: 
         $ref : "#/components/schemas/Photo"    
-    Comment: #can be referenced using $ref : "#/components/schemas/Comment"
+    Comment: 
       type: object
       description: a comment composed of id, userID, content
       properties:
@@ -914,64 +893,65 @@ components:
           pattern: ".{1,1024}$"
           minLength: 1
           maxLength: 1024    
-    Message: #can be referenced using $ref : "#/components/schemas/Message"      
+    Message:       
       description: a simple text message
       type: string
       example: "This is the outcome"
       pattern: ".{0,1024}"
       minLength: 0
       maxLength: 1024
-      
+    ListOfUsers:       
+      type: array
+      description: a list of users
+      minItems: 0
+      maxItems: 100
+      items: 
+        $ref : "#/components/schemas/User"
+  
   responses: # LastMod - 2/12
-    OK: #can be referenced using $ref : "#/components/responses/OK"
+    OK: 
       description: The request has been completed successfully
       content: 
         application/json:
           schema:
             $ref : "#/components/schemas/Message"
-    Created: #can be referenced using $ref : "#/components/responses/Created"
+    Created: 
       description: The request has been completed successfully, resulting in a creation
       content: 
         application/json:
           schema:
             $ref : "#/components/schemas/Message"
-    BadRequest: #can be referenced using $ref : "#/components/responses/BadRequest"
+    BadRequest: 
       description: The request is bad asked
       content: 
         application/json:
           schema:
             $ref : "#/components/schemas/Message"
-    Unauthorized: #can be referenced using $ref : "#/components/responses/Unauthorized"
+    Unauthorized: 
       description: This request is unauthorized
       content: 
         application/json:
           schema:
             $ref : "#/components/schemas/Message"    
-    Forbidden: #can be referenced using $ref : "#/components/responses/Forbidden"
+    Forbidden: 
       description: Resource(s) not found
       content: 
         application/json:
           schema:
             $ref : "#/components/schemas/Message"
-    NotFound: #can be referenced using $ref : "#/components/responses/NotFound"
+    NotFound: 
       description: Resource(s) not found
       content: 
         application/json:
           schema:
-            $ref : "#/components/schemas/Message"
-    #NotAcceptable: #can be referenced using $ref : "#/components/responses/NotAcceptable"
-    #  description: Resource(s) not acceptable
-    #  content: 
-    #    application/json:
-    #      schema:
-    #        $ref : "#/components/schemas/Message"
-    Conflict: #can be referenced using $ref : "#/components/responses/Conflict"
+            $ref : "#/components/schemas/Message"    
+    Conflict: 
       description: The request creates a conflict
       content: 
         application/json:
           schema:
             $ref : "#/components/schemas/Message"
-    InternalServerError: #can be referenced using $ref : "#/components/responses/InteralServerError"
+    InternalServerError: 
       description: Internal server error has occurred
       content: 
         application/json:
