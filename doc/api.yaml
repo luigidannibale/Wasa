@@ -33,39 +33,34 @@ info:
 
 tags:
   - name: User
-    description: Operations of users on his profile (e.g. creation, change username, etc.)
+    description: "Operations of users on his profile (e.g. creation, change username, etc.)"
   - name: User Interactions
-    description: Operations of users regarding other users (e.g. follow, ban, etc.)
+    description: "Operations of users regarding other users (e.g. follow, ban, etc.)"
   - name: Photos
-    description: Operations of users on their photos (e.g. post a photo, delete, etc.)
+    description: "Operations of users on their photos (e.g. post a photo, delete, etc.)"
   - name: Photos Interactions
-    description: Operations of users on others users photos (e.g. post a photo, delete, etc.)
-  - name: Working BanSafe
-    description: | 
-      (debug tag) Methods implemented and operative, and checks for bans 
-      (if a is banned by b, a will not find b profile, b photos etc.)  
-  
+    description: "Operations of users on others users photos (e.g. post a photo, delete, etc.)"
+
 security:
   - UserAuth: []
 
 paths:        
-    #doLogin - LastMod : 2/12 - Status : Working BanSafe   
-    #getUserProfile - LastMod : 11/12 - Status : Working BanSafe
+    #doLogin        - LastMod :  2/12 
+    #getUserProfile - LastMod : 11/12 
     /users:
       post:
         operationId: doLogin
         security: []
         tags: 
           - User
-          - Working BanSafe
+          
         summary: Logs in a user
         description: |-
           If the user does not exist, it will be created,
           and an identifier is returned.
           If the user exists, the user identifier is returned.        
         requestBody:
-          description: Usename of the user
-          required: true
+          description: Username of the user          
           content:
             application/json:
               schema:
@@ -92,7 +87,7 @@ paths:
         operationId: getUserProfile
         tags: 
           - User
-          - Working BanSafe
+          
         summary: Returns the profile of the user.
         description: |
           The profile of the user is returned, so all the details about the user.
@@ -119,7 +114,7 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError"      
     
-    #updateUser     - LastMod : 11/12 - Status : Working BanSafe  
+    #updateUser     - LastMod : 11/12 
     /users/{userID}/profile:
       parameters:
       - $ref : "#/components/parameters/userID"
@@ -128,7 +123,7 @@ paths:
         operationId: updateUser
         tags:
           - User
-          - Working BanSafe
+          
         summary: Updates the user with new data
         description: |
           Takes a user (by the id) and a new user profile and updates the user, with the new data.
@@ -156,7 +151,7 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError"
     
-    #setMyUserName - LastMod : 6/12 - Status : Working BanSafe 
+    #setMyUserName  - LastMod :  6/12
     /users/{userID}/profile/username:      
       parameters:
       - $ref : "#/components/parameters/userID"
@@ -164,7 +159,7 @@ paths:
         operationId: setMyUserName
         tags:
           - User
-          - Working BanSafe
+          
         summary: Changes the username        
         description: |
           Takes a user (by the id) and a name and sets the name as the new username of such user.           
@@ -192,7 +187,7 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError"   
         
-    #getMyStream - LastMod : 30/11 - Status : Working BanSafe
+    #getMyStream  - LastMod : 30/11 
     /users/{userID}/profile/stream:
       parameters:
         - $ref : "#/components/parameters/userID"
@@ -200,7 +195,7 @@ paths:
         operationId: getMyStream
         tags:
           - User
-          - Working BanSafe
+          
         summary: Gets the user his stream 
         description: |
           Takes an user id and returns his stream (stream of photos of users 
@@ -221,7 +216,7 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError"
     
-    #getMyStream - LastMod : 31/12
+    #getMyStream  - LastMod : 31/12
     /users/{userID}/profile/photos:
       parameters:
         - $ref : "#/components/parameters/userID"
@@ -248,8 +243,8 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError"
     
-    #getFollowedList - LastMod : 11/12 - Status : Working BanSafe
-    #followUser      - LastMod : 11/12 - Status : Working BanSafe
+    #getFollowedList  - LastMod : 11/12 
+    #followUser       - LastMod : 11/12 
     /users/{userID}/followed:
       parameters:
       - $ref : "#/components/parameters/userID"
@@ -258,7 +253,7 @@ paths:
         operationId: followUser
         tags:
           - User Interactions
-          - Working BanSafe
+          
         summary: Follows a user
         description: |
           The actual user (userID) starts following the given user (userToFollowID).
@@ -290,7 +285,7 @@ paths:
         operationId: getFollowedList
         tags:
           - User Interactions
-          - Working BanSafe
+          
         summary: Gets the list of all the followed from the user
         description: Gets the list of all the followed from the user
         responses:
@@ -336,7 +331,7 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError"
     
-    #unfollowUser - LastMod : 11/12 - Status : Working BanSafe
+    #unfollowUser     - LastMod : 11/12
     /users/{userID}/followed/{followedID}:
       parameters:
       - $ref : "#/components/parameters/userID"
@@ -346,7 +341,7 @@ paths:
         operationId: unfollowUser
         tags:
           - User Interactions
-          - Working BanSafe
+          
         summary: Unfollows a user
         description: |
           The actual user (userID) unfollows the given user (followedID).          
@@ -364,17 +359,17 @@ paths:
           "500": 
             $ref : "#/components/responses/InternalServerError"
     
-    #getBannedList - LastMod : 11/12 - Status : Working BanSafe
-    #banUser       - LastMod : 11/12 - Status : Working BanSafe
+    #getBannedList    - LastMod : 11/12 
+    #banUser          - LastMod : 11/12 
     /users/{userID}/banned:
       parameters:
       - $ref : "#/components/parameters/userID"
       
       put:
         operationId: banUser
-        tags:
+        tags:          
           - User Interactions
-          - Working BanSafe
+          
         summary: Bans a user
         description: |
           The actual user (user ID) bans the given user (userToBanID).
@@ -405,7 +400,7 @@ paths:
         operationId: getBannedList
         tags:
           - User Interactions
-          - Working BanSafe
+          
         summary: Gets the list of all the banned from the users
         description: Gets the list of all the banned from the users
         responses:
@@ -424,7 +419,7 @@ paths:
           "500":
             $ref : "#/components/responses/InternalServerError"
           
-    #unbanUser - LastMod : 11/12 - - Status : Working BanSafe
+    #unbanUser        - LastMod : 11/12 
     /users/{userID}/banned/{bannedID}:
       parameters:
       - $ref : "#/components/parameters/userID"
@@ -434,7 +429,7 @@ paths:
         operationId: unbanUser
         tags:
           - User Interactions
-          - Working BanSafe
+          
         summary: Unbans a user
         description: |
           The actual user (user ID) unbans the given user (banned ID).           
@@ -452,13 +447,13 @@ paths:
           "500": 
             $ref : "#/components/responses/InternalServerError"
     
-    #uploadPhoto  - LastMod : 11/12 - Status : Working BanSafe
+    #uploadPhoto       - LastMod : 11/12 - Status : Working BanSafe
     /photos:
       post:
         operationId: uploadPhoto
         tags:
           - Photos
-          - Working BanSafe
+          
         summary: Post a new photo
         description: |
           Takes a photo and a user, the user posts the photo.          
@@ -501,7 +496,7 @@ paths:
         operationId: getPhoto
         tags:
           - Photos Interactions
-          - Working BanSafe
+          
         description: 
           Gets a photo by the id.
         summary: Gets a photo
@@ -524,7 +519,7 @@ paths:
         operationId: deletePhoto
         tags:
           - Photos 
-          - Working BanSafe
+          
         description: |
           Deletes a photo by the id.          
         summary: Deletes a photo
@@ -552,7 +547,7 @@ paths:
         operationId: likePhoto
         tags: 
           - Photos Interactions
-          - Working BanSafe
+          
         summary: Puts a like to a photo
         description: |
           Takes a userID and creates a like of that user to the photo, 
@@ -574,7 +569,7 @@ paths:
         operationId: getLike
         tags:
           - Photos Interactions
-          - Working BanSafe
+          
         description: 
           Gets a like
         summary: Gets a like
@@ -597,7 +592,7 @@ paths:
         operationId: unlikePhoto
         tags:
           - Photos Interactions
-          - Working BanSafe
+          
         summary: Deletes a like to the photo
         description: |
           Takes a userID, if it matches the user that has put the like, the like is deleted,
@@ -620,7 +615,7 @@ paths:
         operationId: getLikersList
         tags:
           - Photos Interactions
-          - Working BanSafe
+          
         summary: Gets the list of all the id of users that liked to the photo
         description: Gets the list of all the id of users that liked to the photo
         responses:
@@ -653,7 +648,7 @@ paths:
         operationId: commentPhoto
         tags: 
           - Photos Interactions
-          - Working BanSafe
+          
         summary: Comments a photo
         description: |
           Takes a userID and the text message of the comment and creates 
@@ -683,7 +678,7 @@ paths:
         operationId: getCommentsList
         tags:
           - Photos Interactions
-          - Working BanSafe
+          
         summary: Gets the list of all the comments to the photo
         description: Gets the list of all the comments to the photo        
         responses:
@@ -718,7 +713,7 @@ paths:
         operationId: getComment
         tags: 
           - Photos Interactions
-          - Working BanSafe
+          
         summary: Gets the comment details
         description: Takes a comment id and returns the comment
         responses:
@@ -740,7 +735,7 @@ paths:
         operationId: uncommentPhoto
         tags:
           - Photos Interactions
-          - Working BanSafe
+          
         summary: Deletes a comment to the photo
         description: |
           Deletes a comment to the photo, useing both photoID and commentID.
@@ -757,6 +752,7 @@ paths:
             $ref : "#/components/responses/InternalServerError"
     
 components:  
+
   securitySchemes: # LastMod - 2/12
     UserAuth: 
       type: http
@@ -842,8 +838,8 @@ components:
     Timestamp: 
       type: string
       description: a timestamp composed of date, hour, minutes, seconds
-      pattern: "[0-9]{2}\/[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}[A|P]M '[0-9]{2} .[0-9]{4}"
-      example: "12/11 03:08:38PM '23 +0100"      
+      pattern: "[0-9]{2} [0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}[A|P]M '[0-9]{2} .[0-9]{4}"
+      example: "12 11 03:08:38PM '23 +0100"
     Photo: 
       type: object 
       description: a photo composed of id, image, caption, upload timestamp
@@ -857,8 +853,8 @@ components:
           description: image of the photo
           type: string
           format: binary          
-          #minLength: 0
-          #maxLength: 40960
+          minLength: 0
+          maxLength: 40960          
         caption:
           description: caption of the photo
           type: string  
