@@ -1,17 +1,19 @@
 <script>
 import { reactive } from 'vue';
 
-export default {
-    name:"Profile",
+export default {	
+    name:"Profile",	
     data: function() {
-		return {
-			username: null,
-			
-            fullname: "Mario rossi",			
+		return {					
+            fullname: null,			
             n_photos:null,
 			n_following:null,
 			n_followers:null,			
-			
+			username: null,
+			id: null,
+			err: false,
+			errMess:null,
+
             isFollowersvisible: false,
 			isFollowingVisible: false,
 			followers:null,
@@ -19,14 +21,10 @@ export default {
 			images:reactive({}),			
 		}
 	},
-	methods: {		
-		async configProfile(){
-			this.username = sessionStorage.getItem("username");			
-			
-			this.inputform = sessionStorage.getItem("new") === "true" ? true : false									
-			var id = sessionStorage.getItem("id")
+	methods: {	
+		async logProfile(loggedId){
 			var r = null
-			// Getting the user profile
+
 			try {
 				this.loading=true;								
 				await this.$axios({
@@ -36,34 +34,41 @@ export default {
 						username:this.username
 					},
 					headers:{
-						Authorization:id
+						Authorization:loggedId
 					}
 				}).then((response)=>{
 					r = response}
-					)				
-				
+					)								
 			} catch (e) {
 				r = e.response;							
 			}
-			this.loading=false;			
+			this.loading=false;					
 			switch (r.status) {
 				case 200:					
-					this.fullname = r.data["name"] + " " + r.data["surname"]					
-					if (this.fullname === " ") 					
-						this.inputform = true;											
+					this.fullname = r.data["name"] + " " + r.data["surname"]	
+					this.id = r.data["id"]												
+					if (this.fullname === " ") {
+						this.inputform = true;
+					}
 					break;												
 				default:
 					this.errAlert(r.data);
 					break;
 			}
-			// Getting the users photos
+			this.getProfilePhotos(loggedId,this.id)
+			this.getProfileFollowers(loggedId,this.id)			
+			this.getProfileFollowing(loggedId,this.id)
+		},	
+		async getProfilePhotos(loggedId,profileId){
+			var r = null
+			
 			try {
 				this.loading=true;								
 				await this.$axios({
 					method:"get",
-					url:"/users/"+id+"/profile/photos",					
+					url:"/users/"+profileId+"/profile/photos",					
 					headers:{
-						Authorization:id
+						Authorization:loggedId
 					}
 				}).then((response)=>{
 					r = response}
@@ -74,21 +79,23 @@ export default {
 			}
 			this.loading=false;			
 			switch (r.status) {
-				case 200:								
-					this.setPhotos(r.data)							
+				case 200:			
+					this.setPhotos(r.data) 
 					break;												
 				default:
 					this.errAlert(r.data);
 					break;
 			}
-			// Getting the users followers
+		},
+		async getProfileFollowers(loggedId,profileId){
+			var r = null
 			try {
 				this.loading=true;								
 				await this.$axios({
 					method:"get",
-					url:"/users/"+id+"/followers",					
+					url:"/users/"+profileId+"/followers",					
 					headers:{
-						Authorization:id
+						Authorization:loggedId
 					}
 				}).then((response)=>{
 					r = response}
@@ -106,14 +113,16 @@ export default {
 					this.errAlert(r.data);
 					break;
 			}
-			// Getting the users following
+		},
+		async getProfileFollowing(loggedId,profileId){
+			var r = null
 			try {
-				this.loading=true;								
+				this.loading=true;											
 				await this.$axios({
 					method:"get",
-					url:"/users/"+id+"/followed",					
+					url:"/users/"+ profileId +"/followed",					
 					headers:{
-						Authorization:id
+						Authorization:loggedId
 					}
 				}).then((response)=>{
 					r = response}
@@ -125,15 +134,33 @@ export default {
 			this.loading=false;			
 			switch (r.status) {
 				case 200:			
-					this.setFollowing(r.data)					
+					this.setFollowing(r.data) 				
 					break;												
 				default:
 					this.errAlert(r.data);
 					break;
 			}
+		},
+		async configProfile(){
+			if(!this.username)
+			{							
+				this.setUsername(sessionStorage.getItem("username"))				
+			}
+			
+			var loggedId = sessionStorage.getItem("id")
+						
+			this.logProfile(loggedId)			
+			
 
 		},
+		setUsername(name){
+			this.username = name			
+		},
 		setPhotos(photos){
+			if(!photos){ 
+				this.n_photos = 0	
+				return
+			}
 			this.n_photos = photos.length			
 			for (let i = 0,x = 0; i < photos.length; i+=2,x++) {
 				let couple = {
@@ -150,12 +177,19 @@ export default {
 			}							
 		},
 		setFollowers(followers){
-			this.n_followers = followers.length			
-			this.followers = followers
+			if(followers){
+				this.n_followers = followers.length			
+				this.followers = followers
+			}
+			else{this.n_followers = 0}
+			
 		},
 		setFollowing(following){
+			if(following){
 			this.n_following = following.length
 			this.following = following
+			}
+			else {this.n_following = 0}
 		},
 		showFollowing(){
 			if (this.isFollowersvisible) {
@@ -178,6 +212,14 @@ export default {
         showForm(){
             this.$emit("show")
         },
+		errAlert(data){
+			this.err = true;			
+			this.errMess = data;
+		},
+		search(name){			
+			sessionStorage.setItem("username",name)    
+			this.$router.push("/users/search/"+name)	            
+		},
 	},
 	mounted() {		
 		this.configProfile()		
@@ -186,7 +228,11 @@ export default {
 </script>
 
 <template>    
-    <div class="container py-5 h-100">								
+	<div class="alert alert-danger" role="alert" v-if="err" >
+		<h4 class="alert-heading" v-text="errMess"></h4>			
+	</div>			
+
+    <div class="container py-5 h-100">										
 				<div class="row d-flex justify-content-left h-100">					
 					<div class="col col-lg-8 ">												
 						<div class="card">																			
@@ -221,7 +267,8 @@ export default {
 								<div id="profileOptions">									
 									<button id="editProfile" type="button" class="btn btn-outline-dark" data-mdb-ripple-color="dark" style="z-index: 1;" @click="showForm">
 									Edit profile
-									</button> 									
+									</button> 	
+
 									<button type="button" class="btn btn-outline-dark" data-mdb-ripple-color="dark" style="z-index: 1; margin-left: 20px;" @click="" >
 									Post photo
 									</button>
@@ -265,7 +312,7 @@ export default {
 								</div>
 							</div>
 							<ul class="list-group list-group-flush">
-								<li class="list-group-item" v-for="f in followers" v-text="f.username"></li>								
+								<li class="list-group-item" v-for="f in followers" v-text="f.username" @click="search(f.username)" role="button"></li>								
 							</ul>
 						</div>
 						<div class="card" v-if="isFollowingVisible">							
@@ -282,7 +329,7 @@ export default {
 								</div>
 							</div>
 							<ul class="list-group list-group-flush">
-								<li class="list-group-item" v-for="f in following" v-text="f.username"></li>								
+								<li class="list-group-item" v-for="f in following" v-text="f.username" @click="search(f.username)" role="button"></li>								
 							</ul>
 						</div>
 					</div>					

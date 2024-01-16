@@ -1,5 +1,11 @@
 <script>
+import Profile from "../components/Profile.vue"
+import SearchBar from "../components/SearchBar.vue"
 export default {
+	components: {
+		Profile,
+		SearchBar
+	},
 	data: function() {
 		return {
 			errormsg: null,
@@ -8,21 +14,30 @@ export default {
             err : false,
             errMess:null,
             username:null,
+			searched:null,
+			profileActive:false,
 		}
 	},
     watch: {
-        $route(to, from) {
-            // Check if the username has changed
-            if (to.params.username !== from.params.username) {
-                console.log("aggiorno")
+        $route(to, from) {            
+            if (to.params.username !== from.params.username) {                
                 this.load()
             }
         }
     },
 	methods: {		
 		async load() {                        
-            this.username = window.location.href.split("/").pop()
-            this.nullAlerts()
+            this.searched = window.location.href.split("/").pop()
+			
+			if(this.searched === "search"){
+				this.profileActive =false
+				return
+			}
+			else{ 
+				this.profileActive =true
+			}
+
+            
             var id = sessionStorage.getItem("id")
             var r 
 			try {
@@ -31,7 +46,7 @@ export default {
 					method:"get",
 					url:"/users",
 					params:{
-						username:this.username
+						username:this.searched
 					},
 					headers:{
 						Authorization:id
@@ -41,76 +56,43 @@ export default {
 					)				
 				
 			} catch (e) {                
-				r = e.response;							
-                console.log("arrivo",e)
+				r = e.response;							                
 			}            
-			this.loading=false;
-            console.log(r)
+			this.loading=false;            
 			switch (r.status) {
 				case 200:	
 				case 201:	
-
+					this.searched = r.data["name"]
 					break;					
 				default:
 					this.errAlert(r.data);
 					break;				
 			}	
-
 		},
-        async search() {			            
-			this.$router.push("/users/search/"+this.username)	
-            console.log(this.username)              
-            //location.replace("#/users/search/"+this.username)
-		},
-        async errAlert(data){			
-			this.err = true;			
+		async errAlert(data){			
+			this.err = true;
 			this.errMess = data;
-		},
+		},		
 		async nullAlerts(){
 			this.err = false;			
 			this.errMess = null;			
 		},
-        async refresh() {
-			this.loading = true;
-			this.errormsg = null;
-			try {
-				let response = await this.$axios.get("/");
-				this.some_data = response.data;
-			} catch (e) {
-				this.errormsg = e.toString();
-			}
-			this.loading = false;
-		},
 	},
 	mounted() {
-        this.load()
-        
+        this.load()        
 	}
 }
 </script>
 
 <template>
-	<div>
-		<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">		
-			<div>
-				<h1>
-					Discover new users
-				</h1>
-			</div>								
-        </div>	
-            <div class="input-group mb-3">
-				<input type="text" class="form-control" placeholder="Search a user" aria-label="Recipient's username" aria-describedby="basic-addon2" 
-                v-model="username">
-				<div class="input-group-append">
-					<button class="btn btn-outline-secondary" type="button" @click="search">
-                        <svg class="feather"><use href="/feather-sprite-v4.29.0.svg#search"/></svg>
-                    </button>
-				</div>
-			</div>
-            <div class="alert alert-danger" role="alert" v-if="err" >
-                <h4 class="alert-heading" v-text="errMess"></h4>			
-            </div>
+		
+		<SearchBar></SearchBar>
+		<div class="alert alert-danger" role="alert" v-if="err" >
+			<h4 class="alert-heading" v-text="errMess"></h4>			
 		</div>
+		<section class="h-100 gradient-custom-2" v-if="profileActive">
+			<Profile></Profile>
+		</section>
 	
 </template>
 

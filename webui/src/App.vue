@@ -13,9 +13,7 @@ export default {
         // Dai target da controllare, se modificato chiama la funz collegata		
 		$route(to, from){
             this.logged = sessionStorage.getItem("logged") === "true" ? true : false
-			this.id = sessionStorage.getItem("id")			
-			//location.update()	
-				
+			this.id = sessionStorage.getItem("id")						
         }
     },
     methods: {
@@ -55,23 +53,7 @@ export default {
 								<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#log-in"/></svg>
 								Logout
 							</RouterLink>
-						</li>
-						<!--
-						<li class="nav-item">
-							<RouterLink to="/createuser" class="nav-link">
-								<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#user-plus"/></svg>
-								Register
-							</RouterLink>
-						</li>
-						-->
-						<!--
-						<li class="nav-item">
-							<RouterLink to="/link2" class="nav-link">
-								<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#key"/></svg>
-								Menu item 2
-							</RouterLink>
-						</li>
-						-->
+						</li>						
 					</ul>
 					<div v-if="logged">
 					<h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">

@@ -46,20 +46,19 @@ func (db *appdbimpl) CreateUserByUsername(username string) (int, string, error) 
 /*
 Errors that can be returned: (NotFound, InternalServerError, UsernameTaken)
 */
-func (db *appdbimpl) UpdateUser(user utils.User) (utils.User, string, error) {
+func (db *appdbimpl) UpdateUser(userNull utils.User) (utils.User, string, error) {
 
-	userNull, _, e1 := db.GetUserByUsername(user.Username)
-
+	user, _, e1 := db.GetUserByUsername(userNull.Username)
 	if e1 == nil && userNull.Id != user.Id {
 		return user, "This username is already used by someone else", ErrUsernameTaken
 	}
-	if len(user.Name) == 0 {
+	if len(userNull.Name) != 0 {
 		user.Name = userNull.Name
 	}
-	if len(user.Surname) == 0 {
+	if len(userNull.Surname) != 0 {
 		user.Surname = userNull.Surname
 	}
-	if len(user.DateOfBirth.String()) == 0 {
+	if len(userNull.DateOfBirth.String()) != 0 {
 		user.DateOfBirth = userNull.DateOfBirth
 	}
 	res, err := db.c.Exec(`	UPDATE Users

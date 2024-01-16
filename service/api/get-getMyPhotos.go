@@ -38,11 +38,17 @@ func (rt *_router) getMyPhotos(w http.ResponseWriter, r *http.Request, ps httpro
 		http.Error(w, "Could not convert the userID "+err.Error(), http.StatusBadRequest)
 		return
 	}
-	if userIDauth != userIDparam {
-		http.Error(w, "Authentication userID and parameter userID don't match", http.StatusForbidden)
+	e = rt.db.VerifyUserId(userIDparam)
+	if e != nil {
+		if errors.Is(e, database.ErrNotFound) {
+			http.Error(w, "The userID provided for authentication can't be found", http.StatusNotFound)
+		}
+		if errors.Is(e, database.ErrInternalServerError) {
+			http.Error(w, "An error occurred on ther server while identifying userID", http.StatusInternalServerError)
+		}
 		return
 	}
-	userID := userIDauth
+	userID := userIDparam
 
 	stream, s, err := rt.db.GetMyPhotos(userID)
 	if err != nil {

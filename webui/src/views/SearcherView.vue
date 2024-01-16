@@ -1,17 +1,21 @@
 <script>
 import { VueElement } from 'vue';
 
+import SearchBar from "../components/SearchBar.vue"
 export default {
+	components: {		
+		SearchBar
+	},
 	data: function() {
 		return {
 			errormsg: null,
-			loading: false,
-			username: null,
+			loading: false,			
+			searched: null,
 		}
 	},
 	methods: {		
 		async search() {			
-			this.$router.push("/users/search/"+this.username)	
+			this.$router.push("/users/search/"+this.searched)	
 		},
 		async refresh() {
 			this.loading = true;
@@ -32,26 +36,8 @@ export default {
 }
 </script>
 
-<template>
-	<div>
-		<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">		
-			<div>
-				<h1>
-					Discover new users
-				</h1>
-			</div>						
-		
-        </div>	
-			
-            <div class="input-group mb-3">
-				<input type="text" class="form-control" placeholder="Search a user" aria-label="Recipient's username" aria-describedby="basic-addon2" v-model="username">
-				<div class="input-group-append">
-					<button class="btn btn-outline-secondary" type="button" @click="search">
-						<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#search"/></svg>
-					</button>
-				</div>
-			</div>
-		</div>
+<template>	
+	<SearchBar></SearchBar>			
 	
 </template>
 

@@ -1,19 +1,23 @@
 <script>
-import { VueElement } from 'vue';
-import { reactive } from 'vue';
-import App from '../App.vue';
+
+import { VueElement } from 'vue'
+import { reactive } from 'vue'
+import App from '../App.vue'
 import Profile from "../components/Profile.vue"
+
 export default {
 	components: {
 		Profile	
 	},
 	data: function() {
 		return {
+			username : null,
+			name:null,
+			surname:null,
+			birthday:null,
 			err: false,
-			errMess:null,
-			
-			loading: false,
-			
+			errMess:null,			
+			loading: false,			
 			dataFormName : "Register your data here",
 			inputform: null,
 			backAv:false,
@@ -54,10 +58,12 @@ export default {
 			}
 			this.loading=false;					
 			switch (r.status) {
-				case 200:					
+				case 200:
 				case 201:
 					sessionStorage.setItem("new",false)		
-					sessionStorage.setItem("username",this.username)			
+					if(this.username) {
+						sessionStorage.setItem("username",this.username)
+					}
 					this.hideInputForm()
 					break;
 				default:
@@ -65,18 +71,54 @@ export default {
 					break;
 			}
 			location.reload()
-		},		
-		async showInputForm(){
-			console.log("lo faccio")
+		},
+		async showInputForm(){			
 			this.inputform = true;
-			this.dataFormName = "Update your data";
+			this.dataFormName = "Update your data";						
 			this.backAv = true			
+			var r = null
+			var id = sessionStorage.getItem("id")			
+			try {
+				this.loading=true;								
+				await this.$axios({
+					method:"get",
+					url:"/users",
+					params:{
+						username:this.username
+					},
+					headers:{
+						Authorization:id
+					}
+				}).then((response)=>{
+					r = response}
+					)								
+			} catch (e) {
+				r = e.response;							
+			}
+			this.loading=false;
+			
+			switch (r.status) {
+				case 200:										
+					this.name = r.data["name"] 
+					this.surname = r.data["surname"]	
+					this.birthday = r.data["dateOfBirth"]																	
+					break;												
+				default:
+					this.errAlert(r.data);
+					break;
+			}
+
 		},
 		async hideInputForm(){
 			this.inputform = false;						
-		},		
+		},	
+		async log(){			
+			this.username = sessionStorage.getItem("loggedUsername")
+			sessionStorage.setItem("username",this.username)	
+		}
 	},
-	mounted() {				
+	mounted() {					
+		this.log()
 	}
 }
 
@@ -98,15 +140,10 @@ export default {
 		<div class="alert alert-danger" role="alert" v-if="err" >
 			<h4 class="alert-heading" v-text="errMess"></h4>			
 		</div>						
-		<!--
-			<input type="file" id="fileInput" @change="handleFileSelect()">
-	    	<img id="imagePreview" alt="Preview">
-		-->		
 
 		<div v-if="!err">			
 		<section class="h-100 gradient-custom-2" v-show="!inputform" >
-			<Profile @show="showInputForm()" >
-				
+			<Profile @show="showInputForm()"> 
 			</Profile>
 		</section>
 		<section class="vh-100 gradient-custom"  v-show="inputform" >
@@ -123,7 +160,7 @@ export default {
 
 							<div class="form-outline">
 								<input type="text" id="firstName" class="form-control form-control-lg" pattern="^[a-zA-Z]{3,25}$" 
-								v-bind:required="!backAv"
+								v-bind:required="!backAv" :value="name"
 								title="First name must be beetween 3 an 25 char and must not contain special char"/>
 								<label class="form-label" for="firstName">First Name</label>
 							</div>
@@ -133,7 +170,7 @@ export default {
 
 							<div class="form-outline">
 								<input type="text" id="lastName" class="form-control form-control-lg" pattern="^[a-zA-Z']{3,25}$" 
-								v-bind:required="!backAv"
+								v-bind:required="!backAv" :value="surname"
 								title="Last name must be beetween 3 an 25 char and must not contain special char except for '"/>
 								<label class="form-label" for="lastName">Last Name</label>
 							</div>
@@ -146,7 +183,7 @@ export default {
 
 								<div class="form-outline datepicker w-100">
 									<input type="text" class="form-control form-control-lg" id="birthdayDate" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}" 
-									v-bind:required="!backAv"
+									v-bind:required="!backAv" :value="birthday"
 									title="Format the data as so yyyy-mm-dd" placeholder="yyyy-mm-dd"/>
 									<label for="birthdayDate" class="form-label">Birthday</label>
 								</div>
@@ -155,8 +192,7 @@ export default {
 								
 								<div class="form-outline">
 									<input type="text" id="username" class="form-control form-control-lg" pattern="^[a-zA-Z0-9._]{3,16}$" 
-									v-bind:placeholder="username"									
-									title="The username must be beetween 3 and 16 char and must not contain special char expcet for . and _ "/>
+									:value = username title="The username must be beetween 3 and 16 char and must not contain special char expcet for . and _ "/>
 									<label class="form-label" for="lastName">Username</label>
 								</div>
 							
