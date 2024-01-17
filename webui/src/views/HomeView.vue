@@ -4,10 +4,14 @@ import { VueElement } from 'vue'
 import { reactive } from 'vue'
 import App from '../App.vue'
 import Profile from "../components/Profile.vue"
+import EditProfile from "../components/EditProfile.vue"
+import PostPhoto from "../components/PostPhoto.vue"
 
 export default {
 	components: {
-		Profile	
+		EditProfile,
+		PostPhoto,
+		Profile
 	},
 	data: function() {
 		return {
@@ -36,8 +40,7 @@ export default {
 		async submit(){
 			try {
 				this.loading=true;
-				var r;
-				//let response = await this.$axios.get("/users",{username:this.username},headers={Authorization:sessionStorage.getItem("id")});
+				var r;				
 				await this.$axios({
 					method:"put",
 					url:"/users/"+sessionStorage.getItem("id")+"/profile",
@@ -142,8 +145,16 @@ export default {
 		</div>						
 
 		<div v-if="!err">			
-		<section class="h-100 gradient-custom-2" v-show="!inputform" >
-			<Profile @show="showInputForm()"> 
+		<section class="h-100 gradient-custom-2" v-show="!inputform" >			
+			<section class="row">
+				<div class="col col-lg-2" >
+					<EditProfile @editProfile="showInputForm"></EditProfile>
+				</div>	
+				<div class="col col-lg-2" >
+					<PostPhoto></PostPhoto>
+				</div>
+			</section>				
+			<Profile > 
 			</Profile>
 		</section>
 		<section class="vh-100 gradient-custom"  v-show="inputform" >

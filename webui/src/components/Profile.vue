@@ -1,6 +1,7 @@
 <script>
 import { reactive } from 'vue';
 
+
 export default {	
     name:"Profile",	
     data: function() {
@@ -53,7 +54,7 @@ export default {
 					break;												
 				default:
 					this.errAlert(r.data);
-					break;
+					return					
 			}
 			this.getProfilePhotos(loggedId,this.id)
 			this.getProfileFollowers(loggedId,this.id)			
@@ -147,11 +148,8 @@ export default {
 				this.setUsername(sessionStorage.getItem("username"))				
 			}
 			
-			var loggedId = sessionStorage.getItem("id")
-						
-			this.logProfile(loggedId)			
-			
-
+			var loggedId = sessionStorage.getItem("id")						
+			this.logProfile(loggedId)						
 		},
 		setUsername(name){
 			this.username = name			
@@ -208,17 +206,14 @@ export default {
 		},
 		hideFollowers(){
 			this.isFollowersvisible = false
-		},
-        showForm(){
-            this.$emit("show")
-        },
+		},        
 		errAlert(data){
 			this.err = true;			
 			this.errMess = data;
 		},
-		search(name){			
-			sessionStorage.setItem("username",name)    
-			this.$router.push("/users/search/"+name)	            
+		search(f){			
+			sessionStorage.setItem("username",f.username)    			
+			this.$router.push("/users/search/"+f.username)	            
 		},
 	},
 	mounted() {		
@@ -265,15 +260,9 @@ export default {
 								</div>
 
 								<div id="profileOptions">									
-									<button id="editProfile" type="button" class="btn btn-outline-dark" data-mdb-ripple-color="dark" style="z-index: 1;" @click="showForm">
-									Edit profile
-									</button> 	
-
-									<button type="button" class="btn btn-outline-dark" data-mdb-ripple-color="dark" style="z-index: 1; margin-left: 20px;" @click="" >
-									Post photo
-									</button>
+																		
 								</div>		
-
+								
 							</div>
 							
 							<div id="profilePhotos" class="card-body p-4 text-black">						
@@ -312,7 +301,7 @@ export default {
 								</div>
 							</div>
 							<ul class="list-group list-group-flush">
-								<li class="list-group-item" v-for="f in followers" v-text="f.username" @click="search(f.username)" role="button"></li>								
+								<li class="list-group-item" v-for="f in followers" v-text="f.username" @click="search(f)" role="button"></li>								
 							</ul>
 						</div>
 						<div class="card" v-if="isFollowingVisible">							
@@ -329,7 +318,7 @@ export default {
 								</div>
 							</div>
 							<ul class="list-group list-group-flush">
-								<li class="list-group-item" v-for="f in following" v-text="f.username" @click="search(f.username)" role="button"></li>								
+								<li class="list-group-item" v-for="f in following" v-text="f.username" @click="search(f)" role="button"></li>								
 							</ul>
 						</div>
 					</div>					
