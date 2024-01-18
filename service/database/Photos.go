@@ -72,7 +72,7 @@ Errors that can be returned: (NotFound, InternalServerError)
 */
 func (db *appdbimpl) GetStream(userID int) ([]utils.Photo, string, error) {
 	var stream []utils.Photo
-	rows, e := db.c.Query(`SELECT Id, Image, Caption, UploadTimestamp
+	rows, e := db.c.Query(`SELECT Id, Image, Caption, UploadTimestamp, UserId
 						FROM Photos
 						JOIN Follows ON userID = FollowedID 
 						WHERE FollowerID = ?
@@ -87,7 +87,7 @@ func (db *appdbimpl) GetStream(userID int) ([]utils.Photo, string, error) {
 	for rows.Next() {
 		var p utils.Photo
 		var ts string
-		err := rows.Scan(&p.Id, &p.Image, &p.Caption, &ts)
+		err := rows.Scan(&p.Id, &p.Image, &p.Caption, &ts, &p.UserId)
 		if err != nil {
 			return stream, e.Error(), ErrInternalServerError
 		}
@@ -96,7 +96,6 @@ func (db *appdbimpl) GetStream(userID int) ([]utils.Photo, string, error) {
 			return stream, er.Error(), ErrInternalServerError
 		}
 		p.UploadTimestamp = ut
-		p.UserId = userID
 		stream = append(stream, p)
 	}
 	return stream, "Photos found successfully", nil

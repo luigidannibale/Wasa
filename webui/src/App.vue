@@ -9,8 +9,7 @@ export default {
 			id :null,		
         }
     },
-	watch:{		
-        // Dai target da controllare, se modificato chiama la funz collegata		
+	watch:{		        
 		$route(to, from){
             this.logged = sessionStorage.getItem("logged") === "true" ? true : false
 			this.id = sessionStorage.getItem("id")						
@@ -63,13 +62,19 @@ export default {
 						<li class="nav-item">
 							<RouterLink :to="'/home/' + id" class="nav-link">
 								<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#file-text"/></svg>
-								My profile
+								Home
 							</RouterLink>
 						</li>
 						<li class="nav-item" >
-							<RouterLink :to="'/users/search'" class="nav-link">
+							<RouterLink :to="'/search'" class="nav-link">
 								<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#search"/></svg>
 								Search
+							</RouterLink>
+						</li>
+						<li class="nav-item" >
+							<RouterLink :to="'/feed'" class="nav-link">
+								<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#compass"/></svg>
+								Feed
 							</RouterLink>
 						</li>
 					</ul>

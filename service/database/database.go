@@ -161,7 +161,7 @@ type AppDatabase interface {
 	/*
 	   Errors that can be returned: (NotFound, InternalServerError)
 	*/
-	GetLikersList(int) ([]int, string, error)
+	GetLikersList(int) ([]string, string, error)
 
 	// --------------------------------------------------------
 
@@ -356,7 +356,6 @@ func PopulateDB(db *sql.DB) error {
 	sqlStmt = `INSERT INTO Follows (FollowerID,FollowedID)
 				VALUES
 						(1,2),
-						(1,3),
 						(1,4),
 						(2,1),						
 						(2,4),
@@ -373,8 +372,8 @@ func PopulateDB(db *sql.DB) error {
 						(1,6),
 						(2,3),
 						(3,1),
-						(5,6),
-						(3,2);`
+						(3,2),
+						(5,6);`
 	_, err = db.Exec(sqlStmt)
 	if err != nil {
 		return fmt.Errorf("error populating bans table: %w", err)

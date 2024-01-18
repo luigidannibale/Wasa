@@ -17,7 +17,7 @@ export default {
     },
 	methods: {		
 		async search() {			
-			this.$router.push("/users/search/"+this.bar_text)
+			this.$router.push("/search/"+this.bar_text)
             sessionStorage.setItem("username",this.bar_text)
 		},
 		async refresh() {

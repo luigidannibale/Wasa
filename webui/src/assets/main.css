@@ -58,3 +58,9 @@
 	stroke-linejoin: round;
 	fill: none;
 }
+.like {
+		width: 24px;
+		height: 24px;		
+		fill:red
+}
+	

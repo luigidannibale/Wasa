@@ -213,7 +213,7 @@ export default {
 		},
 		search(f){			
 			sessionStorage.setItem("username",f.username)    			
-			this.$router.push("/users/search/"+f.username)	            
+			this.$router.push("/search/"+f.username)	            
 		},
 	},
 	mounted() {		
@@ -249,20 +249,14 @@ export default {
 											<p class="mb-1 h5" v-text="n_followers"></p>
 											<p class="small text-muted mb-0">Followers</p>
 										</div>
-									</a>									
+									</a>
 									<a @click="showFollowing()" role="button">
                                         <div class="card px-3" >
                                             <p class="mb-1 h5" v-text="n_following"></p>
                                             <p class="small text-muted mb-0">Following</p>
                                         </div>
                                     </a>
-
-								</div>
-
-								<div id="profileOptions">									
-																		
-								</div>		
-								
+								</div>								
 							</div>
 							
 							<div id="profilePhotos" class="card-body p-4 text-black">						

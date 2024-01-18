@@ -59,10 +59,11 @@ func (db *appdbimpl) DeleteLike(like utils.Like) (string, error) {
 /*
 Errors that can be returned: (NotFound, InternalServerError)
 */
-func (db *appdbimpl) GetLikersList(photoID int) ([]int, string, error) {
-	var likers []int
-	rows, e := db.c.Query(`SELECT UserID
+func (db *appdbimpl) GetLikersList(photoID int) ([]string, string, error) {
+	var likers []string
+	rows, e := db.c.Query(`SELECT Username
 						FROM Likes
+						JOIN Users ON UserId == Id
 						WHERE PhotoID = ?`, photoID)
 	if e != nil {
 		if errors.Is(e, sql.ErrNoRows) {
@@ -72,12 +73,12 @@ func (db *appdbimpl) GetLikersList(photoID int) ([]int, string, error) {
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var uID int
-		err := rows.Scan(&uID)
+		var username string
+		err := rows.Scan(&username)
 		if err != nil {
 			return likers, e.Error(), ErrInternalServerError
 		}
-		likers = append(likers, uID)
+		likers = append(likers, username)
 	}
 
 	return likers, "List of likers found successfully", nil
