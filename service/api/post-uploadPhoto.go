@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -42,7 +43,7 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 
 	err := r.ParseMultipartForm(20 << 20) // 20 MB limit
 	if err != nil {
-		http.Error(w, er.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -62,7 +63,7 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	var photo utils.Photo
 	photo.UserId = userID
 	photo.Caption = caption
-	photo.Image = string(image)
+	photo.Image = base64.StdEncoding.EncodeToString(image)
 	photo.UploadTimestamp = time.Now()
 	if e = photo.Validate(); e != nil {
 		http.Error(w, "Couldn't validate the photo "+e.Error(), http.StatusBadRequest)

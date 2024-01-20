@@ -79,8 +79,8 @@ export default {
 			this.loading=false;			
 			switch (r.status) {
 				case 200:	
-                    await this.getProfileFollowing(loggedId)									
-                    this.setPhotos(r.data) 
+                    await this.getProfileFollowing(loggedId)
+                    this.setPhotos(r.data)
 					break;												
 				default:
 					this.errAlert(r.data);
@@ -119,14 +119,17 @@ export default {
             sessionStorage.setItem("username",name)
 		},
         setFollowing(data){            
-            this.following = {}            
+            this.following = {} 
+            if(!data) 
+                return
             data.forEach(f => {
                 this.following[f.id] = f
             });                        
 		},
         async setPhotos(photos){
 			if(!photos){ 
-				this.n_photos = 0	
+				this.n_photos = 0
+                this.errAlert("Your feed is empty")
 				return
 			}                        
 			this.n_photos = photos.length			
@@ -135,7 +138,7 @@ export default {
 					im1: {},
 				}
 				couple.im1.blob = "data:image/*;base64," + photos[i].image
-				couple.im1.id = photos[i].id
+				couple.im1.id = photos[i].id                
                 couple.im1.cap = photos[i].caption
                 couple.im1.username = photos[i].username
                 couple.im1.showComments = false
@@ -155,13 +158,14 @@ export default {
                 else couple.im1.n_likes = 0                 
                 if(commentslist) couple.im1.n_comments = commentslist.length
                 else couple.im1.n_comments = 0                 
-                couple.im1.likes = likerslist
-                couple.im1.comments = {}
+                couple.im1.likes = likerslist                
+                couple.im1.comments = []
                 for(let x = 0; x<commentslist.length; x++){                    
                     let c = {}                    
                     c.author = commentslist[x].userID
                     c.text = commentslist[x].content
                     c.id = commentslist[x].id
+                    c.delete = false
                     couple.im1.comments[x] = c
                 }                
 				couple.im1.username = this.following[photos[i].userId].username                                
@@ -217,25 +221,61 @@ export default {
 					return null					
 			} 
         },   
-        async deleteComment(im,commId){
+        async postComment(n){
+            var r = null	                        
+            var e = document.getElementById("textcomment"+n)                        
+			try {											
+				await this.$axios({
+					method:"post",
+					url:"/photos/"+n+"/comments",
+					headers:{
+						Authorization:this.loggedId
+					},
+                    params:{
+                        content: e.value,
+                        photoID: n 
+                    }
+				}).then((response)=>{
+					r = response}
+					)
+			} catch (e) {
+				r = e.response;							
+			}		            
+			switch (r.status) {
+				case 201:
+                    this.images[n].im1.n_comments+=1
+                    let c = {}
+                    c.author = this.loggedId
+                    c.text = e.value
+                    c.photoID = n
+                    c.id = parseInt(r.data.slice(36),10)
+                    this.images[n].im1.comments = [...this.images[n].im1.comments,c]
+                    e.value = ""
+                    
+				default:
+					return null					
+			}
+        },
+        async deleteComment(n,commId){
             var r = null	                        
 			try {
 											
 				await this.$axios({
 					method:"delete",
-					url:"/photos/"+im.id+"/comments"+commId,
+					url:"/photos/"+n+"/comments/"+commId,
 					headers:{
 						Authorization:this.loggedId
 					}
 				}).then((response)=>{
 					r = response}
-					)								
+					)
 			} catch (e) {
 				r = e.response;							
-			}			
+			}			            
 			switch (r.status) {
 				case 200:	                    
-                    to do									
+                    this.images[n].im1.n_comments  -=1                    
+                    this.images[n].im1.comments = this.images[n].im1.comments.filter(item => item.id !== commId);
 				default:
 					return null					
 			} 
@@ -268,8 +308,7 @@ export default {
                         return 
                 }
             }
-            else{
-                console.log("put",n,this.images[n].im1.likes)
+            else{                
                 try {                                               
                     await this.$axios({
                         method:"put",
@@ -288,7 +327,7 @@ export default {
                     case 201:  
                         this.images[n].im1.liked = true
                         this.images[n].im1.n_likes += 1                        
-                        this.images[n].im1.likes = [...this.images[n].im1.likes, username]                        
+                        this.images[n].im1.likes = [...this.images[n].im1.likes, this.username]                        
                         return 													
                     default:
                         return 
@@ -311,8 +350,7 @@ export default {
         async log(){
             this.username = sessionStorage.getItem("loggedUsername")               
             this.loggedId = sessionStorage.getItem("id")                        
-            this.getStreamPhotos(this.loggedId)            
-            
+            this.getStreamPhotos(this.loggedId)                        
         },        
 	},
 	mounted() {					
@@ -337,7 +375,7 @@ export default {
 		
 		<div class="alert alert-danger" role="alert" v-if="err" >
 			<h4 class="alert-heading" v-text="errMess"></h4>			
-		</div>						
+		</div>					
 
 		<div v-if="!err">			
 		<section class="h-100 gradient-custom-2" v-show="!inputform" >			
@@ -367,10 +405,22 @@ export default {
                         <div class="col-md-12 col-lg-10 col-xl-8" id="commentsSection" v-if="i.im1.showComments">
                             <h4 class="text-center mb-12 pb-2" style="margin-top: 30px;">Comments</h4>
                             <div class="card-body p-12" v-for="c in i.im1.comments">
-                                <div class="row">                                
+                                <div class="row">
                                     <p class="mb-1">
-                                        {{ c.author }}                                    
-                                        <svg class="feather" style="margin-left: 50px;" role="button" @click="deleteComment(i.im1.id)" :id="'delete'+i.im1.id" v-if="loggedId == c.author">  <use href="/feather-sprite-v4.29.0.svg#trash-2"/></svg>                                                                                 
+                                        {{ c.author }}
+                                        <svg class="feather" style="margin-left: 40px;" role="button" @click="c.delete = true" :id="'delete'+i.im1.id" v-if="loggedId == c.author">  <use href="/feather-sprite-v4.29.0.svg#trash-2"/></svg>
+                                        <span v-if="c.delete" class="small">
+                                            Delete comment ? 
+                                            <span role="button" @click="deleteComment(i.im1.id, c.id)" :id="'delete'+i.im1.id" style="color: green;">
+                                                Yes
+                                                <svg class="feather" ><use href="/feather-sprite-v4.29.0.svg#check"/></svg>
+                                            </span>                                       
+                                            <span role="button" @click="c.delete = false" :id="'delete'+i.im1.id" style="color: red;">
+                                                No
+                                                <svg class="feather" > <use href="/feather-sprite-v4.29.0.svg#x"/></svg>
+                                            </span>
+                                            
+                                        </span>
                                     </p>                                                                                
                                     
                                     <p class="small mb-0">
@@ -379,9 +429,13 @@ export default {
                                     <hr>
                                 </div>
                             </div>
-                            <div style="margin-top: 20px;">
-                                Insert new comment here 
-                                <svg class="feather" >  <use href="/feather-sprite-v4.29.0.svg#edit"/></svg>
+                            <div style="margin-top: 20px;" class="row">                                
+                                <span class="col">
+                                    <textarea :id="'textcomment'+i.im1.id" cols="30" rows="2" placeholder="Insert new comment"></textarea>
+                                </span>
+                                <span class="col">
+                                    <svg class="feather" style="margin-left: 10px;" role="button" @click="postComment(i.im1.id)"><use href="/feather-sprite-v4.29.0.svg#edit"/></svg>
+                                </span>
                             </div>                            
                         </div>
 
@@ -389,7 +443,7 @@ export default {
                             <h4 class="text-center mb-12 pb-2" style="margin-top: 30px;">Likes</h4>
                             <div class="card-body p-12" v-for="u in i.im1.likes">
                                 <div class="row">                                
-                                    <p class="mb-1">
+                                    <p class="mb-1" role="button" @click="search(u)" > 
                                         {{ u }}
                                     </p>
                                 </div>

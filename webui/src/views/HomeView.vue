@@ -4,13 +4,9 @@ import { VueElement } from 'vue'
 import { reactive } from 'vue'
 import App from '../App.vue'
 import Profile from "../components/Profile.vue"
-import EditProfile from "../components/EditProfile.vue"
-import PostPhoto from "../components/PostPhoto.vue"
 
 export default {
 	components: {
-		EditProfile,
-		PostPhoto,
 		Profile
 	},
 	data: function() {
@@ -22,10 +18,12 @@ export default {
 			err: false,
 			errMess:null,			
 			loading: false,			
+			imagePreview:false,
+			imageFile:null,
 			dataFormName : "Register your data here",
 			inputform: null,
-			backAv:false,
-			
+			postPhotoForm : null,
+			backAv:false,			
 		}
 	},
 	methods: {				
@@ -81,8 +79,7 @@ export default {
 			this.backAv = true			
 			var r = null
 			var id = sessionStorage.getItem("id")			
-			try {
-				this.loading=true;								
+			try {			
 				await this.$axios({
 					method:"get",
 					url:"/users",
@@ -98,8 +95,6 @@ export default {
 			} catch (e) {
 				r = e.response;							
 			}
-			this.loading=false;
-			
 			switch (r.status) {
 				case 200:										
 					this.name = r.data["name"] 
@@ -112,12 +107,66 @@ export default {
 			}
 
 		},
-		async hideInputForm(){
+		async postPhoto(){
+			//this.hidePostPhotoForm()
+			var r = null
+			var id = sessionStorage.getItem("id")	
+			var rbody = new FormData();
+			rbody.append("image",this.imageFile)
+			try {			
+				await this.$axios({
+					method:"post",
+					url:"/photos",
+					params:{
+						caption:document.getElementById("caption").value
+					},
+					headers:{
+						Authorization:id,
+						'Content-Type': 'image/png',
+					},					
+					data: rbody,				
+				}).then((response)=>{
+					r = response}
+					)								
+			} catch (e) {
+				r = e.response;							
+			}
+			console.log(r.data)
+			switch (r.status) {
+				case 201:										
+					
+					break;												
+				default:
+					this.errAlert(r.data);
+					break;
+			}
+		},
+		async showPostPhotoForm(){			
+			this.postPhotoForm = true;
+		},
+		hidePostPhotoForm(){
+			this.postPhotoForm = false;						
+		},
+		hideInputForm(){
 			this.inputform = false;						
 		},	
-		async log(){			
+		log(){			
 			this.username = sessionStorage.getItem("loggedUsername")
 			sessionStorage.setItem("username",this.username)	
+		},
+		handleFileUpload(event) {
+			this.imageFile = event.target.files[0];
+            if (this.imageFile && this.imageFile['type'].startsWith('image')) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.imagePreview = e.target.result;
+                };
+                reader.readAsDataURL(this.imageFile);
+            } else {
+                event.target.value = "";
+                alert('The given file is not an image');
+            }
+			
 		}
 	},
 	mounted() {					
@@ -145,13 +194,17 @@ export default {
 		</div>						
 
 		<div v-if="!err">			
-		<section class="h-100 gradient-custom-2" v-show="!inputform" >			
+		<section class="h-100 gradient-custom-2" v-show="!inputform && !postPhotoForm" >			
 			<section class="row">
-				<div class="col col-lg-2" >
-					<EditProfile @editProfile="showInputForm"></EditProfile>
+				<div class="col col-lg-2" >					
+					<button id="editProfile" type="button" class="btn btn-outline-dark" data-mdb-ripple-color="dark" style="z-index: 1; margin-right: 5px; margin-left: 5px;" @click="showInputForm()" >
+						Edit profile
+					</button> 	
 				</div>	
-				<div class="col col-lg-2" >
-					<PostPhoto></PostPhoto>
+				<div class="col col-lg-2" >					
+					<button id="postPhoto" type="button" class="btn btn-outline-dark" data-mdb-ripple-color="dark" style="z-index: 1; margin-right: 5px; margin-left: 5px;" @click="showPostPhotoForm()" >
+						Post Photo
+					</button>
 				</div>
 			</section>				
 			<Profile > 
@@ -239,6 +292,55 @@ export default {
 			</div>
 		</section>		
 
+		<section class="vh-100 gradient-custom"  v-show="postPhotoForm" >
+			<div class="container py-5 h-100">
+				<div class="row justify-content-left align-items-left h-100">
+				<div class="col-12 col-lg-9 col-xl-7">
+					<div class="card shadow-2-strong card-registration" style="border-radius: 15px;">
+					<div class="card-body p-4 p-md-5">
+						<h3 class="mb-4 pb-2 pb-md-0 mb-md-5">Post your photo</h3>
+						<form @submit="postPhoto()">
+							<div class="row">
+								<div class="col-md-6 mb-4">
+									<div class="form-outline">								
+										<label class="form-label" for="firstName"> Caption </label>
+										<textarea name="caption" id="caption" cols="20" rows="2"></textarea>
+									</div>
+									<div class="form-outline">								
+										<label class="form-label" for="firstName"> Upload image </label>
+										<input type="file" @change="handleFileUpload">
+										<div v-if="imagePreview">
+											<span> Preview </span>
+											<img :src="imagePreview" alt="Preview" style="height: 300px; width: fit-content;">
+										</div>
+									</div>
+								</div>							
+							</div>						
+							<div class="row">
+								<div class="col-md-6 mb-4 d-flex align-items-center">
+									<div class="form-outline">
+										<div class="mt-4 pt-2">
+											<input class="btn btn-primary btn-lg"  value="Back" 
+											style="background-color:brown" @click="hidePostPhotoForm"/>
+										</div>
+									</div>
+								</div>						
+								<div class="col-md-6 mb-4 d-flex align-items-center">
+									<div class="form-outline">
+										<div class="mt-4 pt-2">
+											<input class="btn btn-primary btn-lg" type="submit" role="button" value="Submit" style="background-color:green"/>
+										</div>
+									</div>
+								
+								</div>
+							</div>
+						</form>
+					</div>
+					</div>
+				</div>
+				</div>
+			</div>
+		</section>
 		</div>
 		
 	</div>

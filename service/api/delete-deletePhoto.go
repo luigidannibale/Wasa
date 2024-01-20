@@ -52,7 +52,7 @@ func (rt *_router) deletePhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	}
 
 	//  Checks if the user is trying to delete a photo of others
-	if userID != photo.Id {
+	if userID != photo.UserId {
 		http.Error(w, "The user has not posted this photo, nor can delete it", http.StatusForbidden)
 		return
 	}
