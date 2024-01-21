@@ -21,22 +21,22 @@ func (rt *_router) unfollowUser(w http.ResponseWriter, r *http.Request, ps httpr
 	*/
 	userIDauth, e := strconv.Atoi(r.Header.Get("Authorization"))
 	if e != nil {
-		http.Error(w, "Couldn't identify userId for authentication "+e.Error(), http.StatusUnauthorized)
+		http.Error(w, MsgAuthNotFound+e.Error(), http.StatusUnauthorized)
 		return
 	}
 	e = rt.db.VerifyUserId(userIDauth)
 	if e != nil {
 		if errors.Is(e, database.ErrNotFound) {
-			http.Error(w, "The userID provided for authentication can't be found", http.StatusUnauthorized)
+			http.Error(w, MsgAuthNotFound+e.Error(), http.StatusUnauthorized)
 		}
 		if errors.Is(e, database.ErrInternalServerError) {
-			http.Error(w, "An error occurred on ther server while identifying userID", http.StatusInternalServerError)
+			http.Error(w, MsgServerErrorUserID+e.Error(), http.StatusInternalServerError)
 		}
 		return
 	}
 	userIDparam, err := strconv.Atoi(ps.ByName("userID"))
 	if err != nil {
-		http.Error(w, "Could not convert the userID "+err.Error(), http.StatusBadRequest)
+		http.Error(w, MsgConvertionErrorUserID+err.Error(), http.StatusBadRequest)
 		return
 	}
 	if userIDauth != userIDparam {
@@ -48,7 +48,7 @@ func (rt *_router) unfollowUser(w http.ResponseWriter, r *http.Request, ps httpr
 	// Takes the id of the user to unfollow, and validates it
 	userToUnfollowID, err := strconv.Atoi(ps.ByName("followedID"))
 	if err != nil {
-		http.Error(w, "Could not convert the followedID", http.StatusBadRequest)
+		http.Error(w, MsgConvertionErrorFollowedID, http.StatusBadRequest)
 		return
 	}
 	e = rt.db.VerifyUserId(userToUnfollowID)
@@ -60,6 +60,17 @@ func (rt *_router) unfollowUser(w http.ResponseWriter, r *http.Request, ps httpr
 	// Checks if user is trying to unfollow himself
 	if userID == userToUnfollowID {
 		http.Error(w, "The follower and followed can't have the same id", http.StatusForbidden)
+		return
+	}
+
+	// Check if the user to unfollow banned the one who is trying to unfollow him
+	e = rt.db.CheckBan(userToUnfollowID, userID)
+	if e == nil {
+		http.Error(w, "UserToUnfollow "+MsgNotFound, http.StatusNotFound)
+		return
+	}
+	if errors.Is(e, database.ErrInternalServerError) {
+		http.Error(w, MsgServerError, http.StatusInternalServerError)
 		return
 	}
 
@@ -77,7 +88,7 @@ func (rt *_router) unfollowUser(w http.ResponseWriter, r *http.Request, ps httpr
 			http.Error(w, s, http.StatusNotFound)
 		}
 		if errors.Is(err, database.ErrInternalServerError) {
-			http.Error(w, "An error occurred on the server while deleting the follow"+s, http.StatusInternalServerError)
+			http.Error(w, MsgServerError+" while deleting the follow"+s, http.StatusInternalServerError)
 		}
 		return
 	}

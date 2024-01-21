@@ -19,16 +19,16 @@ func (rt *_router) getBannedList(w http.ResponseWriter, r *http.Request, ps http
 	*/
 	userID, er := strconv.Atoi(r.Header.Get("Authorization"))
 	if er != nil {
-		http.Error(w, "Couldn't identify userId for authentication", http.StatusUnauthorized)
+		http.Error(w, MsgAuthNotFound+er.Error(), http.StatusUnauthorized)
 		return
 	}
 	e := rt.db.VerifyUserId(userID)
 	if e != nil {
 		if errors.Is(e, database.ErrNotFound) {
-			http.Error(w, "The userID provided for authentication can't be found", http.StatusUnauthorized)
+			http.Error(w, MsgAuthNotFound+e.Error(), http.StatusUnauthorized)
 		}
 		if errors.Is(e, database.ErrInternalServerError) {
-			http.Error(w, "An error occurred on ther server while identifying userID", http.StatusInternalServerError)
+			http.Error(w, MsgServerErrorUserID+e.Error(), http.StatusInternalServerError)
 		}
 		return
 	}
@@ -42,7 +42,7 @@ func (rt *_router) getBannedList(w http.ResponseWriter, r *http.Request, ps http
 			http.Error(w, s, http.StatusNotFound)
 		}
 		if errors.Is(err, database.ErrInternalServerError) {
-			http.Error(w, "An error occurred on ther server while getting the list of banned "+s, http.StatusInternalServerError)
+			http.Error(w, MsgServerError+" while getting the list of banned "+s, http.StatusInternalServerError)
 		}
 		return
 	}

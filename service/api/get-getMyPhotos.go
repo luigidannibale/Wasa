@@ -20,31 +20,31 @@ func (rt *_router) getMyPhotos(w http.ResponseWriter, r *http.Request, ps httpro
 	*/
 	userIDauth, e := strconv.Atoi(r.Header.Get("Authorization"))
 	if e != nil {
-		http.Error(w, "Couldn't identify userId for authentication "+e.Error(), http.StatusUnauthorized)
+		http.Error(w, MsgAuthNotFound+e.Error(), http.StatusUnauthorized)
 		return
 	}
 	e = rt.db.VerifyUserId(userIDauth)
 	if e != nil {
 		if errors.Is(e, database.ErrNotFound) {
-			http.Error(w, "The userID provided for authentication can't be found", http.StatusUnauthorized)
+			http.Error(w, MsgAuthNotFound+e.Error(), http.StatusUnauthorized)
 		}
 		if errors.Is(e, database.ErrInternalServerError) {
-			http.Error(w, "An error occurred on ther server while identifying userID", http.StatusInternalServerError)
+			http.Error(w, MsgServerErrorUserID+e.Error(), http.StatusInternalServerError)
 		}
 		return
 	}
 	userIDparam, err := strconv.Atoi(ps.ByName("userID"))
 	if err != nil {
-		http.Error(w, "Could not convert the userID "+err.Error(), http.StatusBadRequest)
+		http.Error(w, MsgConvertionErrorUserID+err.Error(), http.StatusBadRequest)
 		return
 	}
 	e = rt.db.VerifyUserId(userIDparam)
 	if e != nil {
 		if errors.Is(e, database.ErrNotFound) {
-			http.Error(w, "The userID provided for authentication can't be found", http.StatusNotFound)
+			http.Error(w, MsgAuthNotFound+e.Error(), http.StatusNotFound)
 		}
 		if errors.Is(e, database.ErrInternalServerError) {
-			http.Error(w, "An error occurred on ther server while identifying userID", http.StatusInternalServerError)
+			http.Error(w, MsgServerErrorUserID+e.Error(), http.StatusInternalServerError)
 		}
 		return
 	}
@@ -56,7 +56,7 @@ func (rt *_router) getMyPhotos(w http.ResponseWriter, r *http.Request, ps httpro
 			http.Error(w, s, http.StatusNotFound)
 		}
 		if errors.Is(err, database.ErrInternalServerError) {
-			http.Error(w, "An error occurred on ther server while taking the stream "+s, http.StatusInternalServerError)
+			http.Error(w, MsgServerError+" while taking the stream "+s, http.StatusInternalServerError)
 		}
 		return
 	}

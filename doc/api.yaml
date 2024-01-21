@@ -602,6 +602,10 @@ paths:
             $ref : "#/components/responses/OK" 
           "400":
             $ref : "#/components/responses/BadRequest" 
+          "401":
+            $ref : "#/components/responses/Unauthorized" 
+          "403":
+            $ref : "#/components/responses/Forbidden" 
           "404":
             $ref : "#/components/responses/NotFound" 
           "500":
@@ -738,14 +742,20 @@ paths:
           
         summary: Deletes a comment to the photo
         description: |
-          Deletes a comment to the photo, useing both photoID and commentID.
+          Deletes a comment to the photo, using both photoID and commentID.
         responses:
           "200":
             description: Success, comment deleted
+            content:
+              application/json:
+                schema:
+                   $ref : "#/components/schemas/Message"
           "400":
             $ref : "#/components/responses/BadRequest"
           "401":
             $ref : "#/components/responses/Unauthorized"
+          "403":
+            $ref : "#/components/responses/Forbidden"
           "404":
             $ref : "#/components/responses/NotFound" 
           "500":

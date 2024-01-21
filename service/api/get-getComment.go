@@ -19,16 +19,16 @@ func (rt *_router) getComment(w http.ResponseWriter, r *http.Request, ps httprou
 	*/
 	userID, er := strconv.Atoi(r.Header.Get("Authorization"))
 	if er != nil {
-		http.Error(w, "Couldn't identify userId for authentication", http.StatusUnauthorized)
+		http.Error(w, MsgAuthNotFound+er.Error(), http.StatusUnauthorized)
 		return
 	}
 	e := rt.db.VerifyUserId(userID)
 	if e != nil {
 		if errors.Is(e, database.ErrNotFound) {
-			http.Error(w, "The userID provided for authentication can't be found", http.StatusUnauthorized)
+			http.Error(w, MsgAuthNotFound+e.Error(), http.StatusUnauthorized)
 		}
 		if errors.Is(e, database.ErrInternalServerError) {
-			http.Error(w, "An error occurred on ther server while identifying userID", http.StatusInternalServerError)
+			http.Error(w, MsgServerErrorUserID+e.Error(), http.StatusInternalServerError)
 		}
 		return
 	}
@@ -36,7 +36,7 @@ func (rt *_router) getComment(w http.ResponseWriter, r *http.Request, ps httprou
 	// Takes the photoID from params and validates it
 	photoID, e := strconv.Atoi(ps.ByName("photoID"))
 	if e != nil {
-		http.Error(w, "Error taking the photoID "+e.Error(), http.StatusBadRequest)
+		http.Error(w, MsgConvertionErrorPhotoID+e.Error(), http.StatusBadRequest)
 		return
 	}
 	photo, s, e := rt.db.GetPhoto(photoID)
@@ -45,7 +45,7 @@ func (rt *_router) getComment(w http.ResponseWriter, r *http.Request, ps httprou
 			http.Error(w, s, http.StatusNotFound)
 		}
 		if errors.Is(e, database.ErrInternalServerError) {
-			http.Error(w, "An error occurred while validating the photo "+s, http.StatusInternalServerError)
+			http.Error(w, MsgValidationErrorPhoto+s, http.StatusInternalServerError)
 		}
 		return
 	}
@@ -53,18 +53,18 @@ func (rt *_router) getComment(w http.ResponseWriter, r *http.Request, ps httprou
 	// Check if the user that posted the searched photo banned the one who is trying to search it
 	e = rt.db.CheckBan(photo.UserId, userID)
 	if e == nil {
-		http.Error(w, "Couldn't find the photo", http.StatusNotFound)
+		http.Error(w, MsgNotFoundPhoto, http.StatusNotFound)
 		return
 	}
 	if errors.Is(e, database.ErrInternalServerError) {
-		http.Error(w, "An error occurred on ther server", http.StatusInternalServerError)
+		http.Error(w, MsgServerError, http.StatusInternalServerError)
 		return
 	}
 
 	// Takes the commentID from params and validates it
 	commentID, e := strconv.Atoi(ps.ByName("commentID"))
 	if e != nil {
-		http.Error(w, "Error taking the commentID "+e.Error(), http.StatusBadRequest)
+		http.Error(w, MsgConvertionErrorCommentID+e.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -77,7 +77,7 @@ func (rt *_router) getComment(w http.ResponseWriter, r *http.Request, ps httprou
 			http.Error(w, s, http.StatusNotFound)
 		}
 		if errors.Is(err, database.ErrInternalServerError) {
-			http.Error(w, "An error occurred on ther server while getting the comment"+s, http.StatusInternalServerError)
+			http.Error(w, MsgServerError+" while getting the comment"+s, http.StatusInternalServerError)
 		}
 		return
 	}

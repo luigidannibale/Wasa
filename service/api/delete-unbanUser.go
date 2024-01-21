@@ -21,34 +21,35 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 	*/
 	userIDauth, e := strconv.Atoi(r.Header.Get("Authorization"))
 	if e != nil {
-		http.Error(w, "Couldn't identify userId for authentication "+e.Error(), http.StatusUnauthorized)
+		http.Error(w, MsgAuthNotFound+e.Error(), http.StatusUnauthorized)
 		return
 	}
 	e = rt.db.VerifyUserId(userIDauth)
 	if e != nil {
 		if errors.Is(e, database.ErrNotFound) {
-			http.Error(w, "The userID provided for authentication can't be found", http.StatusUnauthorized)
+			http.Error(w, MsgAuthNotFound+e.Error(), http.StatusUnauthorized)
 		}
 		if errors.Is(e, database.ErrInternalServerError) {
-			http.Error(w, "An error occurred on ther server while identifying userID", http.StatusInternalServerError)
+			http.Error(w, MsgServerErrorUserID+e.Error(), http.StatusInternalServerError)
 		}
 		return
 	}
 	userIDparam, err := strconv.Atoi(ps.ByName("userID"))
 	if err != nil {
-		http.Error(w, "Could not convert the userID "+err.Error(), http.StatusBadRequest)
+		http.Error(w, MsgConvertionErrorUserID+err.Error(), http.StatusBadRequest)
 		return
 	}
 	if userIDauth != userIDparam {
 		http.Error(w, "Authentication userID and parameter userID don't match", http.StatusForbidden)
 		return
 	}
+
 	userID := userIDauth
 
 	//  Takes the id of the user to unban, and validates it
 	userToUnbanID, err := strconv.Atoi(ps.ByName("bannedID"))
 	if err != nil {
-		http.Error(w, "Could not convert the bannedID", http.StatusBadRequest)
+		http.Error(w, MsgConvertionErrorBannedID, http.StatusBadRequest)
 		return
 	}
 	//  Checks if the user is trying to unban himself
@@ -58,11 +59,11 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 	}
 	e = rt.db.VerifyUserId(userToUnbanID)
 	if e != nil {
-		if errors.Is(err, database.ErrNotFound) {
+		if errors.Is(e, database.ErrNotFound) {
 			http.Error(w, "The user to unban can't be found", http.StatusNotFound)
 		}
-		if errors.Is(err, database.ErrInternalServerError) {
-			http.Error(w, "An error has occurred on the server while looking for the user to unban ", http.StatusInternalServerError)
+		if errors.Is(e, database.ErrInternalServerError) {
+			http.Error(w, MsgServerError+" while looking for the user to unban ", http.StatusInternalServerError)
 		}
 		return
 	}
@@ -81,7 +82,7 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 			http.Error(w, s, http.StatusNotFound)
 		}
 		if errors.Is(err, database.ErrInternalServerError) {
-			http.Error(w, "An error has occurred on the server while deleting the ban"+s, http.StatusInternalServerError)
+			http.Error(w, MsgServerError+" while deleting the ban"+s, http.StatusInternalServerError)
 		}
 		return
 	}

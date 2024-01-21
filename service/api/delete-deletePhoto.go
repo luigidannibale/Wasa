@@ -19,16 +19,16 @@ func (rt *_router) deletePhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	*/
 	userIDauth, e := strconv.Atoi(r.Header.Get("Authorization"))
 	if e != nil {
-		http.Error(w, "Couldn't identify userId for authentication "+e.Error(), http.StatusUnauthorized)
+		http.Error(w, MsgAuthNotFound+e.Error(), http.StatusUnauthorized)
 		return
 	}
 	e = rt.db.VerifyUserId(userIDauth)
 	if e != nil {
 		if errors.Is(e, database.ErrNotFound) {
-			http.Error(w, "The userID provided for authentication can't be found", http.StatusUnauthorized)
+			http.Error(w, MsgAuthNotFound+e.Error(), http.StatusUnauthorized)
 		}
 		if errors.Is(e, database.ErrInternalServerError) {
-			http.Error(w, "An error occurred on ther server while identifying userID ", http.StatusInternalServerError)
+			http.Error(w, MsgServerErrorUserID+e.Error(), http.StatusInternalServerError)
 		}
 		return
 	}
@@ -37,7 +37,7 @@ func (rt *_router) deletePhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	//  Takes the id of the photo to delete, and validates it
 	photoID, err := strconv.Atoi(ps.ByName("photoID"))
 	if err != nil {
-		http.Error(w, "Could not convert the photoID", http.StatusBadRequest)
+		http.Error(w, MsgConvertionErrorPhotoID, http.StatusBadRequest)
 		return
 	}
 	photo, s, e := rt.db.GetPhoto(photoID)
@@ -46,14 +46,14 @@ func (rt *_router) deletePhoto(w http.ResponseWriter, r *http.Request, ps httpro
 			http.Error(w, s, http.StatusNotFound)
 		}
 		if errors.Is(e, database.ErrInternalServerError) {
-			http.Error(w, "An error occurred while validating the photo "+e.Error(), http.StatusInternalServerError)
+			http.Error(w, MsgValidationErrorPhoto+e.Error(), http.StatusInternalServerError)
 		}
 		return
 	}
 
-	//  Checks if the user is trying to delete a photo of others
+	//  Checks if the user is trying to delete a photo he didn't post
 	if userID != photo.UserId {
-		http.Error(w, "The user has not posted this photo, nor can delete it", http.StatusForbidden)
+		http.Error(w, "The user has not post this photo, nor can delete it", http.StatusForbidden)
 		return
 	}
 
@@ -66,7 +66,7 @@ func (rt *_router) deletePhoto(w http.ResponseWriter, r *http.Request, ps httpro
 			http.Error(w, s, http.StatusNotFound)
 		}
 		if errors.Is(err, database.ErrInternalServerError) {
-			http.Error(w, "An error has occurred on the server while deleting the photo "+s, http.StatusInternalServerError)
+			http.Error(w, MsgServerError+" while deleting the photo "+s, http.StatusInternalServerError)
 		}
 		return
 	}
