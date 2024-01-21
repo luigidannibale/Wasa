@@ -22,26 +22,26 @@ func (rt *_router) banUser(w http.ResponseWriter, r *http.Request, ps httprouter
 	*/
 	userIDauth, e := strconv.Atoi(r.Header.Get("Authorization"))
 	if e != nil {
-		http.Error(w, "Couldn't identify userId for authentication "+e.Error(), http.StatusUnauthorized)
+		http.Error(w, MsgAuthNotFound+e.Error(), http.StatusUnauthorized)
 		return
 	}
 	e = rt.db.VerifyUserId(userIDauth)
 	if e != nil {
 		if errors.Is(e, database.ErrNotFound) {
-			http.Error(w, "The userID provided for authentication can't be found", http.StatusUnauthorized)
+			http.Error(w, MsgAuthNotFound+e.Error(), http.StatusUnauthorized)
 		}
 		if errors.Is(e, database.ErrInternalServerError) {
-			http.Error(w, "An error occurred on ther server while identifying userID", http.StatusInternalServerError)
+			http.Error(w, MsgServerErrorUserID+e.Error(), http.StatusInternalServerError)
 		}
 		return
 	}
 	userIDparam, err := strconv.Atoi(ps.ByName("userID"))
 	if err != nil {
-		http.Error(w, "Could not convert the userID "+err.Error(), http.StatusBadRequest)
+		http.Error(w, MsgConvertionErrorUserID+err.Error(), http.StatusBadRequest)
 		return
 	}
 	if userIDauth != userIDparam {
-		http.Error(w, "Authentication userID and parameter userID don't match", http.StatusForbidden)
+		http.Error(w, MsgAuthNoMatch, http.StatusForbidden)
 		return
 	}
 	userID := userIDauth
@@ -49,16 +49,16 @@ func (rt *_router) banUser(w http.ResponseWriter, r *http.Request, ps httprouter
 	// Takes the id of the user to ban, and validates it
 	userToBanID, err := strconv.Atoi(r.URL.Query().Get("userToBanID"))
 	if err != nil {
-		http.Error(w, "Could not convert the userToBanID", http.StatusBadRequest)
+		http.Error(w, MsgConvertionErrorUserToBanID, http.StatusBadRequest)
 		return
 	}
 	e = rt.db.VerifyUserId(userToBanID)
 	if e != nil {
 		if errors.Is(e, database.ErrNotFound) {
-			http.Error(w, "The userToBanID can't be found", http.StatusNotFound)
+			http.Error(w, "UserToBanID "+MsgNotFound, http.StatusNotFound)
 		}
 		if errors.Is(e, database.ErrInternalServerError) {
-			http.Error(w, "An error occurred on ther server while identifying userToBanID", http.StatusInternalServerError)
+			http.Error(w, MsgServerError+" while identifying userToBanID", http.StatusInternalServerError)
 		}
 		return
 	}
@@ -83,7 +83,7 @@ func (rt *_router) banUser(w http.ResponseWriter, r *http.Request, ps httprouter
 			w.WriteHeader(http.StatusOK)
 		}
 		if errors.Is(err, database.ErrInternalServerError) {
-			http.Error(w, "An error has occurred on the server while creating the ban "+s, http.StatusInternalServerError)
+			http.Error(w, MsgServerError+" while creating the ban "+s, http.StatusInternalServerError)
 			return
 		}
 	} else {

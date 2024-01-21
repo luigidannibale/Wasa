@@ -24,16 +24,16 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	*/
 	userID, er := strconv.Atoi(r.Header.Get("Authorization"))
 	if er != nil {
-		http.Error(w, "Couldn't identify userId for authentication "+er.Error(), http.StatusUnauthorized)
+		http.Error(w, MsgAuthNotFound+er.Error(), http.StatusUnauthorized)
 		return
 	}
 	e := rt.db.VerifyUserId(userID)
 	if e != nil {
 		if errors.Is(e, database.ErrNotFound) {
-			http.Error(w, "The userID provided for authentication can't be found", http.StatusUnauthorized)
+			http.Error(w, MsgAuthNotFound+e.Error(), http.StatusUnauthorized)
 		}
 		if errors.Is(e, database.ErrInternalServerError) {
-			http.Error(w, "An error occurred on ther server while identifying userID", http.StatusInternalServerError)
+			http.Error(w, MsgServerErrorUserID+e.Error(), http.StatusInternalServerError)
 		}
 		return
 	}
@@ -49,7 +49,7 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 
 	imageFile, _, err := r.FormFile("image")
 	if err != nil {
-		http.Error(w, "Error while retrieving image", http.StatusBadRequest)
+		http.Error(w, "Error while retrieving image from request body", http.StatusBadRequest)
 		return
 	}
 	defer imageFile.Close()
@@ -66,7 +66,7 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	photo.Image = base64.StdEncoding.EncodeToString(image)
 	photo.UploadTimestamp = time.Now()
 	if e = photo.Validate(); e != nil {
-		http.Error(w, "Couldn't validate the photo "+e.Error(), http.StatusBadRequest)
+		http.Error(w, MsgValidationErrorPhoto+e.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -74,7 +74,7 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	photoId, s, e := rt.db.CreatePhoto(photo)
 	if e != nil {
 		if errors.Is(e, database.ErrInternalServerError) {
-			http.Error(w, "An error occurred on the server creating the comment "+s, http.StatusInternalServerError)
+			http.Error(w, MsgServerError+" while creating the comment "+s, http.StatusInternalServerError)
 		}
 		return
 	}

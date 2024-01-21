@@ -40,7 +40,7 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 	if userIDauth != userIDparam {
-		http.Error(w, "Authentication userID and parameter userID don't match", http.StatusForbidden)
+		http.Error(w, MsgAuthNoMatch, http.StatusForbidden)
 		return
 	}
 

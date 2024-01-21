@@ -40,7 +40,7 @@ func (rt *_router) unfollowUser(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 	if userIDauth != userIDparam {
-		http.Error(w, "Authentication userID and parameter userID don't match", http.StatusForbidden)
+		http.Error(w, MsgAuthNoMatch, http.StatusForbidden)
 		return
 	}
 	userID := userIDauth

@@ -20,16 +20,16 @@ func (rt *_router) likePhoto(w http.ResponseWriter, r *http.Request, ps httprout
 	*/
 	userID, er := strconv.Atoi(r.Header.Get("Authorization"))
 	if er != nil {
-		http.Error(w, "Couldn't identify userID for authentication "+er.Error(), http.StatusUnauthorized)
+		http.Error(w, MsgAuthNotFound+er.Error(), http.StatusUnauthorized)
 		return
 	}
 	e := rt.db.VerifyUserId(userID)
 	if e != nil {
 		if errors.Is(e, database.ErrNotFound) {
-			http.Error(w, "The userID provided for authentication can't be found", http.StatusUnauthorized)
+			http.Error(w, MsgAuthNotFound+e.Error(), http.StatusUnauthorized)
 		}
 		if errors.Is(e, database.ErrInternalServerError) {
-			http.Error(w, "An error occurred on ther server while identifying userID", http.StatusInternalServerError)
+			http.Error(w, MsgServerErrorUserID+e.Error(), http.StatusInternalServerError)
 		}
 		return
 	}
@@ -37,7 +37,7 @@ func (rt *_router) likePhoto(w http.ResponseWriter, r *http.Request, ps httprout
 	// Takes the photoID and validates it
 	photoID, er := strconv.Atoi(ps.ByName("photoID"))
 	if er != nil {
-		http.Error(w, "Couldn't identify userId for authentication "+er.Error(), http.StatusUnauthorized)
+		http.Error(w, MsgConvertionErrorPhotoID+er.Error(), http.StatusUnauthorized)
 		return
 	}
 	photo, s, e := rt.db.GetPhoto(photoID)
@@ -46,7 +46,7 @@ func (rt *_router) likePhoto(w http.ResponseWriter, r *http.Request, ps httprout
 			http.Error(w, s, http.StatusNotFound)
 		}
 		if errors.Is(e, database.ErrInternalServerError) {
-			http.Error(w, "An error occurred on ther server while getting the photo "+s, http.StatusInternalServerError)
+			http.Error(w, MsgValidationErrorPhoto+s, http.StatusInternalServerError)
 		}
 		return
 
@@ -55,11 +55,11 @@ func (rt *_router) likePhoto(w http.ResponseWriter, r *http.Request, ps httprout
 	// Check if the user that posted the searched photo banned the one who is trying to search it
 	e = rt.db.CheckBan(photo.UserId, userID)
 	if e == nil {
-		http.Error(w, "Couldn't find the photo", http.StatusNotFound)
+		http.Error(w, MsgNotFoundPhoto, http.StatusNotFound)
 		return
 	}
 	if errors.Is(e, database.ErrInternalServerError) {
-		http.Error(w, "An error occurred on ther server", http.StatusInternalServerError)
+		http.Error(w, MsgServerError, http.StatusInternalServerError)
 		return
 	}
 
@@ -77,7 +77,7 @@ func (rt *_router) likePhoto(w http.ResponseWriter, r *http.Request, ps httprout
 			w.WriteHeader(http.StatusOK)
 		}
 		if errors.Is(e, database.ErrInternalServerError) {
-			http.Error(w, "An error has occurred on the server while creating the like "+s, http.StatusInternalServerError)
+			http.Error(w, MsgServerError+" while creating the like "+s, http.StatusInternalServerError)
 			return
 		}
 	} else {

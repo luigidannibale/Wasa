@@ -39,7 +39,7 @@ func (rt *_router) getMyStream(w http.ResponseWriter, r *http.Request, ps httpro
 		return
 	}
 	if userIDauth != userIDparam {
-		http.Error(w, "Authentication userID and parameter userID don't match", http.StatusForbidden)
+		http.Error(w, MsgAuthNoMatch, http.StatusForbidden)
 		return
 	}
 	userID := userIDauth

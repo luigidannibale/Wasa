@@ -41,7 +41,7 @@ func (rt *_router) doLogin(w http.ResponseWriter, r *http.Request, ps httprouter
 	// Checks for DB errors
 	if err != nil {
 		if errors.Is(err, database.ErrInternalServerError) {
-			http.Error(w, "An error occurred on the server creating the user "+s, http.StatusInternalServerError)
+			http.Error(w, MsgServerError+" while creating the user "+s, http.StatusInternalServerError)
 		}
 		return
 	}
