@@ -17,6 +17,9 @@ func (db *appdbimpl) GetBannedList(userID int) ([]utils.User, string, error) {
 						FROM Bans
 						JOIN Users ON BannedID = Id
 						WHERE BannerID = ? `, userID)
+	if rows.Err() != nil {
+		return banned, rows.Err().Error(), ErrInternalServerError
+	}
 	if e != nil {
 		if errors.Is(e, sql.ErrNoRows) {
 			return banned, "Couldn't find any banned", ErrNotFound
@@ -25,11 +28,12 @@ func (db *appdbimpl) GetBannedList(userID int) ([]utils.User, string, error) {
 	}
 
 	defer rows.Close()
+
 	for rows.Next() {
 		var u utils.User
 		err := rows.Scan(&u.Id, &u.Username, &u.Name, &u.Surname, &u.DateOfBirth)
 		if err != nil {
-			return banned, e.Error(), ErrInternalServerError
+			return banned, err.Error(), ErrInternalServerError
 		}
 		banned = append(banned, u)
 	}
@@ -43,6 +47,7 @@ func (db *appdbimpl) DeleteBan(ban utils.Ban) (string, error) {
 	userID, userToUnbanID := ban.BannerID, ban.BannedID
 
 	res, err := db.c.Exec(`DELETE FROM Bans WHERE BannerID = ? AND BannedID = ?`, userID, userToUnbanID)
+
 	if x, y := res.RowsAffected(); x == 0 && y == nil {
 		return fmt.Sprintf("User %d was not banned by %d", userToUnbanID, userID), ErrNotFound
 	}
@@ -83,7 +88,10 @@ func (db *appdbimpl) CreateBan(ban utils.Ban) (string, error) {
 		retS, retE = err.Error(), ErrInternalServerError
 	}
 	if retE != nil {
-		tx.Rollback()
+		rbErr := tx.Rollback()
+		if rbErr != nil {
+			return rbErr.Error(), ErrInternalServerError
+		}
 		return retS, retE
 	}
 

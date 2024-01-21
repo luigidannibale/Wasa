@@ -63,6 +63,9 @@ func (db *appdbimpl) GetCommentsList(photoID int) ([]utils.Comment, string, erro
 	rows, e := db.c.Query(`SELECT Id, userID, Content
 						FROM Comments
 						WHERE PhotoID = ?`, photoID)
+	if rows.Err() != nil {
+		return comments, rows.Err().Error(), ErrInternalServerError
+	}
 	if e != nil {
 		if errors.Is(e, sql.ErrNoRows) {
 			return comments, "Couldn't find any comment", ErrNotFound
@@ -74,7 +77,7 @@ func (db *appdbimpl) GetCommentsList(photoID int) ([]utils.Comment, string, erro
 		var c utils.Comment
 		err := rows.Scan(&c.Id, &c.UserID, &c.Content)
 		if err != nil {
-			return comments, e.Error(), ErrInternalServerError
+			return comments, err.Error(), ErrInternalServerError
 		}
 		c.PhotoID = photoID
 		comments = append(comments, c)

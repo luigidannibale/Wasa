@@ -53,11 +53,13 @@ func (db *appdbimpl) GetPhoto(photoID int) (utils.Photo, string, error) {
 	if caption.Valid {
 		photo.Caption = caption.String
 	}
+
 	ut, er := time.Parse(time.Layout, ts)
 	if er != nil {
 		return photo, er.Error(), ErrInternalServerError
 	}
 	photo.UploadTimestamp = ut
+
 	if e == nil {
 		return photo, "Photo found successfully", nil
 	}
@@ -77,6 +79,9 @@ func (db *appdbimpl) GetStream(userID int) ([]utils.Photo, string, error) {
 						JOIN Follows ON userID = FollowedID 
 						WHERE FollowerID = ?
 						ORDER BY UploadTimestamp DESC`, userID)
+	if rows.Err() != nil {
+		return stream, rows.Err().Error(), ErrInternalServerError
+	}
 	if e != nil {
 		if errors.Is(e, sql.ErrNoRows) {
 			return stream, "Couldn't find any photo", ErrNotFound
@@ -89,7 +94,7 @@ func (db *appdbimpl) GetStream(userID int) ([]utils.Photo, string, error) {
 		var ts string
 		err := rows.Scan(&p.Id, &p.Image, &p.Caption, &ts, &p.UserId)
 		if err != nil {
-			return stream, e.Error(), ErrInternalServerError
+			return stream, err.Error(), ErrInternalServerError
 		}
 		ut, er := time.Parse(time.Layout, ts)
 		if er != nil {
@@ -110,6 +115,9 @@ func (db *appdbimpl) GetMyPhotos(userID int) ([]utils.Photo, string, error) {
 						FROM Photos		
 						Where UserId = ?
 						ORDER BY UploadTimestamp DESC`, userID)
+	if rows.Err() != nil {
+		return stream, rows.Err().Error(), ErrInternalServerError
+	}
 	if e != nil {
 		if errors.Is(e, sql.ErrNoRows) {
 			return stream, "Couldn't find any photo", ErrNotFound
@@ -122,7 +130,7 @@ func (db *appdbimpl) GetMyPhotos(userID int) ([]utils.Photo, string, error) {
 		var ts string
 		err := rows.Scan(&p.Id, &p.Image, &p.Caption, &ts)
 		if err != nil {
-			return stream, e.Error(), ErrInternalServerError
+			return stream, err.Error(), ErrInternalServerError
 		}
 		ut, er := time.Parse(time.Layout, ts)
 		if er != nil {

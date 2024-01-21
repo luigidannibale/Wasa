@@ -47,12 +47,13 @@ Errors that can be returned: (NotFound, InternalServerError)
 func (db *appdbimpl) DeleteLike(like utils.Like) (string, error) {
 
 	res, err := db.c.Exec(`DELETE FROM Likes WHERE UserID = ? AND PhotoID = ?`, like.UserID, like.PhotoID)
-	if x, y := res.RowsAffected(); x == 0 && y == nil {
-		return "Couldn't find the like", ErrNotFound
-	}
 	if err != nil {
 		return err.Error(), ErrInternalServerError
 	}
+	if x, y := res.RowsAffected(); x == 0 && y == nil {
+		return "Couldn't find the like", ErrNotFound
+	}
+
 	return "Like deleted successfully", nil
 }
 
@@ -65,6 +66,9 @@ func (db *appdbimpl) GetLikersList(photoID int) ([]string, string, error) {
 						FROM Likes
 						JOIN Users ON UserId == Id
 						WHERE PhotoID = ?`, photoID)
+	if rows.Err() != nil {
+		return likers, rows.Err().Error(), ErrInternalServerError
+	}
 	if e != nil {
 		if errors.Is(e, sql.ErrNoRows) {
 			return likers, "Couldn't find any like", ErrNotFound

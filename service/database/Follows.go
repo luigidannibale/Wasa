@@ -17,6 +17,9 @@ func (db *appdbimpl) GetFollowedList(userID int) ([]utils.User, string, error) {
 						FROM Follows
 						JOIN Users ON FollowedID = Id
 						WHERE FollowerID = ?`, userID)
+	if rows.Err() != nil {
+		return followed, rows.Err().Error(), ErrInternalServerError
+	}
 	if e != nil {
 		if errors.Is(e, sql.ErrNoRows) {
 			return followed, "Couldn't find any followed", ErrNotFound
@@ -28,7 +31,7 @@ func (db *appdbimpl) GetFollowedList(userID int) ([]utils.User, string, error) {
 		var u utils.User
 		err := rows.Scan(&u.Id, &u.Username, &u.Name, &u.Surname, &u.DateOfBirth)
 		if err != nil {
-			return followed, e.Error(), ErrInternalServerError
+			return followed, err.Error(), ErrInternalServerError
 		}
 		followed = append(followed, u)
 	}
@@ -46,6 +49,9 @@ func (db *appdbimpl) GetFollowersList(userID int) ([]utils.User, string, error) 
 						FROM Follows
 						JOIN Users ON FollowerID = Id
 						WHERE FollowedID = ?`, userID)
+	if rows.Err() != nil {
+		return followers, rows.Err().Error(), ErrInternalServerError
+	}
 	if e != nil {
 		if errors.Is(e, sql.ErrNoRows) {
 			return followers, "Couldn't find any follower", ErrNotFound
@@ -57,7 +63,7 @@ func (db *appdbimpl) GetFollowersList(userID int) ([]utils.User, string, error) 
 		var u utils.User
 		err := rows.Scan(&u.Id, &u.Username, &u.Name, &u.Surname, &u.DateOfBirth)
 		if err != nil {
-			return followers, e.Error(), ErrInternalServerError
+			return followers, err.Error(), ErrInternalServerError
 		}
 		followers = append(followers, u)
 	}
@@ -106,11 +112,11 @@ func (db *appdbimpl) DeleteFollow(follow utils.Follow) (string, error) {
 	userID, userToUnfollowID := follow.FollowerID, follow.FollowedID
 
 	res, err := db.c.Exec(`DELETE FROM Follows WHERE FollowerID = ? AND FollowedID = ?`, userID, userToUnfollowID)
-	if x, y := res.RowsAffected(); x == 0 && y == nil {
-		return fmt.Sprintf("Couldn't find the user to unfollow %d in the following of user %d", userID, userToUnfollowID), ErrNotFound
-	}
 	if err != nil {
 		return err.Error(), ErrInternalServerError
+	}
+	if x, y := res.RowsAffected(); x == 0 && y == nil {
+		return fmt.Sprintf("Couldn't find the user to unfollow %d in the following of user %d", userID, userToUnfollowID), ErrNotFound
 	}
 
 	return fmt.Sprintf("User %d is no longer following %d", userID, userToUnfollowID), nil

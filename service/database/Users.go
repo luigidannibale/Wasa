@@ -29,14 +29,14 @@ func (db *appdbimpl) CreateUserByUsername(username string) (int, string, error) 
 	var userID int
 	u, s, e := db.GetUserByUsername(username)
 	if e != nil {
-		switch e {
-		case ErrNotFound:
+		if errors.Is(e, ErrNotFound) {
 			err := db.c.QueryRow(`INSERT INTO Users(Username) VALUES (?) RETURNING Id`, username).Scan(&userID)
 			if err == nil {
 				return userID, "Created", nil
 			}
 			return userID, err.Error(), ErrInternalServerError
-		case ErrInternalServerError:
+		}
+		if errors.Is(e, ErrInternalServerError) {
 			return userID, s, ErrInternalServerError
 		}
 	}
