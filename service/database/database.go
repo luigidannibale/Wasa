@@ -381,12 +381,12 @@ func PopulateDB(db *sql.DB) error {
 
 	sqlStmt = `INSERT INTO Photos (UserID,Image,Caption,UploadTimestamp)
 				VALUES
-						(1,"","First photo","12/11 03:08:38PM '23 +0100"),
-						(2,"","Second photo","12/11 03:08:38PM '22 +0100"),
-						(3,"","Third photo","12/11 03:08:38PM '21 +0100"),
-						(4,"","Fourth photo","12/11 03:08:38PM '21 +0100"),
-						(5,"","Fifth photo","12/11 03:08:38PM '21 +0100"),
-						(6,"","Sixth photo","12/11 03:08:38PM '20 +0100");`
+						(1,"","First photo","11/11 03:08:38PM '22 +0100"),
+						(2,"","Second photo","12/12 02:08:38PM '22 +0100"),
+						(3,"","Third photo","11/11 04:08:38PM '23 +0100"),
+						(4,"","Fourth photo","12/12 05:08:38PM '23 +0100"),
+						(5,"","Fifth photo","13/12 07:08:38PM '23 +0100"),
+						(6,"","Sixth photo","14/12 01:08:38PM '23 +0100");`
 
 	_, err = db.Exec(sqlStmt)
 	if err != nil {

@@ -263,25 +263,31 @@ export default {
 		setUsername(name){
 			this.username = name			
 		},
+		convertTime(timestamp){
+			const date = new Date(timestamp);
+      		const options = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric'};
+      		return date.toLocaleDateString('en-US', options);
+		},
 		async setPhotos(photos){
 			if(!photos){ 
 				this.n_photos = 0	
 				return
 			}
-			this.n_photos = photos.length			
+			this.n_photos = photos.length				
 			for (let i = 0,x = 0; i < photos.length; i+=2,x++) {
 				let couple = {
 					im1: {},
 					im2: {},
 				}												
 				couple.im1.blob = "data:image/*;base64," + photos[i].image
-				couple.im1.id = photos[i].id
-				couple.im1.cap = photos[i].caption	
+				couple.im1.id = photos[i].id				
+				couple.im1.cap = photos[i].caption + " - posted on " + this.convertTime(photos[i].uploadTimestamp)
 				couple.im1.showComments = false
                 couple.im1.showLikes = false
-				var likerslist = await this.getLikes(photos[i])
-                var commentslist = await this.getComments(photos[i])
-                
+				couple.im1.deletable = photos[i].userId == this.loggedId
+					
+				
+				var likerslist = await this.getLikes(photos[i])                                
                 if(likerslist) {
                     couple.im1.n_likes = likerslist.length
                     couple.im1.liked = false                    
@@ -291,58 +297,63 @@ export default {
                         }                        
                     }
                 }
-                else couple.im1.n_likes = 0                 
-                if(commentslist) couple.im1.n_comments = commentslist.length
+                else couple.im1.n_likes = 0   
+				couple.im1.likes = likerslist
+				
+				var commentslist = await this.getComments(photos[i])
+                if(commentslist) {
+					couple.im1.n_comments = commentslist.length
+					couple.im1.comments = []
+					for(let e = 0; e<commentslist.length; e++){                    
+						let c = {}                    
+						c.author = commentslist[e].userID
+						c.text = commentslist[e].content
+						c.id = commentslist[e].id
+						c.delete = false
+						couple.im1.comments[e] = c
+					}                
+				}					
                 else couple.im1.n_comments = 0                 
-                couple.im1.likes = likerslist                
-                couple.im1.comments = []
-                for(let x = 0; x<commentslist.length; x++){                    
-                    let c = {}                    
-                    c.author = commentslist[x].userID
-                    c.text = commentslist[x].content
-                    c.id = commentslist[x].id
-                    c.delete = false
-                    couple.im1.comments[x] = c
-                }                
-				couple.im1.username = this.following[photos[i].userId].username                                
                 				
 				if(i < photos.length-1){																				
 					couple.im2.blob = "data:image/*;base64," + photos[i+1].image
-					couple.im2.cap = photos[i+1].caption
-					couple.im2.id = photos[i+1].id
+					couple.im2.cap = photos[i+1].caption + " - posted on " + this.convertTime(photos[i+1].uploadTimestamp)
+					couple.im2.id = photos[i+1].id					
 					couple.im2.showComments = false
                 	couple.im2.showLikes = false
+					couple.im2.deletable = photos[i+1].userId == this.loggedId
 
-					var likerslist = await this.getLikes(photos[i])
-					var commentslist = await this.getComments(photos[i])
+					var likerslist = await this.getLikes(photos[i+1])
+					
 					
 					if(likerslist) {
 						couple.im2.n_likes = likerslist.length
 						couple.im2.liked = false                    
-						for(let x = 0; x<likerslist.length; x++){
-							if(likerslist[x] === this.username){                        
+						for(let e = 0; e<likerslist.length; e++){
+							if(likerslist[e] === this.username){                        
 								couple.im2.liked = true
 							}                        
 						}
 					}
 					else couple.im2.n_likes = 0                 
-					if(commentslist) couple.im2.n_comments = commentslist.length
-					else couple.im2.n_comments = 0                 
-					couple.im2.likes = likerslist                
-					couple.im2.comments = []
-					for(let x = 0; x<commentslist.length; x++){                    
-						let c = {}                    
-						c.author = commentslist[x].userID
-						c.text = commentslist[x].content
-						c.id = commentslist[x].id
-						c.delete = false
-						couple.im2.comments[x] = c
-					}                
-					couple.im2.username = this.following[photos[i].userId].username                                
-					
+					couple.im2.likes = likerslist                					                
+					var commentslist = await this.getComments(photos[i+1])
+					if(commentslist){
+						couple.im2.n_comments = commentslist.length
+						couple.im2.comments = []
+						for(let e = 0; e<commentslist.length; e++){                    
+							let c = {}                    
+							c.author = commentslist[e].userID
+							c.text = commentslist[e].content
+							c.id = commentslist[e].id
+							c.delete = false
+							couple.im2.comments[e] = c
+						}
+					}
+					else couple.im2.n_comments = 0                 					
 					}	
 				else {
-					c.im2 = null
+					couple.im2 = null
 				}							
 				couple.id = "c"+x.toString()
 				this.images["c"+x.toString()] = couple								
@@ -461,6 +472,39 @@ export default {
                 this.images[n].im1.showLikes = false
             }
         },
+		async deletePhoto(pid){			
+			var r = null
+			var id = sessionStorage.getItem("id")				
+			try {			
+				await this.$axios({
+					method:"delete",
+					url:"/photos/"+pid,
+					headers:{
+						Authorization:id,						
+					},												
+				}).then((response)=>{
+					r = response}
+					)								
+			} catch (e) {
+				r = e.response;							
+			}
+			console.log(r)
+			switch (r.status) {
+				case 200:										
+					location.reload()
+					break;												
+				default:
+					this.errAlert(r.data);
+					break;
+			}
+		},
+		async showPostPhotoForm(){			
+			this.postPhotoForm = true;
+		},
+		hidePostPhotoForm(){
+			this.postPhotoForm = false;		
+			location.reload()				
+		},
 	},
 	mounted() {		
 		this.configProfile()		
@@ -475,7 +519,7 @@ export default {
 
     <div class="container py-5 h-100">										
 				<div class="row d-flex justify-content-left h-100">					
-					<div class="col col-lg-12 ">												
+					<div class="col col-lg-10 ">												
 						<div class="card">
 							<div id="profileHeader" class="p-4 text-black" style="background-color: #f8f9fa;" >
 								<div class="d-flex justify-content-between align-items-center mb-4">
@@ -524,7 +568,7 @@ export default {
 											<svg class="feather" role="button" style="margin-right: 10px;"><use href="/feather-sprite-v4.29.0.svg#message-circle"/></svg>
 										</div>
 										<div>
-											<svg class="feather" role="button" @click="c.im1.deleteSect = !c.im1.deleteSect"><use href="/feather-sprite-v4.29.0.svg#trash-2"/></svg>
+											<svg class="feather" role="button" @click="c.im1.deleteSect = !c.im1.deleteSect" v-if="c.im1.deletable"><use href="/feather-sprite-v4.29.0.svg#trash-2"/></svg>
 										</div>
 										<div class="scrollable-container" id="commentsSection" v-if="c.im1.showComments">
 											<h6 style="text-align: center;">Comments</h6>
@@ -563,7 +607,7 @@ export default {
 											                            
 										</div>
 
-										<div id="likesSection" v-if="c.im1.showLikes">
+										<div :id="'likesSection'+c.im1.id" v-if="c.im1.showLikes">
 											<h6 class="text-center mb-12 pb-2" style="margin-top: 5px;">Likes</h6>
 											<div v-for="u in c.im1.likes">
 												<div class="row">                                
@@ -577,7 +621,7 @@ export default {
 										<div :id="'deleteSect'+c.im1.id" v-if="c.im1.deleteSect"> 
 											<span> Do you really want to delete this post? </span>
 											<br>
-											<span class="small" role="button" @click="" :id="'delete'+c.im1.id" style="color: green;">
+											<span class="small" role="button" @click="deletePhoto(c.im1.id)" :id="'delete'+c.im1.id" style="color: green;">
                                                 Yes
                                                 <svg class="feather" ><use href="/feather-sprite-v4.29.0.svg#check"/></svg>
                                             </span>                                       
@@ -603,17 +647,27 @@ export default {
 											<svg class="feather" role="button" style="margin-right: 10px;"><use href="/feather-sprite-v4.29.0.svg#message-circle"/></svg>
 										</div>
 										<div>
-											<svg class="feather" role="button" @click="c.im2.deleteSect = !c.im2.deleteSect"><use href="/feather-sprite-v4.29.0.svg#trash-2"/></svg>
+											<svg class="feather" role="button" @click="c.im2.deleteSect = !c.im2.deleteSect" v-if="c.im2.deletable"><use href="/feather-sprite-v4.29.0.svg#trash-2"/></svg>
 										</div>
 										         
 										
 										<div :id="'commentSect'+c.im2.id" v-if="c.im2.commentSect"> 
 
 										</div>
+										<div :id="'likesSection'+c.im2.id" v-if="c.im2.showLikes">
+											<h6 class="text-center mb-12 pb-2" style="margin-top: 5px;">Likes</h6>
+											<div v-for="u in c.im2.likes">
+												<div class="row">                                
+													<p class="mb-1" role="button" @click="search(u)" > 
+														{{ u }}
+													</p>
+												</div>
+											</div>
+										</div>
 										<div :id="'deleteSect'+c.im2.id" v-if="c.im2.deleteSect"> 
 											<span> Do you really want to delete this post? </span>
 											<br>
-											<span class="small" role="button" @click="" :id="'delete'+c.im2.id" style="color: green;">
+											<span class="small" role="button" @click="deletePhoto(c.im2.id)" :id="'delete'+c.im2.id" style="color: green;">
                                                 Yes
                                                 <svg class="feather" ><use href="/feather-sprite-v4.29.0.svg#check"/></svg>
                                             </span>                                       
@@ -630,9 +684,9 @@ export default {
 						</div>						
 					</div>
 
-					<div class="col col-lg-4 ">
+					<div class="col col-lg-2">
 						<div class="card" v-if="isFollowersvisible">							
-							<div class="container py-3">
+							<div class="container py-2">
 								<div class="row">
 									<div class="col-10">
 										<h4>Followers</h4>
@@ -649,7 +703,7 @@ export default {
 							</ul>
 						</div>
 						<div class="card" v-if="isFollowingVisible">							
-							<div class="container py-3">
+							<div class="container py-2">
 								<div class="row">
 									<div class="col-10">
 										<h4>Following</h4>

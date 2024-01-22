@@ -112,40 +112,41 @@ export default {
 			var r = null
 			var id = sessionStorage.getItem("id")	
 			var rbody = new FormData();
-			rbody.append("image",this.imageFile)
+			rbody.append("image",this.imageFile)			
 			try {			
 				await this.$axios({
 					method:"post",
-					url:"/photos",
-					params:{
-						caption:document.getElementById("caption").value
-					},
+					url:"/photos",					
 					headers:{
 						Authorization:id,
 						'Content-Type': 'image/png',
-					},					
-					data: rbody,				
+					},		
+					params:{
+						caption:document.getElementById("caption").value
+					},
+					data: rbody,														
 				}).then((response)=>{
 					r = response}
 					)								
 			} catch (e) {
 				r = e.response;							
-			}
-			console.log(r.data)
+			}			
 			switch (r.status) {
 				case 201:										
-					
+					this.hidePostPhotoForm()
 					break;												
 				default:
 					this.errAlert(r.data);
 					break;
 			}
 		},
+		
 		async showPostPhotoForm(){			
 			this.postPhotoForm = true;
 		},
 		hidePostPhotoForm(){
-			this.postPhotoForm = false;						
+			this.postPhotoForm = false;		
+			location.reload()				
 		},
 		hideInputForm(){
 			this.inputform = false;						
@@ -207,7 +208,7 @@ export default {
 					</button>
 				</div>
 			</section>				
-			<Profile > 
+			<Profile> 
 			</Profile>
 		</section>
 		<section class="vh-100 gradient-custom"  v-show="inputform" >
@@ -277,8 +278,7 @@ export default {
 									<div class="mt-4 pt-2">
 										<input class="btn btn-primary btn-lg" type="submit" value="Submit" style="background-color:green"/>
 									</div>
-								</div>
-							
+								</div>							
 							</div>
 						</div>
 
@@ -299,42 +299,42 @@ export default {
 					<div class="card shadow-2-strong card-registration" style="border-radius: 15px;">
 					<div class="card-body p-4 p-md-5">
 						<h3 class="mb-4 pb-2 pb-md-0 mb-md-5">Post your photo</h3>
-						<form @submit="postPhoto()">
+						<section>
 							<div class="row">
 								<div class="col-md-6 mb-4">
 									<div class="form-outline">								
-										<label class="form-label" for="firstName"> Caption </label>
+										<label class="form-label" for="firstName"> Caption </label><br>
 										<textarea name="caption" id="caption" cols="20" rows="2"></textarea>
 									</div>
+								</div>
+								<div class="col-md-6 mb-4">
 									<div class="form-outline">								
 										<label class="form-label" for="firstName"> Upload image </label>
-										<input type="file" @change="handleFileUpload">
-										<div v-if="imagePreview">
-											<span> Preview </span>
-											<img :src="imagePreview" alt="Preview" style="height: 300px; width: fit-content;">
-										</div>
+										<input type="file" @change="handleFileUpload">										
 									</div>
 								</div>							
-							</div>						
-							<div class="row">
-								<div class="col-md-6 mb-4 d-flex align-items-center">
+							</div>													
+							<div class ="row" v-if="imagePreview">
+								<span> Preview </span>
+								<img :src="imagePreview" alt="Preview" style="height: 300px; width: fit-content;">
+							</div>							
+							<div class="row">								
+								<div class="col-md-4 mb-4 d-flex align-items-center">
 									<div class="form-outline">
 										<div class="mt-4 pt-2">
-											<input class="btn btn-primary btn-lg"  value="Back" 
-											style="background-color:brown" @click="hidePostPhotoForm"/>
+											<input class="btn btn-primary btn-lg"  value="Back" type="submit" style="background-color:brown" @click="hidePostPhotoForm"/>
 										</div>
 									</div>
 								</div>						
-								<div class="col-md-6 mb-4 d-flex align-items-center">
+								<div class="col-md-4 mb-4 d-flex align-items-center">
 									<div class="form-outline">
 										<div class="mt-4 pt-2">
-											<input class="btn btn-primary btn-lg" type="submit" role="button" value="Submit" style="background-color:green"/>
+											<input class="btn btn-primary btn-lg" value="Post" role="button" type="submit" style="background-color:green" @click = "postPhoto()"/>
 										</div>
 									</div>
-								
 								</div>
-							</div>
-						</form>
+							</div>							
+						</section>
 					</div>
 					</div>
 				</div>

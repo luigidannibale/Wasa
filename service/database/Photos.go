@@ -114,7 +114,7 @@ func (db *appdbimpl) GetMyPhotos(userID int) ([]utils.Photo, string, error) {
 	rows, e := db.c.Query(`SELECT Photos.Id, Image, Caption, UploadTimestamp
 						FROM Photos		
 						Where UserId = ?
-						ORDER BY UploadTimestamp DESC`, userID)
+						ORDER BY Photos.Id DESC`, userID)
 	if rows.Err() != nil {
 		return stream, rows.Err().Error(), ErrInternalServerError
 	}
