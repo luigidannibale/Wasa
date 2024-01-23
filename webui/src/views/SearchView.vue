@@ -25,12 +25,11 @@ export default {
 			username:null,
 			searched:null,
 			profileActive:false,
-
-			editable:false,
-            followable:false,
-            unfollowable:false,
-            bannable:false,
-            unbannable:false,
+			
+            is_followable:false,
+            is_unfollowable:false,
+            is_bannable:false,
+            is_unbannable:false,
 		}
 	},
     watch: {
@@ -147,33 +146,24 @@ export default {
 			
 			
 		},
-		async editable(){
-			this.editable = true
-			this.bannable = false
-			this.followable = false
-			this.unbannable = false
-			this.unfollowable = false
-		},
-		async followable(){
-			this.editable = false
-			this.bannable = true
-			this.followable = true
-			this.unbannable = false
-			this.unfollowable = false
+
+		async followable(){			
+			this.is_bannable = true
+			this.is_followable = true
+			this.is_unbannable = false
+			this.is_unfollowable = false
 		},
 		async unfollowable(){
-			this.editable = false
-			this.bannable = true
-			this.followable = false
-			this.unbannable = false
-			this.unfollowable = true
+			this.is_bannable = true
+			this.is_followable = false
+			this.is_unbannable = false
+			this.is_unfollowable = true
 		},
 		async unbannable(){
-			this.editable = false
-			this.bannable = false
-			this.followable = false
-			this.unbannable = true
-			this.unfollowable = false
+			this.is_bannable = false
+			this.is_followable = false
+			this.is_unbannable = true
+			this.is_unfollowable = false
 		},
 		async errAlert(data){			
 			this.err = true;
@@ -198,18 +188,18 @@ export default {
 		<div class="alert alert-danger" role="alert" v-if="err" >
 			<h4 class="alert-heading" v-text="errMess"></h4>			
 		</div>
-		<section class="h-100 gradient-custom-2" v-if="profileActive">		
+		<section class="h-100 gradient-custom-1" v-if="profileActive">		
 			<div class="row">				
-				<div class="col col-lg-2" v-if="bannable">
+				<div class="col col-lg-2" v-if="is_bannable">
 					<Ban @refresh="refresh()" @err="errAlert"></Ban>
 				</div>
-				<div class="col col-lg-2" v-if="unbannable">
+				<div class="col col-lg-2" v-if="is_unbannable">
 					<Unban @refresh="refresh()" @err="errAlert"></Unban>
 				</div>
-				<div class="col col-lg-2" v-if="followable">
+				<div class="col col-lg-2" v-if="is_followable">
 					<Follow @refresh="refresh()" @err="errAlert"></Follow>
 				</div>
-				<div class="col col-lg-2" v-if="unfollowable">
+				<div class="col col-lg-2" v-if="is_unfollowable">
 					<Unfollow @refresh="refresh()" @err="errAlert"></Unfollow>
 				</div>
 			</div>						
