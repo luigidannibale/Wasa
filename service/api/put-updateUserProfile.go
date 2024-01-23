@@ -34,7 +34,7 @@ func (rt *_router) updateUser(w http.ResponseWriter, r *http.Request, ps httprou
 		}
 		return
 	}
-	userIDparam, e := strconv.Atoi(ps.ByName("userID"))
+	userIDparam, e := strconv.Atoi(ps.ByName(ParamUserID))
 	if e != nil {
 		http.Error(w, MsgConvertionErrorUserID+e.Error(), http.StatusBadRequest)
 		return

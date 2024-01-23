@@ -1,16 +1,8 @@
-//go:build webui
+// go:build webui
 
 package main
 
-import (
-	"fmt"
-	"io/fs"
-	"net/http"
-	"strings"
-
-	"github.com/luigidannibale/Wasa/webui"
-)
-
+/*
 func registerWebUI(hdl http.Handler) (http.Handler, error) {
 	distDirectory, err := fs.Sub(webui.Dist, "dist")
 	if err != nil {
@@ -24,3 +16,4 @@ func registerWebUI(hdl http.Handler) (http.Handler, error) {
 		hdl.ServeHTTP(w, r)
 	}), nil
 }
+*/

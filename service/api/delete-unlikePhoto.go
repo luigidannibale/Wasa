@@ -35,7 +35,7 @@ func (rt *_router) unlikePhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	}
 
 	//Takes the id of the photo, and validates it
-	photoID, err := strconv.Atoi(ps.ByName("photoID"))
+	photoID, err := strconv.Atoi(ps.ByName(ParamPhotoID))
 	if err != nil {
 		http.Error(w, MsgConvertionErrorPhotoID+err.Error(), http.StatusBadRequest)
 		return

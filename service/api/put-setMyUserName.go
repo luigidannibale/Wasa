@@ -34,7 +34,7 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps http
 		}
 		return
 	}
-	userIDparam, e := strconv.Atoi(ps.ByName("userID"))
+	userIDparam, e := strconv.Atoi(ps.ByName(ParamUserID))
 	if e != nil {
 		http.Error(w, MsgConvertionErrorUserID+e.Error(), http.StatusBadRequest)
 		return

@@ -35,7 +35,7 @@ func (rt *_router) likePhoto(w http.ResponseWriter, r *http.Request, ps httprout
 	}
 
 	// Takes the photoID and validates it
-	photoID, er := strconv.Atoi(ps.ByName("photoID"))
+	photoID, er := strconv.Atoi(ps.ByName(ParamPhotoID))
 	if er != nil {
 		http.Error(w, MsgConvertionErrorPhotoID+er.Error(), http.StatusUnauthorized)
 		return

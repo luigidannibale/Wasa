@@ -35,7 +35,7 @@ func (rt *_router) deletePhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	userID := userIDauth
 
 	//  Takes the id of the photo to delete, and validates it
-	photoID, err := strconv.Atoi(ps.ByName("photoID"))
+	photoID, err := strconv.Atoi(ps.ByName(ParamPhotoID))
 	if err != nil {
 		http.Error(w, MsgConvertionErrorPhotoID, http.StatusBadRequest)
 		return

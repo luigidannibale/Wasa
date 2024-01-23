@@ -35,7 +35,7 @@ func (rt *_router) followUser(w http.ResponseWriter, r *http.Request, ps httprou
 		}
 		return
 	}
-	userIDparam, err := strconv.Atoi(ps.ByName("userID"))
+	userIDparam, err := strconv.Atoi(ps.ByName(ParamUserID))
 	if err != nil {
 		http.Error(w, MsgConvertionErrorUserID+err.Error(), http.StatusBadRequest)
 		return

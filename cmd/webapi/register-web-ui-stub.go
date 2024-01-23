@@ -1,4 +1,4 @@
-//go:build !webui
+// go:build !webui
 
 package main
 

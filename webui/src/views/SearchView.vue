@@ -26,11 +26,11 @@ export default {
 			searched:null,
 			profileActive:false,
 
-			_editable:false,
-            _followable:false,
-            _unfollowable:false,
-            _bannable:false,
-            _unbannable:false,
+			editable:false,
+            followable:false,
+            unfollowable:false,
+            bannable:false,
+            unbannable:false,
 		}
 	},
     watch: {
@@ -142,38 +142,38 @@ export default {
 				});
 			}
 			
-			if(!this._unbannable && !this._unfollowable)
+			if(!this.unbannable && !this.unfollowable)
 				this.followable()
 			
 			
 		},
 		async editable(){
-			this._editable = true
-			this._bannable = false
-			this._followable = false
-			this._unbannable = false
-			this._unfollowable = false
+			this.editable = true
+			this.bannable = false
+			this.followable = false
+			this.unbannable = false
+			this.unfollowable = false
 		},
 		async followable(){
-			this._editable = false
-			this._bannable = true
-			this._followable = true
-			this._unbannable = false
-			this._unfollowable = false
+			this.editable = false
+			this.bannable = true
+			this.followable = true
+			this.unbannable = false
+			this.unfollowable = false
 		},
 		async unfollowable(){
-			this._editable = false
-			this._bannable = true
-			this._followable = false
-			this._unbannable = false
-			this._unfollowable = true
+			this.editable = false
+			this.bannable = true
+			this.followable = false
+			this.unbannable = false
+			this.unfollowable = true
 		},
 		async unbannable(){
-			this._editable = false
-			this._bannable = false
-			this._followable = false
-			this._unbannable = true
-			this._unfollowable = false
+			this.editable = false
+			this.bannable = false
+			this.followable = false
+			this.unbannable = true
+			this.unfollowable = false
 		},
 		async errAlert(data){			
 			this.err = true;
@@ -200,16 +200,16 @@ export default {
 		</div>
 		<section class="h-100 gradient-custom-2" v-if="profileActive">		
 			<div class="row">				
-				<div class="col col-lg-2" v-if="_bannable">
+				<div class="col col-lg-2" v-if="bannable">
 					<Ban @refresh="refresh()" @err="errAlert"></Ban>
 				</div>
-				<div class="col col-lg-2" v-if="_unbannable">
+				<div class="col col-lg-2" v-if="unbannable">
 					<Unban @refresh="refresh()" @err="errAlert"></Unban>
 				</div>
-				<div class="col col-lg-2" v-if="_followable">
+				<div class="col col-lg-2" v-if="followable">
 					<Follow @refresh="refresh()" @err="errAlert"></Follow>
 				</div>
-				<div class="col col-lg-2" v-if="_unfollowable">
+				<div class="col col-lg-2" v-if="unfollowable">
 					<Unfollow @refresh="refresh()" @err="errAlert"></Unfollow>
 				</div>
 			</div>						

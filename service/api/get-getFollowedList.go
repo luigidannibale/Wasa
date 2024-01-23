@@ -33,7 +33,7 @@ func (rt *_router) getFollowedList(w http.ResponseWriter, r *http.Request, ps ht
 		}
 		return
 	}
-	userIDparam, err := strconv.Atoi(ps.ByName("userID"))
+	userIDparam, err := strconv.Atoi(ps.ByName(ParamUserID))
 	if err != nil {
 		http.Error(w, MsgConvertionErrorUserID+err.Error(), http.StatusBadRequest)
 		return
@@ -41,7 +41,7 @@ func (rt *_router) getFollowedList(w http.ResponseWriter, r *http.Request, ps ht
 	e = rt.db.VerifyUserId(userIDparam)
 	if e != nil {
 		if errors.Is(e, database.ErrNotFound) {
-			http.Error(w, "UserID "+MsgNotFound+e.Error(), http.StatusNotFound)
+			http.Error(w, MsgNotFoundUserID+e.Error(), http.StatusNotFound)
 		}
 		if errors.Is(e, database.ErrInternalServerError) {
 			http.Error(w, MsgServerErrorUserID+e.Error(), http.StatusInternalServerError)
@@ -53,7 +53,7 @@ func (rt *_router) getFollowedList(w http.ResponseWriter, r *http.Request, ps ht
 	if userIDauth != userIDparam {
 		e = rt.db.CheckBan(userIDparam, userIDauth)
 		if e == nil {
-			http.Error(w, "UserID "+MsgNotFound, http.StatusNotFound)
+			http.Error(w, MsgNotFoundUserID, http.StatusNotFound)
 			return
 		}
 		if errors.Is(e, database.ErrInternalServerError) {
@@ -71,7 +71,7 @@ func (rt *_router) getFollowedList(w http.ResponseWriter, r *http.Request, ps ht
 			http.Error(w, s, http.StatusNotFound)
 		}
 		if errors.Is(err, database.ErrInternalServerError) {
-			http.Error(w, MsgServerError+" while getting the list of followed"+s, http.StatusInternalServerError)
+			http.Error(w, MsgServerError+" while getting the list of followed "+s, http.StatusInternalServerError)
 		}
 		return
 	}

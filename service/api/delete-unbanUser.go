@@ -34,7 +34,7 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 		}
 		return
 	}
-	userIDparam, err := strconv.Atoi(ps.ByName("userID"))
+	userIDparam, err := strconv.Atoi(ps.ByName(ParamUserID))
 	if err != nil {
 		http.Error(w, MsgConvertionErrorUserID+err.Error(), http.StatusBadRequest)
 		return

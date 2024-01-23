@@ -64,19 +64,19 @@ export default {
 					sessionStorage.setItem("new",false)		
 					if(this.username) {
 						sessionStorage.setItem("username",this.username)
-					}
-					this.hideInputForm()
+					}					
+					this.hideInputForm()					
 					break;
 				default:
 					this.errAlert(r.data);
 					break;
 			}
-			location.reload()
+			// location.reload()
 		},
 		async showInputForm(){			
 			this.inputform = true;
 			this.dataFormName = "Update your data";						
-			this.backAv = true			
+			this.backAv = !sessionStorage.getItem("new")			
 			var r = null
 			var id = sessionStorage.getItem("id")			
 			try {			
@@ -139,8 +139,7 @@ export default {
 					this.errAlert(r.data);
 					break;
 			}
-		},
-		
+		},		
 		async showPostPhotoForm(){			
 			this.postPhotoForm = true;
 		},
@@ -153,7 +152,11 @@ export default {
 		},	
 		log(){			
 			this.username = sessionStorage.getItem("loggedUsername")
-			sessionStorage.setItem("username",this.username)	
+			sessionStorage.setItem("username",this.username)				
+			if (sessionStorage.getItem("new") == "true")
+				this.showInputForm()
+			
+
 		},
 		handleFileUpload(event) {
 			this.imageFile = event.target.files[0];
@@ -211,7 +214,7 @@ export default {
 			<Profile> 
 			</Profile>
 		</section>
-		<section class="vh-100 gradient-custom"  v-show="inputform" >
+		<section class="vh-100 gradient-custom"  v-if="inputform" >
 			<div class="container py-5 h-100">
 				<div class="row justify-content-left align-items-left h-100">
 				<div class="col-12 col-lg-9 col-xl-7">
@@ -268,7 +271,7 @@ export default {
 							<div class="col-md-6 mb-4 d-flex align-items-center">
 								<div class="form-outline">
 									<div class="mt-4 pt-2">
-										<input class="btn btn-primary btn-lg" type="submit" value="Back" v-show="backAv"
+										<input class="btn btn-primary btn-lg" type="submit" value="Back" v-if="backAv"
 										style="background-color:brown" @click="hideInputForm"/>
 									</div>
 								</div>

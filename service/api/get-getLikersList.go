@@ -33,7 +33,7 @@ func (rt *_router) getLikersList(w http.ResponseWriter, r *http.Request, ps http
 		return
 	}
 	// Takes the photoID from params and validates it
-	photoID, e := strconv.Atoi(ps.ByName("photoID"))
+	photoID, e := strconv.Atoi(ps.ByName(ParamPhotoID))
 	if e != nil {
 		http.Error(w, MsgConvertionErrorPhotoID+e.Error(), http.StatusBadRequest)
 		return

@@ -60,7 +60,7 @@ func (rt *_router) getUserProfile(w http.ResponseWriter, r *http.Request, ps htt
 	// Check if the user searched banned the one who is trying to search him
 	e = rt.db.CheckBan(user.Id, userID)
 	if e == nil {
-		http.Error(w, "UserID "+MsgNotFound, http.StatusNotFound)
+		http.Error(w, MsgNotFoundUserID, http.StatusNotFound)
 		return
 	}
 	if errors.Is(e, database.ErrInternalServerError) {

@@ -3,6 +3,7 @@ package api
 const (
 	MsgNotFound                      = "can't be found"
 	MsgNotFoundPhoto                 = "Photo " + MsgNotFound
+	MsgNotFoundUserID                = "UserID " + MsgNotFound
 	MsgAuthNotFound                  = "The userID provided for authentication " + MsgNotFound
 	MsgAuthNoMatch                   = "Authentication userID and parameter userID don't match"
 	MsgServerError                   = "An error occurred on ther server"
@@ -16,4 +17,6 @@ const (
 	MsgConvertionErrorPhotoID        = MsgConvertionError + "photoID "
 	MsgConvertionErrorUserToBanID    = MsgConvertionError + "userToBanID"
 	MsgConvertionErrorUserToFollowID = MsgConvertionError + "userToFollowID"
+	ParamUserID                      = "userID"
+	ParamPhotoID                     = "photoID"
 )

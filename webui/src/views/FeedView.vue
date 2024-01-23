@@ -3,11 +3,11 @@
 import { VueElement } from 'vue'
 import { reactive } from 'vue'
 import App from '../App.vue'
-import LikeComment from '../components/LikeCommentBar.vue'
+
 
 export default {
 	components: {
-		LikeComment,
+		
 	},
 	data: function() {
 		return {
