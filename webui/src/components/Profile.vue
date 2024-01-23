@@ -553,11 +553,11 @@ export default {
 								</div>
 								
 								<div class="row" v-for="c in images">
-									<div class="col-lg-4" style="margin-bottom: 10px;">																				
+									<div v-if="c.im1" class="col-lg-4" style="margin-bottom: 10px;">																				
 										<img v-if="c.im1.blob" :src="c.im1.blob" alt="Image 1" class="w-100 rounded-3">										
 										<p v-if="c.im1.cap" v-text="c.im1.cap"></p>
 									</div>									
-									<div class="col-lg-2">																				
+									<div class="col-lg-2" v-if="c.im1">																				
 										<div>											
 											<span role="button" @click="showLikes1(c.id)" :id="'showlikes'+c.im1.id" style="margin: 0px 10px 0px 5px;"> {{ c.im1.n_likes }} </span>        
 											<svg class="feather" @click="showLike1(c.id)" role="button" style="margin-right: 10px;" v-if="!c.im1.liked"><use href="/feather-sprite-v4.29.0.svg#heart"/></svg>
@@ -582,7 +582,7 @@ export default {
 												</span>																																				
 											</div>
 											<div v-for="com in c.im1.comments">
-												<div class="row" style="padding: 0px;">
+												<div class="row" style="padding: 0px;" v-if="com">
 													<p class="mb-1">
 														{{ com.author }}
 														<svg class="feather" style="margin-left: 5px;" role="button" @click="com.delete = true" :id="'delete'+c.im1.id" v-if="loggedId == com.author">  <use href="/feather-sprite-v4.29.0.svg#trash-2"/></svg>
@@ -610,7 +610,7 @@ export default {
 										<div :id="'likesSection'+c.im1.id" v-if="c.im1.showLikes">
 											<h6 class="text-center mb-12 pb-2" style="margin-top: 5px;">Likes</h6>
 											<div v-for="u in c.im1.likes">
-												<div class="row">                                
+												<div class="row" v-if="u">                                
 													<p class="mb-1" role="button" @click="search(u)" > 
 														{{ u }}
 													</p>
@@ -632,7 +632,7 @@ export default {
 										</div>
 									</div>
 
-									<div class="col-lg-4"  style="margin-bottom: 10px;" v-if="c.im2">										
+									<div v-if="c.im2" class="col-lg-4"  style="margin-bottom: 10px;">										
 										<img v-if="c.im2.blob" :src="c.im2.blob" alt="Image 2" class="w-100 rounded-3">
 										<p v-if="c.im2.cap" v-text="c.im2.cap"></p>										
 									</div>
@@ -657,7 +657,7 @@ export default {
 										<div :id="'likesSection'+c.im2.id" v-if="c.im2.showLikes">
 											<h6 class="text-center mb-12 pb-2" style="margin-top: 5px;">Likes</h6>
 											<div v-for="u in c.im2.likes">
-												<div class="row">                                
+												<div class="row" v-if="u">                                
 													<p class="mb-1" role="button" @click="search(u)" > 
 														{{ u }}
 													</p>

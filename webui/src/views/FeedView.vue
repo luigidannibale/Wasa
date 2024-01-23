@@ -380,10 +380,10 @@ export default {
 		<div v-if="!err">			
 		<section class="h-100 gradient-custom-2" v-show="!inputform" >			
 			<div class="row" v-for="i in images">
-                <div class="col" style="margin-bottom: 10px;">                    
-                    <img v-if="i.im1.blob" :src="i.im1.blob" alt="Image 1" class="w-100 rounded-3">
+                <div v-if="i.im1.blob" class="col" style="margin-bottom: 10px;">                    
+                    <img :src="i.im1.blob" alt="Image 1" class="w-100 rounded-3">
                 </div>
-                <div class="col"  style="margin-bottom: 10px;">
+                <div class="col" v-if="i.im1" style="margin-bottom: 10px;">
                     <h6 v-if="i.im1.username" v-text="i.im1.username" role="button" @click="search(i.im1.username)"></h6>                    
                     <p v-if="i.im1.cap" v-text="i.im1.cap"></p>        
                     <p v-if="i.im1.ut" v-text="'Uploaded in ' + i.im1.ut"></p>                    
@@ -405,7 +405,7 @@ export default {
                         <div class="col-md-12 col-lg-10 col-xl-8" id="commentsSection" v-if="i.im1.showComments">
                             <h4 class="text-center mb-12 pb-2" style="margin-top: 30px;">Comments</h4>
                             <div class="card-body p-12" v-for="c in i.im1.comments">
-                                <div class="row">
+                                <div class="row" v-if="c">
                                     <p class="mb-1">
                                         {{ c.author }}
                                         <svg class="feather" style="margin-left: 40px;" role="button" @click="c.delete = true" :id="'delete'+i.im1.id" v-if="loggedId == c.author">  <use href="/feather-sprite-v4.29.0.svg#trash-2"/></svg>
@@ -421,8 +421,7 @@ export default {
                                             </span>
                                             
                                         </span>
-                                    </p>                                                                                
-                                    
+                                    </p>                                                                                                                    
                                     <p class="small mb-0">
                                         {{ c.text }}
                                     </p>                                    
@@ -442,7 +441,7 @@ export default {
                         <div class="col-md-12 col-lg-10 col-xl-4" id="likesSection" v-if="i.im1.showLikes">
                             <h4 class="text-center mb-12 pb-2" style="margin-top: 30px;">Likes</h4>
                             <div class="card-body p-12" v-for="u in i.im1.likes">
-                                <div class="row">                                
+                                <div v-if="u" class="row">                                
                                     <p class="mb-1" role="button" @click="search(u)" > 
                                         {{ u }}
                                     </p>
