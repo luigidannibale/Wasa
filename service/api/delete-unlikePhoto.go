@@ -34,7 +34,7 @@ func (rt *_router) unlikePhoto(w http.ResponseWriter, r *http.Request, ps httpro
 		return
 	}
 
-	//Takes the id of the photo, and validates it
+	// Takes the id of the photo, and validates it
 	photoID, err := strconv.Atoi(ps.ByName(ParamPhotoID))
 	if err != nil {
 		http.Error(w, MsgConvertionErrorPhotoID+err.Error(), http.StatusBadRequest)
@@ -61,15 +61,15 @@ func (rt *_router) unlikePhoto(w http.ResponseWriter, r *http.Request, ps httpro
 		http.Error(w, MsgServerError, http.StatusInternalServerError)
 		return
 	}
-	//Creates the like that must be deleted from DB
+	// Creates the like that must be deleted from DB
 	var like utils.Like
 	like.PhotoID = photoID
 	like.UserID = userID
 
-	//Deletes the like from DB
+	// Deletes the like from DB
 	s, err = rt.db.DeleteLike(like)
 
-	//Checks for DB errors
+	// Checks for DB errors
 	if err != nil {
 		if errors.Is(err, database.ErrNotFound) {
 			http.Error(w, s, http.StatusForbidden)
@@ -79,7 +79,7 @@ func (rt *_router) unlikePhoto(w http.ResponseWriter, r *http.Request, ps httpro
 		}
 		return
 	}
-	//Operation successful, creates an OK response
+	// Operation successful, creates an OK response
 	w.WriteHeader(http.StatusOK)
 	e = json.NewEncoder(w).Encode(s)
 	if e != nil {

@@ -552,7 +552,7 @@ export default {
 									<p class="lead fw-normal mb-0">Your photos</p>									
 								</div>
 								
-								<div class="row" v-for="c in images">
+								<div class="row" v-for="c in images" :key="c.id">
 									<div v-if="c.im1" class="col-lg-4" style="margin-bottom: 10px;">																				
 										<img v-if="c.im1.blob" :src="c.im1.blob" alt="Image 1" class="w-100 rounded-3">										
 										<p v-if="c.im1.cap" v-text="c.im1.cap"></p>
@@ -581,7 +581,7 @@ export default {
 													
 												</span>																																				
 											</div>
-											<div v-for="com in c.im1.comments">
+											<div v-for="com in c.im1.comments" :key="com.id">
 												<div class="row" style="padding: 0px;" v-if="com">
 													<p class="mb-1">
 														{{ com.author }}
@@ -609,7 +609,7 @@ export default {
 
 										<div :id="'likesSection'+c.im1.id" v-if="c.im1.showLikes">
 											<h6 class="text-center mb-12 pb-2" style="margin-top: 5px;">Likes</h6>
-											<div v-for="u in c.im1.likes">
+											<div v-for="u in c.im1.likes" :key="u">
 												<div class="row" v-if="u">                                
 													<p class="mb-1" role="button" @click="search(u)" > 
 														{{ u }}
@@ -656,7 +656,7 @@ export default {
 										</div>
 										<div :id="'likesSection'+c.im2.id" v-if="c.im2.showLikes">
 											<h6 class="text-center mb-12 pb-2" style="margin-top: 5px;">Likes</h6>
-											<div v-for="u in c.im2.likes">
+											<div v-for="u in c.im2.likes" :key="u">
 												<div class="row" v-if="u">                                
 													<p class="mb-1" role="button" @click="search(u)" > 
 														{{ u }}
@@ -699,7 +699,7 @@ export default {
 								</div>
 							</div>
 							<ul class="list-group list-group-flush">
-								<li class="list-group-item" v-for="f in followers" v-text="f.username" @click="search(f)" role="button"></li>								
+								<li class="list-group-item" v-for="f in followers" :key="f.username" v-text="f.username" @click="search(f)" role="button"></li>								
 							</ul>
 						</div>
 						<div class="card" v-if="isFollowingVisible">							
@@ -716,7 +716,7 @@ export default {
 								</div>
 							</div>
 							<ul class="list-group list-group-flush">
-								<li class="list-group-item" v-for="f in following" v-text="f.username" @click="search(f)" role="button"></li>								
+								<li class="list-group-item" v-for="f in following" :key="f.username" v-text="f.username" @click="search(f)" role="button"></li>								
 							</ul>
 						</div>
 					</div>					

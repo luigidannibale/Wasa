@@ -127,7 +127,7 @@ export default {
 				r = e.response;							                
 			}            			
 			switch (r.status) {
-				case 200:					
+				case 200:										
 					break;					
 				default:
 					this.errAlert(r.data);
@@ -141,9 +141,8 @@ export default {
 				});
 			}
 			
-			if(!this.unbannable && !this.unfollowable)
-				this.followable()
-			
+			if(!this.is_unbannable && !this.is_unfollowable)
+				this.followable()			
 			
 		},
 

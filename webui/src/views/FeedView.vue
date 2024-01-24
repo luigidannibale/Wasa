@@ -379,7 +379,7 @@ export default {
 
 		<div v-if="!err">			
 		<section class="h-100 gradient-custom-2" v-show="!inputform" >			
-			<div class="row" v-for="i in images">
+			<div class="row" v-for="i in images" :key="i.im1.id">
                 <div v-if="i.im1.blob" class="col" style="margin-bottom: 10px;">                    
                     <img :src="i.im1.blob" alt="Image 1" class="w-100 rounded-3">
                 </div>
@@ -404,7 +404,7 @@ export default {
                         
                         <div class="col-md-12 col-lg-10 col-xl-8" id="commentsSection" v-if="i.im1.showComments">
                             <h4 class="text-center mb-12 pb-2" style="margin-top: 30px;">Comments</h4>
-                            <div class="card-body p-12" v-for="c in i.im1.comments">
+                            <div class="card-body p-12" v-for="c in i.im1.comments" :key="c.id">
                                 <div class="row" v-if="c">
                                     <p class="mb-1">
                                         {{ c.author }}
@@ -440,7 +440,7 @@ export default {
 
                         <div class="col-md-12 col-lg-10 col-xl-4" id="likesSection" v-if="i.im1.showLikes">
                             <h4 class="text-center mb-12 pb-2" style="margin-top: 30px;">Likes</h4>
-                            <div class="card-body p-12" v-for="u in i.im1.likes">
+                            <div class="card-body p-12" v-for="u in i.im1.likes" :key="u">
                                 <div v-if="u" class="row">                                
                                     <p class="mb-1" role="button" @click="search(u)" > 
                                         {{ u }}

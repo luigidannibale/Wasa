@@ -33,7 +33,7 @@ func (rt *_router) uncommentPhoto(w http.ResponseWriter, r *http.Request, ps htt
 		}
 		return
 	}
-	//Takes the id of the photo, and validates it
+	// Takes the id of the photo, and validates it
 	photoID, err := strconv.Atoi(ps.ByName(ParamPhotoID))
 	if err != nil {
 		http.Error(w, MsgConvertionErrorPhotoID, http.StatusBadRequest)
@@ -61,7 +61,7 @@ func (rt *_router) uncommentPhoto(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 
-	//Takes the id of the comment, and validates it
+	// Takes the id of the comment, and validates it
 	commentID, err := strconv.Atoi(ps.ByName("commentID"))
 	if err != nil {
 		http.Error(w, MsgConvertionErrorCommentID, http.StatusBadRequest)
@@ -69,7 +69,7 @@ func (rt *_router) uncommentPhoto(w http.ResponseWriter, r *http.Request, ps htt
 	}
 
 	comment, s, e := rt.db.GetComment(commentID)
-	//Checks for DB errors
+	// Checks for DB errors
 	if e != nil {
 		if errors.Is(e, database.ErrNotFound) {
 			http.Error(w, s, http.StatusNotFound)
@@ -86,7 +86,7 @@ func (rt *_router) uncommentPhoto(w http.ResponseWriter, r *http.Request, ps htt
 	}
 
 	s, e = rt.db.DeleteComment(commentID)
-	//Checks for DB errors
+	// Checks for DB errors
 	if e != nil {
 		if errors.Is(e, database.ErrNotFound) {
 			http.Error(w, s, http.StatusNotFound)
@@ -97,7 +97,7 @@ func (rt *_router) uncommentPhoto(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 
-	//Operation successful, creates an OK response
+	// Operation successful, creates an OK response
 	w.WriteHeader(http.StatusOK)
 	e = json.NewEncoder(w).Encode(s)
 	if e != nil {
