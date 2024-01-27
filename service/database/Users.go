@@ -19,6 +19,9 @@ func (db *appdbimpl) CreateUser(user utils.User) (int, string, error) {
 	}
 	user.Id = userID
 	_, s, e = db.UpdateUser(user)
+	if e != nil {
+		return userID, s, e
+	}
 	return userID, s, e
 }
 

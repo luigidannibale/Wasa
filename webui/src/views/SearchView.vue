@@ -8,8 +8,7 @@ import Unban from "../components/UnbanButton.vue"
 
 
 export default {
-	components: {
-		
+	components: {		
 		Ban,
 		Unban,
 		Unfollow,

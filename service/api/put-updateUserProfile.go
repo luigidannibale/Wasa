@@ -59,11 +59,11 @@ func (rt *_router) updateUser(w http.ResponseWriter, r *http.Request, ps httprou
 
 	// Checks for DB errors
 	if err != nil {
-		if errors.Is(e, database.ErrUsernameTaken) {
+		if errors.Is(err, database.ErrUsernameTaken) {
 			http.Error(w, s, http.StatusConflict)
 			return
 		}
-		if errors.Is(e, database.ErrInternalServerError) {
+		if errors.Is(err, database.ErrInternalServerError) {
 			http.Error(w, MsgServerError+" while updating the user "+s, http.StatusInternalServerError)
 			return
 		}

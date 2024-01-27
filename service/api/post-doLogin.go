@@ -30,7 +30,7 @@ func (rt *_router) doLogin(w http.ResponseWriter, r *http.Request, ps httprouter
 	var u utils.User
 	u.Username = username["username"]
 
-	if e := u.ValidateUsername(); e != nil {
+	if e = u.ValidateUsername(); e != nil {
 		http.Error(w, "Username not valid "+e.Error(), http.StatusBadRequest)
 		return
 	}

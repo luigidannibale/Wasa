@@ -199,7 +199,6 @@ func New(db *sql.DB) (AppDatabase, error) {
 	}
 
 	var tableName string
-
 	// Creates Users table if not already existing #LastMod - 10/12
 	err := db.QueryRow(`SELECT name FROM sqlite_master WHERE type = 'table' and name = 'Users';`).Scan(&tableName)
 	if errors.Is(err, sql.ErrNoRows) {
@@ -248,7 +247,6 @@ func New(db *sql.DB) (AppDatabase, error) {
 			return nil, fmt.Errorf("error creating 'Bans' table: %w", err)
 		}
 	}
-
 	// Populates the DB with some values
 	PopulateDB(db)
 

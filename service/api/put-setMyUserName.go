@@ -24,7 +24,7 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps http
 		http.Error(w, MsgAuthNotFound+e.Error(), http.StatusUnauthorized)
 		return
 	}
-	u, s, e := rt.db.GetUser(userIDauth)
+	u, _, e := rt.db.GetUser(userIDauth)
 	if e != nil {
 		if errors.Is(e, database.ErrNotFound) {
 			http.Error(w, MsgAuthNotFound+e.Error(), http.StatusUnauthorized)
@@ -61,7 +61,7 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps http
 	userToUpdate.Surname = u.Surname
 	userToUpdate.DateOfBirth = u.DateOfBirth
 
-	if e := userToUpdate.ValidateUsername(); e != nil {
+	if e = userToUpdate.ValidateUsername(); e != nil {
 		http.Error(w, "Username not valid "+e.Error(), http.StatusBadRequest)
 		return
 	}

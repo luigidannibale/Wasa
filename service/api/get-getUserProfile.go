@@ -38,7 +38,7 @@ func (rt *_router) getUserProfile(w http.ResponseWriter, r *http.Request, ps htt
 	var u utils.User
 	u.Username = username
 
-	if e := u.ValidateUsername(); e != nil {
+	if e = u.ValidateUsername(); e != nil {
 		http.Error(w, "Username not valid "+e.Error(), http.StatusBadRequest)
 		return
 	}

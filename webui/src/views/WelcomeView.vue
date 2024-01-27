@@ -37,7 +37,7 @@ export default {
                     Keep in touch with your friends by sharing photos of special moments.</p>
                 <hr class="my-4">
                 <p> This is WasaPhoto, an educational purpose based project<br>
-                    Relised by D'annibale Luigi</p>
+                    Made by D'annibale Luigi</p>
                 <a class="btn btn-primary btn-lg" href="http://gamificationlab.uniroma1.it/notes/Project.pdf" role="button">
                     Learn more about the project specifications</a>
             </div>

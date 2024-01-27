@@ -19,7 +19,7 @@
 
 
 # Create a first temporary image named "builder"
-FROM golang:1.17 AS builder
+FROM golang:1.19.1 AS builder
 # Copy Go code (in "builder")
 WORKDIR /src/
 COPY . .
