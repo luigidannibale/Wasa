@@ -126,12 +126,12 @@ export default {
                 this.following[f.id] = f
             });                        
 		},
-        async setPhotos(photos){
+        async setPhotos(photos){            
 			if(!photos){ 
 				this.n_photos = 0
                 this.errAlert("Your feed is empty")
 				return
-			}                        
+			}                                 
 			this.n_photos = photos.length			
 			for (let i = 0; i < photos.length; i+=1) {
 				let couple = {
@@ -149,7 +149,7 @@ export default {
                 if(likerslist) {
                     couple.im1.n_likes = likerslist.length
                     couple.im1.liked = false                    
-                    for(let x = 0; x<likerslist.length; x++){
+                    for(let x = 0; x<couple.im1.n_likes; x++){
                         if(likerslist[x] === this.username){                        
                             couple.im1.liked = true
                         }                        
@@ -160,7 +160,7 @@ export default {
                 else couple.im1.n_comments = 0                 
                 couple.im1.likes = likerslist                
                 couple.im1.comments = []
-                for(let x = 0; x<commentslist.length; x++){                    
+                for(let x = 0; x<couple.im1.n_comments; x++){                    
                     let c = {}                    
                     c.author = commentslist[x].userID
                     c.text = commentslist[x].content

@@ -121,13 +121,12 @@ Errors that can be returned: (NotFound, InternalServerError)
 func (db *appdbimpl) GetBan(ban utils.Ban) (string, error) {
 	er := db.c.QueryRow(`SELECT BannerID
 						FROM Bans
-						WHERE BannerID = ? AND BannedID = ?`, ban.BannerID, ban.BannedID)
-
-	if er.Err() == nil {
+						WHERE BannerID = ? AND BannedID = ?`, ban.BannerID, ban.BannedID).Scan(&ban.BannerID)
+	if er == nil {
 		return "Ban found successfully", nil
 	}
-	if errors.Is(er.Err(), sql.ErrNoRows) {
+	if errors.Is(er, sql.ErrNoRows) {
 		return "Couldn't find the ban", ErrNotFound
 	}
-	return er.Err().Error(), ErrInternalServerError
+	return er.Error(), ErrInternalServerError
 }

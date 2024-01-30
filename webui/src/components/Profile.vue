@@ -296,6 +296,7 @@ export default {
                             couple.im1.liked = true
                         }                        
                     }
+					
                 }
                 else couple.im1.n_likes = 0   
 				couple.im1.likes = likerslist
@@ -323,8 +324,7 @@ export default {
                 	couple.im2.showLikes = false
 					couple.im2.deletable = photos[i+1].userId == this.loggedId
 
-					var likerslist = await this.getLikes(photos[i+1])
-					
+					var likerslist = await this.getLikes(photos[i+1])					
 					
 					if(likerslist) {
 						couple.im2.n_likes = likerslist.length
@@ -334,6 +334,7 @@ export default {
 								couple.im2.liked = true
 							}                        
 						}
+						
 					}
 					else couple.im2.n_likes = 0                 
 					couple.im2.likes = likerslist                					                
@@ -461,15 +462,15 @@ export default {
             }
         },
 		showLikes2(n){                     
-            this.images[n].im1.showLikes = !this.images[n].im1.showLikes 
-            if(this.images[n].im1.showLikes){
-                this.images[n].im1.showComments = false
+            this.images[n].im2.showLikes = !this.images[n].im2.showLikes 
+            if(this.images[n].im2.showLikes){
+                this.images[n].im2.showComments = false
             }            
         },
         showComments2(n){
-            this.images[n].im1.showComments = !this.images[n].im1.showComments
-            if(this.images[n].im1.showComments){
-                this.images[n].im1.showLikes = false
+            this.images[n].im2.showComments = !this.images[n].im2.showComments
+            if(this.images[n].im2.showComments){
+                this.images[n].im2.showLikes = false
             }
         },
 		async deletePhoto(pid){			
@@ -563,8 +564,8 @@ export default {
 											<svg class="feather" @click="showLike1(c.id)" role="button" style="margin-right: 10px;" v-if="!c.im1.liked"><use href="/feather-sprite-v4.29.0.svg#heart"/></svg>
 											<svg class="like" 	 @click="showLike1(c.id)" role="button" style="margin-right: 10px;" v-if="c.im1.liked"><use href="/feather-sprite-v4.29.0.svg#heart"/></svg>
 										</div>																		
-										<div>
-											<span role="button" @click="showComments1(c.id)" :id="'showcomments'+c.im1.id" style="margin: 0px 10px 0px 5px;"> {{ c.im1.n_comments }} </span>
+										<div role="button" @click="showComments1(c.id)">
+											<span :id="'showcomments'+c.im1.id" style="margin: 0px 10px 0px 5px;"> {{ c.im1.n_comments }} </span>
 											<svg class="feather" role="button" style="margin-right: 10px;"><use href="/feather-sprite-v4.29.0.svg#message-circle"/></svg>
 										</div>
 										<div>
@@ -636,14 +637,15 @@ export default {
 										<img v-if="c.im2.blob" :src="c.im2.blob" alt="Image 2" class="w-100 rounded-3">
 										<p v-if="c.im2.cap" v-text="c.im2.cap"></p>										
 									</div>
+									
 									<div class="col-lg-2" v-if="c.im2">		
 										<div>											
 											<span role="button" @click="showLikes2(c.id)" :id="'showlikes'+c.im2.id" style="margin: 0px 10px 0px 5px;"> {{ c.im2.n_likes }} </span>        
 											<svg class="feather" @click="showLike2(c.id)" role="button" style="margin-right: 10px;" v-if="!c.im2.liked"><use href="/feather-sprite-v4.29.0.svg#heart"/></svg>
 											<svg class="like" 	 @click="showLike2(c.id)" role="button" style="margin-right: 10px;" v-if="c.im2.liked"><use href="/feather-sprite-v4.29.0.svg#heart"/></svg>
 										</div>																		
-										<div>
-											<span role="button" @click="showComments2(c.id)" :id="'showcomments'+c.im2.id" style="margin: 0px 10px 0px 5px;"> {{ c.im2.n_comments }} </span>
+										<div role="button" @click="showComments2(c.id)">
+											<span :id="'showcomments'+c.im2.id" style="margin: 0px 10px 0px 5px;"> {{ c.im2.n_comments }} </span>
 											<svg class="feather" role="button" style="margin-right: 10px;"><use href="/feather-sprite-v4.29.0.svg#message-circle"/></svg>
 										</div>
 										<div>
@@ -651,8 +653,40 @@ export default {
 										</div>
 										         
 										
-										<div :id="'commentSect'+c.im2.id" v-if="c.im2.commentSect"> 
-
+										<div class="scrollable-container" id="commentsSection" v-if="c.im2.showComments"> 
+											<h6 style="text-align: center;">Comments</h6>
+											<div style="margin-top: 5px;" class="row">                                
+												<span class="col">
+													<input :id="'textcomment'+c.im2.id" placeholder="Insert new comment">
+													<svg class="feather" role="button" @click="postComment(c.im2.id)"><use href="/feather-sprite-v4.29.0.svg#edit"/></svg>
+												</span>												
+												<span>
+													
+												</span>																																				
+											</div>
+											<div v-for="com in c.im2.comments" :key="com.id">
+												<div class="row" style="padding: 0px;" v-if="com">
+													<p class="mb-1">
+														{{ com.author }}
+														<svg class="feather" style="margin-left: 5px;" role="button" @click="com.delete = true" :id="'delete'+c.im2.id" v-if="loggedId == com.author">  <use href="/feather-sprite-v4.29.0.svg#trash-2"/></svg>
+														<span v-if="com.delete" class="small">
+															Delete comment ? 
+															<span role="button" @click="deleteComment(c.im2.id, com.id)" :id="'delete'+c.im2.id" style="color: green;">
+																Yes
+																<svg class="feather" ><use href="/feather-sprite-v4.29.0.svg#check"/></svg>
+															</span>                                       
+															<span role="button" @click="com.delete = false" :id="'delete'+c.im2.id" style="color: red;">
+																No
+																<svg class="feather" > <use href="/feather-sprite-v4.29.0.svg#x"/></svg>
+															</span>															
+														</span>
+													</p>                                                                                													
+													<p class="small mb-0">
+														{{ com.text }}
+													</p>                                    
+													<hr>
+												</div>
+											</div>
 										</div>
 										<div :id="'likesSection'+c.im2.id" v-if="c.im2.showLikes">
 											<h6 class="text-center mb-12 pb-2" style="margin-top: 5px;">Likes</h6>
@@ -677,6 +711,7 @@ export default {
                                             </span>
 										</div>
 									</div>
+
 									<hr>
 								</div>								
 							</div>

@@ -109,6 +109,10 @@ export default {
 		},
 		async postPhoto(){
 			//this.hidePostPhotoForm()
+			let cap = document.getElementById("caption").value			
+			if(cap == ""){				
+				return 
+			}
 			var r = null
 			var id = sessionStorage.getItem("id")	
 			var rbody = new FormData();
@@ -122,7 +126,7 @@ export default {
 						'Content-Type': 'image/png',
 					},		
 					params:{
-						caption:document.getElementById("caption").value
+						caption:cap
 					},
 					data: rbody,														
 				}).then((response)=>{
@@ -302,12 +306,13 @@ export default {
 					<div class="card shadow-2-strong card-registration" style="border-radius: 15px;">
 					<div class="card-body p-4 p-md-5">
 						<h3 class="mb-4 pb-2 pb-md-0 mb-md-5">Post your photo</h3>
-						<section>
+						<form>							
 							<div class="row">
 								<div class="col-md-6 mb-4">
-									<div class="form-outline">								
+									<div class="form-outline">																		
 										<label class="form-label" for="firstName"> Caption </label><br>
-										<textarea name="caption" id="caption" cols="20" rows="2"></textarea>
+										<textarea name="caption" id="caption" cols="20" rows="2" required title="Insert a caption please" 
+										oninvalid="this.setCustomValidity('Insert a caption please')"></textarea>
 									</div>
 								</div>
 								<div class="col-md-6 mb-4">
@@ -337,7 +342,7 @@ export default {
 									</div>
 								</div>
 							</div>							
-						</section>
+						</form>
 					</div>
 					</div>
 				</div>
