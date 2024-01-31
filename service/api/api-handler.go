@@ -10,6 +10,7 @@ func (rt *_router) Handler() http.Handler {
 
 	rt.router.POST("/users", rt.doLogin)
 	rt.router.GET("/users", rt.getUserProfile)
+	rt.router.GET("/users/:userID", rt.getUserProfileByID)
 	rt.router.PUT("/users/:userID/profile", rt.updateUser)
 	rt.router.PUT("/users/:userID/profile/username", rt.setMyUserName)
 	rt.router.GET("/users/:userID/profile/stream", rt.getMyStream)

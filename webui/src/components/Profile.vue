@@ -302,9 +302,10 @@ export default {
 				couple.im1.likes = likerslist
 				
 				var commentslist = await this.getComments(photos[i])
-                if(commentslist) {
+                if(commentslist) {					
 					couple.im1.n_comments = commentslist.length
-					couple.im1.comments = []
+					couple.im1.comments = await this.getCommentsUser(commentslist)
+					
 					for(let e = 0; e<commentslist.length; e++){                    
 						let c = {}                    
 						c.author = commentslist[e].userID
@@ -341,7 +342,7 @@ export default {
 					var commentslist = await this.getComments(photos[i+1])
 					if(commentslist){
 						couple.im2.n_comments = commentslist.length
-						couple.im2.comments = []
+						couple.im2.comments = await this.getCommentsUser(commentslist)
 						for(let e = 0; e<commentslist.length; e++){                    
 							let c = {}                    
 							c.author = commentslist[e].userID
@@ -359,6 +360,36 @@ export default {
 				couple.id = "c"+x.toString()
 				this.images["c"+x.toString()] = couple								
 			}							
+		},
+		async getCommentsUser(comments){
+			var newComments = comments
+			for (let index = 0; index < comments.length; index++) {
+				const c = comments[index];				
+				var newC = c
+				var r
+				try {					
+					await this.$axios({
+						method:"get",
+						url:"/users/"+c.userID,						
+						headers:{
+							Authorization:this.loggedId
+						}
+					}).then((response)=>{
+						r = response}
+						)								
+				} catch (e) {
+					r = e.response;							
+				}				
+				switch (r.status) {
+					case 200:						
+						newC.userID = r.data.username						
+						break;												
+					default:						
+						return					
+				}				
+				newComments[index] = newC
+			}
+			return newComments
 		},
 		async getLikes(im){
             var r = null	            
@@ -408,6 +439,130 @@ export default {
 					return null					
 			} 
         }, 
+		async postComment1(n){
+			var imID = this.images[n].im1.id
+			let val = document.getElementById("textcomment"+imID).value			
+			if(val == ""){				
+				return
+			}	
+			var r		
+			try {
+				await this.$axios({
+					method:"post",
+					url:"/photos/"+imID+"/comments",
+					headers:{
+						Authorization:this.loggedId
+					},
+                    params:{
+                        content: val,
+                        photoID: imID
+                    }
+				}).then((response)=>{
+					r = response}
+					)
+			} catch (e) {
+				r = e.response;							
+			}		            
+			switch (r.status) {
+				case 201:
+                    this.images[n].im1.n_comments+=1
+                    let c = {}
+                    c.author = this.username
+                    c.text = val
+                    c.photoID = imID
+                    c.id = parseInt(r.data.slice(36),10)
+                    this.images[n].im1.comments = [...this.images[n].im1.comments,c]
+                    document.getElementById("textcomment"+imID).value = ""                    
+				default:					
+			}			
+		
+		},
+		async postComment2(n){
+			var imID = this.images[n].im2.id
+			let val = document.getElementById("textcomment"+imID).value			
+			if(val == ""){				
+				return
+			}	
+			var r		
+			try {
+				await this.$axios({
+					method:"post",
+					url:"/photos/"+imID+"/comments",
+					headers:{
+						Authorization:this.loggedId
+					},
+                    params:{
+                        content: val,
+                        photoID: imID
+                    }
+				}).then((response)=>{
+					r = response}
+					)
+			} catch (e) {
+				r = e.response;							
+			}		            
+			switch (r.status) {
+				case 201:
+                    this.images[n].im2.n_comments+=1
+                    let c = {}
+                    c.author = this.username
+                    c.text = val
+                    c.photoID = imID
+                    c.id = parseInt(r.data.slice(36),10)
+                    this.images[n].im2.comments = [...this.images[n].im2.comments,c]
+                    document.getElementById("textcomment"+imID).value = ""                    
+				default:					
+			}			
+		
+		},
+		async deleteComment1(n,commId){
+            var r = null	                        
+			console.log("trying to delete comm n ",commId)
+			try {											
+				await this.$axios({
+					method:"delete",
+					url:"/photos/"+this.images[n].im1.id+"/comments/"+commId,
+					headers:{
+						Authorization:this.loggedId
+					}
+				}).then((response)=>{
+					r = response}
+					)
+			} catch (e) {
+				r = e.response;							
+			}			            
+			switch (r.status) {
+				case 200:	                    
+                    this.images[n].im1.n_comments  -=1                    
+                    this.images[n].im1.comments = this.images[n].im1.comments.filter(item => item.id !== commId);
+				default:
+					return null					
+			} 
+        },  
+		async deleteComment2(n,commId){
+            var r = null	                        
+			console.log("trying to delete comm n ",commId)
+			try {											
+				await this.$axios({
+					method:"delete",
+					url:"/photos/"+this.images[n].im2.id+"/comments/"+commId,
+					headers:{
+						Authorization:this.loggedId
+					}
+				}).then((response)=>{
+					r = response}
+					)
+			} catch (e) {
+				r = e.response;							
+			}			            
+			switch (r.status) {
+				case 200:	                    
+                    this.images[n].im2.n_comments  -=1                    
+                    this.images[n].im2.comments = this.images[n].im2.comments.filter(item => item.id !== commId);
+				default:
+					return null					
+			} 
+        },  
 		setFollowers(followers){
 			if(followers){
 				this.n_followers = followers.length			
@@ -575,9 +730,9 @@ export default {
 											<h6 style="text-align: center;">Comments</h6>
 											<div style="margin-top: 5px;" class="row">                                
 												<span class="col">
-													<textarea :id="'textcomment'+c.im1.id" cols="15" rows="1" placeholder="Insert new comment"></textarea>
-													<svg class="feather" role="button" @click="postComment(c.im1.id)"><use href="/feather-sprite-v4.29.0.svg#edit"/></svg>
-												</span>												
+													<textarea :id="'textcomment'+c.im1.id" type="text" class="form-control" placeholder="Insert new comment" rows="2" required></textarea>
+													<svg class="feather" role="button" @click="postComment1(c.id)"><use href="/feather-sprite-v4.29.0.svg#edit"/></svg>
+												</span>
 												<span>
 													
 												</span>																																				
@@ -586,10 +741,10 @@ export default {
 												<div class="row" style="padding: 0px;" v-if="com">
 													<p class="mb-1">
 														{{ com.author }}
-														<svg class="feather" style="margin-left: 5px;" role="button" @click="com.delete = true" :id="'delete'+c.im1.id" v-if="loggedId == com.author">  <use href="/feather-sprite-v4.29.0.svg#trash-2"/></svg>
+														<svg class="feather" style="margin-left: 5px;" role="button" @click="com.delete = true" :id="'delete'+c.im1.id" v-if="username == com.author"><use href="/feather-sprite-v4.29.0.svg#trash-2"/></svg>
 														<span v-if="com.delete" class="small">
 															Delete comment ? 
-															<span role="button" @click="deleteComment(c.im1.id, com.id)" :id="'delete'+c.im1.id" style="color: green;">
+															<span role="button" @click="deleteComment1(c.id, com.id)" :id="'delete'+c.im1.id" style="color: green;">
 																Yes
 																<svg class="feather" ><use href="/feather-sprite-v4.29.0.svg#check"/></svg>
 															</span>                                       
@@ -657,8 +812,8 @@ export default {
 											<h6 style="text-align: center;">Comments</h6>
 											<div style="margin-top: 5px;" class="row">                                
 												<span class="col">
-													<input :id="'textcomment'+c.im2.id" placeholder="Insert new comment">
-													<svg class="feather" role="button" @click="postComment(c.im2.id)"><use href="/feather-sprite-v4.29.0.svg#edit"/></svg>
+													<textarea :id="'textcomment'+c.im2.id" type="text" class="form-control" placeholder="Insert new comment" rows="2" required></textarea>
+													<svg class="feather" role="button" @click="postComment2(c.id)"><use href="/feather-sprite-v4.29.0.svg#edit"/></svg>
 												</span>												
 												<span>
 													
@@ -668,10 +823,10 @@ export default {
 												<div class="row" style="padding: 0px;" v-if="com">
 													<p class="mb-1">
 														{{ com.author }}
-														<svg class="feather" style="margin-left: 5px;" role="button" @click="com.delete = true" :id="'delete'+c.im2.id" v-if="loggedId == com.author">  <use href="/feather-sprite-v4.29.0.svg#trash-2"/></svg>
+														<svg class="feather" style="margin-left: 5px;" role="button" @click="com.delete = true" :id="'delete'+c.im2.id" v-if="username == com.author">  <use href="/feather-sprite-v4.29.0.svg#trash-2"/></svg>
 														<span v-if="com.delete" class="small">
 															Delete comment ? 
-															<span role="button" @click="deleteComment(c.im2.id, com.id)" :id="'delete'+c.im2.id" style="color: green;">
+															<span role="button" @click="deleteComment2(c.id, com.id)" :id="'delete'+c.im2.id" style="color: green;">
 																Yes
 																<svg class="feather" ><use href="/feather-sprite-v4.29.0.svg#check"/></svg>
 															</span>                                       

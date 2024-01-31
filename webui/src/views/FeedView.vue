@@ -133,7 +133,14 @@ export default {
 				return
 			}                                 
 			this.n_photos = photos.length			
+            photos.sort((a, b) => {                
+                const dateA = new Date(a.uploadTimestamp);
+                const dateB = new Date(b.uploadTimestamp);
+
+                return dateB - dateA;
+            });
 			for (let i = 0; i < photos.length; i+=1) {
+                console.log("photo number ",i," ",photos[i])
 				let couple = {
 					im1: {},
 				}
@@ -169,8 +176,7 @@ export default {
                     couple.im1.comments[x] = c
                 }                
 				couple.im1.username = this.following[photos[i].userId].username                                
-                this.images[photos[i].id] = couple
-                
+                this.images[photos[i].id] = couple                
 			}							
 		},
         async getLikes(im){

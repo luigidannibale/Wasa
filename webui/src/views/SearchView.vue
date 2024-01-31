@@ -77,10 +77,15 @@ export default {
 					return
 									
 			}	
-			}
+			}			
 
 			sessionStorage.setItem("searchedId",this.searched.id)
 			this.profileActive =true			
+			
+			if (this.searched.id == id) {
+				return
+			}
+
 			{ // Checks if logged banned searched
 			try {				
 				await this.$axios({

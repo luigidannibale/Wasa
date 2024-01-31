@@ -115,33 +115,33 @@ paths:
             $ref : "#/components/responses/InternalServerError"      
     
     #getUserProfileByID - LastMod : 30/01
-    # /users/{userID}:
-    #   parameters:
-    #   - $ref : "#/components/parameters/userID"
+    /users/{userID}:
+      parameters:
+      - $ref : "#/components/parameters/userID"
 
-    #   get:
-    #     operationId: getUserProfileByID
-    #     tags: 
-    #       - User
+      get:
+        operationId: getUserProfileByID
+        tags: 
+          - User
           
-    #     summary: Returns the profile of the user.
-    #     description: |
-    #       The profile of the user is returned, so all the details about the user.        
-    #     responses: 
-    #       "200":
-    #         description: Successful, returning the user
-    #         content:
-    #           application/json:      
-    #             schema:
-    #               $ref : "#/components/schemas/Message"
-    #       "400":
-    #         $ref : "#/components/responses/BadRequest" 
-    #       "401":
-    #         $ref : "#/components/responses/Unauthorized" 
-    #       "404":
-    #         $ref : "#/components/responses/NotFound" 
-    #       "500":
-    #         $ref : "#/components/responses/InternalServerError"
+        summary: Returns the profile of the user.
+        description: |
+          The profile of the user is returned, so all the details about the user.        
+        responses: 
+          "200":
+            description: Successful, returning the user
+            content:
+              application/json:      
+                schema:
+                  $ref : "#/components/schemas/Message"
+          "400":
+            $ref : "#/components/responses/BadRequest" 
+          "401":
+            $ref : "#/components/responses/Unauthorized" 
+          "404":
+            $ref : "#/components/responses/NotFound" 
+          "500":
+            $ref : "#/components/responses/InternalServerError"
     
     #updateUser     - LastMod : 11/12 
     /users/{userID}/profile:
