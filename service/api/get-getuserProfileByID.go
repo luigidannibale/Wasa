@@ -3,7 +3,6 @@ package api
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -13,7 +12,6 @@ import (
 
 func (rt *_router) getUserProfileByID(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("content-type", "application/json")
-	fmt.Println("Ciao")
 	/*Authentication part :
 	- takes the 2 userID (from auth and from params,)
 	- validates 1 of them
