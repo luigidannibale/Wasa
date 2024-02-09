@@ -11,17 +11,23 @@ import (
 Errors that can be returned: (NotFound, InternalServerError)
 */
 func (db *appdbimpl) GetLike(like utils.Like) (string, error) {
-	e := db.c.QueryRow(`SELECT UserID, PhotoID
-						FROM Likes
-						WHERE UserID = ? AND PhotoID = ?`, like.UserID, like.PhotoID).Scan(&like.UserID, &like.PhotoID)
+	var exists bool
+	query := `SELECT EXISTS (
+					SELECT 1
+					FROM Likes
+					WHERE UserID = ? AND PhotoID = ?
+				)`
 
-	if e == nil {
-		return "Like found successfully", nil
+	err := db.c.QueryRow(query, like.UserID, like.PhotoID).Scan(&exists)
+	if err != nil {
+		return "Error checking like existence", err
 	}
-	if errors.Is(e, sql.ErrNoRows) {
+
+	if exists {
+		return "Like found successfully", nil
+	} else {
 		return "Couldn't find the like", ErrNotFound
 	}
-	return e.Error(), ErrInternalServerError
 }
 
 /*

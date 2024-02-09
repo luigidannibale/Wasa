@@ -76,17 +76,23 @@ func (db *appdbimpl) GetFollowersList(userID int) ([]utils.User, string, error) 
 Errors that can be returned: (NotFound, InternalServerError)
 */
 func (db *appdbimpl) GetFollow(follow utils.Follow) (string, error) {
+	var exists bool
+	query := `SELECT EXISTS (
+					SELECT 1
+					FROM Follows
+					WHERE FollowerID = ? AND FollowedID = ?
+				)`
 
-	e := db.c.QueryRow(`SELECT FollowerID, FollowedID
-						FROM Follows
-						WHERE FollowerID = ? AND FollowedID = ?`, follow.FollowerID, follow.FollowedID)
-	if e.Err() == nil {
-		return "Follow found successfully", nil
+	err := db.c.QueryRow(query, follow.FollowerID, follow.FollowedID).Scan(&exists)
+	if err != nil {
+		return "Error checking follow existence", err // Modify this error message according to your needs
 	}
-	if errors.Is(e.Err(), sql.ErrNoRows) {
+
+	if exists {
+		return "Follow found successfully", nil
+	} else {
 		return "Couldn't find the follow", ErrNotFound
 	}
-	return e.Err().Error(), ErrInternalServerError
 }
 
 /*
