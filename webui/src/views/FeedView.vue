@@ -139,8 +139,7 @@ export default {
 
                 return dateB - dateA;
             });
-			for (let i = 0; i < photos.length; i+=1) {
-                console.log("photo number ",i," ",photos[i])
+			for (let i = 0; i < photos.length; i+=1) {                
 				let couple = {
 					im1: {},
 				}

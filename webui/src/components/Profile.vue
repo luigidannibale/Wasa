@@ -11,6 +11,7 @@ export default {
 			n_following:null,
 			n_followers:null,			
 			username: null,
+			loggedUsername: null,
 			id: null,
 			err: false,
 			errMess:null,
@@ -23,7 +24,7 @@ export default {
 		}
 	},
 	methods: {	
-		async logProfile(loggedId){
+		async logProfile(){
 			var r = null
 
 			try {
@@ -35,7 +36,7 @@ export default {
 						username:this.username
 					},
 					headers:{
-						Authorization:loggedId
+						Authorization:this.loggedId
 					}
 				}).then((response)=>{
 					r = response}
@@ -56,20 +57,20 @@ export default {
 					this.errAlert(r.data);
 					return					
 			}
-			this.getProfilePhotos(loggedId,this.id)
-			this.getProfileFollowers(loggedId,this.id)			
-			this.getProfileFollowing(loggedId,this.id)
+			this.getProfilePhotos()
+			this.getProfileFollowers()			
+			this.getProfileFollowing()
 		},	
-		async getProfilePhotos(loggedId,profileId){
+		async getProfilePhotos(){
 			var r = null
 			
 			try {
 				this.loading=true;								
 				await this.$axios({
 					method:"get",
-					url:"/users/"+profileId+"/profile/photos",					
+					url:"/users/"+this.id+"/profile/photos",					
 					headers:{
-						Authorization:loggedId
+						Authorization:this.loggedId
 					}
 				}).then((response)=>{
 					r = response}
@@ -88,15 +89,15 @@ export default {
 					break;
 			}
 		},
-		async getProfileFollowers(loggedId,profileId){
+		async getProfileFollowers(){
 			var r = null
 			try {
 				this.loading=true;								
 				await this.$axios({
 					method:"get",
-					url:"/users/"+profileId+"/followers",					
+					url:"/users/"+this.id+"/followers",					
 					headers:{
-						Authorization:loggedId
+						Authorization:this.loggedId
 					}
 				}).then((response)=>{
 					r = response}
@@ -115,15 +116,15 @@ export default {
 					break;
 			}
 		},
-		async getProfileFollowing(loggedId,profileId){
+		async getProfileFollowing(){
 			var r = null
 			try {
 				this.loading=true;											
 				await this.$axios({
 					method:"get",
-					url:"/users/"+ profileId +"/followed",					
+					url:"/users/"+ this.id +"/followed",					
 					headers:{
-						Authorization:loggedId
+						Authorization:this.loggedId
 					}
 				}).then((response)=>{
 					r = response}
@@ -147,14 +148,13 @@ export default {
 			{							
 				this.setUsername(sessionStorage.getItem("username"))				
 			}			
+			this.loggedUsername = sessionStorage.getItem("loggedUsername")
 			this.loggedId = sessionStorage.getItem("id")						
-			this.logProfile(this.loggedId)						
+			this.logProfile()						
 		},
-		async showLike1(n){     			
-			console.log(this.images)          
+		async showLike1(n){     						
             var liked = this.images[n].im1.liked
-            var r = null	            
-            var loggedId = sessionStorage.getItem("id")
+            var r = null
 			
             if(liked){                
                 try {                                               
@@ -162,7 +162,7 @@ export default {
                         method:"delete",
                         url:"/photos/"+this.images[n].im1.id+"/likes",					
                         headers:{
-                            Authorization:loggedId
+                            Authorization:this.loggedId
                         }
                     }).then((response)=>{
                         r = response}
@@ -174,7 +174,8 @@ export default {
                     case 200:  
                         this.images[n].im1.liked = false
                         this.images[n].im1.n_likes -= 1
-                        this.images[n].im1.likes = this.images[n].im1.likes.filter(item => item !== this.username);                        
+						
+                        this.images[n].im1.likes = this.images[n].im1.likes.filter(item => item !== this.loggedUsername);                        
                         return 													
                     default:
                         return 
@@ -186,7 +187,7 @@ export default {
                         method:"put",
                         url:"/photos/"+this.images[n].im1.id+"/likes",					
                         headers:{
-                            Authorization:loggedId
+                            Authorization:this.loggedId
                         }
                     }).then((response)=>{
                         r = response}
@@ -199,7 +200,7 @@ export default {
                     case 201:  
                         this.images[n].im1.liked = true
                         this.images[n].im1.n_likes += 1                        
-                        this.images[n].im1.likes = [...this.images[n].im1.likes, this.username]                        
+                        this.images[n].im1.likes = [...this.images[n].im1.likes, this.loggedUsername]                        
                         return 													
                     default:
                         return 
@@ -228,7 +229,7 @@ export default {
                     case 200:  
                         this.images[n].im2.liked = false
                         this.images[n].im2.n_likes -= 1
-                        this.images[n].im2.likes = this.images[n].im2.likes.filter(item => item !== this.username);                        
+                        this.images[n].im2.likes = this.images[n].im2.likes.filter(item => item !== this.loggedUsername);                        
                         return 													
                     default:
                         return 
@@ -253,7 +254,7 @@ export default {
                     case 201:  
                         this.images[n].im2.liked = true
                         this.images[n].im2.n_likes += 1                        
-                        this.images[n].im2.likes = [...this.images[n].im2.likes, this.username]                        
+                        this.images[n].im2.likes = [...this.images[n].im2.likes, this.loggedUsername]                        
                         return 													
                     default:
                         return 
@@ -292,7 +293,7 @@ export default {
                     couple.im1.n_likes = likerslist.length
                     couple.im1.liked = false                    
                     for(let x = 0; x<likerslist.length; x++){
-                        if(likerslist[x] === this.username){                        
+                        if(likerslist[x] === this.loggedUsername){                        
                             couple.im1.liked = true
                         }                        
                     }
@@ -331,7 +332,7 @@ export default {
 						couple.im2.n_likes = likerslist.length
 						couple.im2.liked = false                    
 						for(let e = 0; e<likerslist.length; e++){
-							if(likerslist[e] === this.username){                        
+							if(likerslist[e] === this.loggedUsername){                        
 								couple.im2.liked = true
 							}                        
 						}
@@ -467,7 +468,7 @@ export default {
 				case 201:
                     this.images[n].im1.n_comments+=1
                     let c = {}
-                    c.author = this.username
+                    c.author = this.loggedUsername
                     c.text = val
                     c.photoID = imID
                     c.id = parseInt(r.data.slice(36),10)
@@ -505,7 +506,7 @@ export default {
 				case 201:
                     this.images[n].im2.n_comments+=1
                     let c = {}
-                    c.author = this.username
+                    c.author = this.loggedUsername
                     c.text = val
                     c.photoID = imID
                     c.id = parseInt(r.data.slice(36),10)
@@ -516,8 +517,7 @@ export default {
 		
 		},
 		async deleteComment1(n,commId){
-            var r = null	                        
-			console.log("trying to delete comm n ",commId)
+            var r = null	                        			
 			try {											
 				await this.$axios({
 					method:"delete",
@@ -540,8 +540,7 @@ export default {
 			} 
         },  
 		async deleteComment2(n,commId){
-            var r = null	                        
-			console.log("trying to delete comm n ",commId)
+            var r = null	                        			
 			try {											
 				await this.$axios({
 					method:"delete",
@@ -600,9 +599,13 @@ export default {
 			this.err = true;			
 			this.errMess = data;
 		},
-		search(f){			
+		search(f){						
 			sessionStorage.setItem("username",f.username)    			
 			this.$router.push("/search/"+f.username)	            
+		},
+		search_u(u){						
+			sessionStorage.setItem("username",u)    			
+			this.$router.push("/search/"+u)	            
 		},
 		showLikes1(n){                     
             this.images[n].im1.showLikes = !this.images[n].im1.showLikes 
@@ -643,8 +646,7 @@ export default {
 					)								
 			} catch (e) {
 				r = e.response;							
-			}
-			console.log(r)
+			}			
 			switch (r.status) {
 				case 200:										
 					location.reload()
@@ -663,7 +665,7 @@ export default {
 		},
 	},
 	mounted() {		
-		this.configProfile()		
+		this.configProfile()			
 	}
 }
 </script>
@@ -741,7 +743,7 @@ export default {
 												<div class="row" style="padding: 0px;" v-if="com">
 													<p class="mb-1">
 														{{ com.author }}
-														<svg class="feather" style="margin-left: 5px;" role="button" @click="com.delete = true" :id="'delete'+c.im1.id" v-if="username == com.author"><use href="/feather-sprite-v4.29.0.svg#trash-2"/></svg>
+														<svg class="feather" style="margin-left: 5px;" role="button" @click="com.delete = true" :id="'delete'+c.im1.id" v-if="loggedUsername == com.author"><use href="/feather-sprite-v4.29.0.svg#trash-2"/></svg>
 														<span v-if="com.delete" class="small">
 															Delete comment ? 
 															<span role="button" @click="deleteComment1(c.id, com.id)" :id="'delete'+c.im1.id" style="color: green;">
@@ -767,7 +769,7 @@ export default {
 											<h6 class="text-center mb-12 pb-2" style="margin-top: 5px;">Likes</h6>
 											<div v-for="u in c.im1.likes" :key="u">
 												<div class="row" v-if="u">                                
-													<p class="mb-1" role="button" @click="search(u)" > 
+													<p class="mb-1" role="button" @click="search_u(u)" > 
 														{{ u }}
 													</p>
 												</div>
@@ -823,7 +825,7 @@ export default {
 												<div class="row" style="padding: 0px;" v-if="com">
 													<p class="mb-1">
 														{{ com.author }}
-														<svg class="feather" style="margin-left: 5px;" role="button" @click="com.delete = true" :id="'delete'+c.im2.id" v-if="username == com.author">  <use href="/feather-sprite-v4.29.0.svg#trash-2"/></svg>
+														<svg class="feather" style="margin-left: 5px;" role="button" @click="com.delete = true" :id="'delete'+c.im2.id" v-if="loggedUsername == com.author">  <use href="/feather-sprite-v4.29.0.svg#trash-2"/></svg>
 														<span v-if="com.delete" class="small">
 															Delete comment ? 
 															<span role="button" @click="deleteComment2(c.id, com.id)" :id="'delete'+c.im2.id" style="color: green;">
@@ -847,7 +849,7 @@ export default {
 											<h6 class="text-center mb-12 pb-2" style="margin-top: 5px;">Likes</h6>
 											<div v-for="u in c.im2.likes" :key="u">
 												<div class="row" v-if="u">                                
-													<p class="mb-1" role="button" @click="search(u)" > 
+													<p class="mb-1" role="button" @click="search_u(u)" > 
 														{{ u }}
 													</p>
 												</div>
