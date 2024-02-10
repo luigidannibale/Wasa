@@ -119,14 +119,21 @@ func (db *appdbimpl) CheckBan(banner int, banned int) error {
 Errors that can be returned: (NotFound, InternalServerError)
 */
 func (db *appdbimpl) GetBan(ban utils.Ban) (string, error) {
-	er := db.c.QueryRow(`SELECT BannerID
-						FROM Bans
-						WHERE BannerID = ? AND BannedID = ?`, ban.BannerID, ban.BannedID).Scan(&ban.BannerID)
-	if er == nil {
-		return "Ban found successfully", nil
+	var exists bool
+	query := `SELECT EXISTS (
+					SELECT 1
+					FROM Bans
+					WHERE BannerID = ? AND BannedID = ?
+				)`
+
+	err := db.c.QueryRow(query, ban.BannerID, ban.BannedID).Scan(&exists)
+	if err != nil {
+		return "Error checking ban existence: " + err.Error(), ErrInternalServerError
 	}
-	if errors.Is(er, sql.ErrNoRows) {
+
+	if exists {
+		return "Ban found successfully", nil
+	} else {
 		return "Couldn't find the ban", ErrNotFound
 	}
-	return er.Error(), ErrInternalServerError
 }

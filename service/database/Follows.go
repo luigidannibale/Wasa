@@ -85,7 +85,7 @@ func (db *appdbimpl) GetFollow(follow utils.Follow) (string, error) {
 
 	err := db.c.QueryRow(query, follow.FollowerID, follow.FollowedID).Scan(&exists)
 	if err != nil {
-		return "Error checking follow existence", err // Modify this error message according to your needs
+		return "Error checking follow existence: " + err.Error(), ErrInternalServerError
 	}
 
 	if exists {

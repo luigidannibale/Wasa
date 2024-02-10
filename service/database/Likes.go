@@ -20,7 +20,7 @@ func (db *appdbimpl) GetLike(like utils.Like) (string, error) {
 
 	err := db.c.QueryRow(query, like.UserID, like.PhotoID).Scan(&exists)
 	if err != nil {
-		return "Error checking like existence", err
+		return "Error checking like existence: " + err.Error(), ErrInternalServerError
 	}
 
 	if exists {
