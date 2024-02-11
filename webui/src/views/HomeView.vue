@@ -71,7 +71,7 @@ export default {
 					this.errAlert(r.data);
 					break;
 			}
-			// location.reload()
+			location.reload()
 		},
 		async showInputForm(){			
 			this.inputform = true;
