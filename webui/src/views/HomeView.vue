@@ -64,6 +64,7 @@ export default {
 					sessionStorage.setItem("new",false)		
 					if(this.username) {
 						sessionStorage.setItem("username",this.username)
+						sessionStorage.setItem("loggedUsername",this.username)
 					}					
 					this.hideInputForm()					
 					break;
@@ -76,7 +77,7 @@ export default {
 		async showInputForm(){			
 			this.inputform = true;
 			this.dataFormName = "Update your data";						
-			this.backAv = !sessionStorage.getItem("new")			
+			this.backAv = !(sessionStorage.getItem("new")=="true")			
 			var r = null
 			var id = sessionStorage.getItem("id")			
 			try {			
@@ -158,8 +159,7 @@ export default {
 			this.username = sessionStorage.getItem("loggedUsername")
 			sessionStorage.setItem("username",this.username)				
 			if (sessionStorage.getItem("new") == "true")
-				this.showInputForm()
-			
+				this.showInputForm()			
 
 		},
 		handleFileUpload(event) {

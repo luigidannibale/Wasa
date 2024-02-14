@@ -681,7 +681,7 @@ export default {
 						<div class="card">
 							<div id="profileHeader" class="p-4 text-black" style="background-color: #f8f9fa;" >
 								<div class="d-flex justify-content-between align-items-center mb-4">
-									<p class="lead fw-normal mb-0" v-text="fullname"></p>									
+									<p class="lead fw-normal mb-0" v-text="username"></p>
 								</div>								
 								
 								<div class="d-flex justify-content-end text-center py-1">
@@ -707,7 +707,7 @@ export default {
 							
 							<div id="profilePhotos" class="card-body p-8 text-black">						
 								<div class="d-flex justify-content-between align-items-center mb-8">
-									<p class="lead fw-normal mb-0">Your photos</p>									
+									<p class="lead fw-normal mb-0">Photos</p>									
 								</div>
 								
 								<div class="row" v-for="c in images" :key="c.id">
