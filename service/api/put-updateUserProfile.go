@@ -55,7 +55,7 @@ func (rt *_router) updateUser(w http.ResponseWriter, r *http.Request, ps httprou
 	user.Id = userID
 
 	// Updates the user
-	user, s, err := rt.db.UpdateUser(user)
+	_, s, err := rt.db.UpdateUser(user)
 
 	// Checks for DB errors
 	if err != nil {

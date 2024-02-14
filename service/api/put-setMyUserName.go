@@ -77,7 +77,7 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps http
 	}
 
 	// Update the user (with only the username)
-	user, s, err := rt.db.UpdateUser(userToUpdate)
+	_, s, err := rt.db.UpdateUser(userToUpdate)
 
 	// Checks for DB errors
 	if err != nil {
@@ -93,7 +93,7 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps http
 
 	// Operation successful, creates a CREATED response
 	w.WriteHeader(http.StatusCreated)
-	e = json.NewEncoder(w).Encode("Username set successfully, new username : " + user.Username)
+	e = json.NewEncoder(w).Encode("Username set successfully, new username : " + username)
 	if e != nil {
 		http.Error(w, "Successful operation, the username has been updated, but an error occurred encoding the message "+e.Error(), http.StatusInternalServerError)
 	}

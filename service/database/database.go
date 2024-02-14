@@ -248,7 +248,10 @@ func New(db *sql.DB) (AppDatabase, error) {
 		}
 	}
 	// Populates the DB with some values
-	PopulateDB(db)
+	err = PopulateDB(db)
+	if err != nil {
+		return nil, fmt.Errorf("error populating db: %w", err)
+	}
 
 	return &appdbimpl{
 		c: db,
